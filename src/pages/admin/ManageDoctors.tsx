@@ -74,7 +74,7 @@ const ManageDoctors = () => {
         if (authError) {
           if (authError.message === 'User already registered') {
             // If user exists, try to get their ID
-            const { data: userData, error: userError } = await supabase.auth.admin.getUserByEmail(formData.email);
+            const { data: userData, error: userError } = await supabase.auth.admin.getUserById(formData.email);
             if (userError) throw userError;
             
             if (!userData?.user?.id) {

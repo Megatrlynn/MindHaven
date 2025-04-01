@@ -1,9 +1,14 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { MessageSquare, Video, PhoneCall, Bot, Loader2, UserPlus, Clock, Send, ArrowLeft } from 'lucide-react';
+import { MessageSquare, Video, PhoneCall, Bot, Loader2, UserPlus, Clock, Send, ArrowLeft, XCircle, CheckCircle, Check } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { getAIResponse } from '../lib/ai';
+import { User } from '@supabase/supabase-js';
 import { Doctor, DoctorPatientConnection, DoctorPatientChat } from '../lib/types';
 import Auth from '../components/Auth';
+import { io } from "socket.io-client";
+import { format } from "date-fns";
+
+const socket = io(import.meta.env.VITE_SOCKET_SERVER_URL);
 
 interface ChatMessage {
   id: string;
@@ -21,12 +26,12 @@ interface DoctorChatMessage extends DoctorPatientChat {
   };
 }
 
-const Chat = () => {
+const Chat: React.FC = () => { 
   const [activeTab, setActiveTab] = useState<'ai' | 'doctor'>('ai');
   const [message, setMessage] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [chatHistory, setChatHistory] = useState<ChatMessage[]>([]);
-  const [user, setUser] = useState(null);
+  const [user, setUser] = useState<User | null>(null);
   const [doctors, setDoctors] = useState<Doctor[]>([]);
   const [connections, setConnections] = useState<DoctorPatientConnection[]>([]);
   const [activeDoctorChat, setActiveDoctorChat] = useState<{
@@ -38,7 +43,93 @@ const Chat = () => {
   const [doctorChatLoading, setDoctorChatLoading] = useState(false);
   const chatEndRef = useRef<HTMLDivElement | null>(null);
 
+  const [loading, setLoading] = useState(true); // Added loading state
+
+  const [incomingCall, setIncomingCall] = useState(false);
+  const [isCallActive, setIsCallActive] = useState(false);
+  const [isConnected, setIsConnected] = useState(false);
+  const [remoteStream, setRemoteStream] = useState<MediaStream | null>(null);
+
+  const localStreamRef = useRef<MediaStream | null>(null);
+  const peerConnectionRef = useRef<RTCPeerConnection | null>(null);
+  const remoteAudioRef = useRef<HTMLAudioElement | null>(null);
+
+  const [offer, setOffer] = useState(null);
+
+  const [callerSocketId, setCallerSocketId] = useState<string | null>(null);
+  const [storedOffer, setStoredOffer] = useState<RTCSessionDescriptionInit | null>(null);
+  const [callStatus, setCallStatus] = useState("Waiting for call...");
+  const [doctorId, setDoctorId] = useState<string[] | null>(null);
+  const [isPatientConnected, setIsPatientConnected] = useState(false); // Track if the patient is connected to a doctor
+
+  const pendingIceCandidatesRef = useRef<RTCIceCandidateInit[]>([]);
+
+  const [patientId, setPatientId] = useState<string[] | null>(null);
+
+  const [doctorName, setDoctorName] = useState("");
+
+  //const patientId = getPatientId(); // This should return a valid patient ID
+
   useEffect(() => {
+    const fetchPatientIds = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+  
+      try {
+        const { data, error } = await supabase
+          .from('doctor_patient_connections')
+          .select('patient_id')
+          .eq('patient_id', user.id); // Fetch all connections
+  
+        if (error) {
+          console.error('Error fetching patient IDs:', error);
+          return;
+        }
+  
+        if (data?.length) {
+          const patientIds = data.map(row => row.patient_id); // Extract all patient IDs
+          const uniquePatientIds = Array.from(new Set(patientIds)); // Remove duplicates using Set
+          setPatientId(uniquePatientIds); // Set as an array of unique patient IDs
+          console.log('Unique Patient IDs fetched:', uniquePatientIds);
+        }
+      } catch (error) {
+        console.error('Error in fetchPatientIds:', error);
+      }
+    };
+  
+    fetchPatientIds();
+  }, []);  
+
+  useEffect(() => {
+    const fetchConnectedDoctors = async () => {
+      if (!doctorId) return; // Ensure doctorId exists
+  
+      try {
+        const { data, error } = await supabase
+          .from("doctors")
+          .select("id, name") // Fetch all connected doctors
+          .in("id", doctorId); // Fetch only doctors connected to the patient
+  
+        if (error) throw error;
+  
+        if (data?.length) {
+          // Find the doctor that matches the calling doctor ID
+          const callingDoctor = data.find((doc) => doc.id === callerSocketId);
+  
+          if (callingDoctor) {
+            setDoctorName(callingDoctor.name); // Store the doctor's name
+          }
+        }
+      } catch (err) {
+        console.error("❌ Error fetching doctors:", err);
+      }
+    };
+  
+    fetchConnectedDoctors();
+  }, [doctorId, callerSocketId]); // Rerun when doctorId or caller changes
+
+  useEffect(() => {
+    console.log("UserID ID in useEffect:", user); // Debugging log
     supabase.auth.getUser().then(({ data: { user } }) => {
       setUser(user);
       if (user) {
@@ -49,15 +140,16 @@ const Chat = () => {
     });
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      setUser(session?.user || null);
+      setUser(session?.user || null); // Set the user
+      setLoading(false); // Stop loading when session is checked
       if (session?.user) {
-        loadChatHistory();
-        loadDoctors();
-        loadConnections();
+        loadChatHistory(); // Load chat history
+        loadDoctors(); // Load doctors
+        loadConnections(); // Load connections
       } else {
-        setChatHistory([]);
-        setDoctors([]);
-        setConnections([]);
+        setChatHistory([]); // Clear chat history
+        setDoctors([]); // Clear doctors list
+        setConnections([]); // Clear connections list
       }
     });
 
@@ -311,6 +403,273 @@ const Chat = () => {
     }
   };
 
+  useEffect(() => {
+    if (!patientId || patientId.length === 0) {
+      console.log("⏳ Waiting for patient IDs to be fetched...");
+      return;
+    }
+  
+    console.log("✅ Using patient IDs:", patientId);
+  
+    const fetchConnectionData = async () => {
+      try {
+        const { data, error } = await supabase
+          .from("doctor_patient_connections")
+          .select("doctor_id, status")
+          .in("patient_id", patientId); // Fetch for all patient IDs
+  
+        if (error) throw error;
+  
+        if (data?.length) {
+          console.log("🔄 Fetched connection data:", data);
+  
+          // Store only connected doctor IDs
+          const connectedDoctors = data
+            .filter((entry) => entry.status === "connected")
+            .map((entry) => entry.doctor_id);
+  
+          if (connectedDoctors.length > 0) {
+            setDoctorId(connectedDoctors); // Store doctor IDs
+            setIsPatientConnected(true); // Set patient as connected
+            console.log("✅ Patient connected to doctors:", connectedDoctors);
+          } else {
+            setIsPatientConnected(false); // No connection
+          }
+  
+          // Register each patient in the socket
+          patientId.forEach((id) => {
+            socket.emit("register", { userId: id, role: "patient" });
+          });
+  
+          socket.on("incoming-call", ({ offer, from, targetPatientId }) => {
+            console.log("📞 Incoming call for patient:", targetPatientId);
+            console.log("🆔 Current patient ID:", patientId);
+            console.log("📞 Incoming call from:", from, "Offer received:", offer);
+            console.log("🟢 Checking patient connection:", isPatientConnected);
+            console.log("✅ Connected doctors:", connectedDoctors);
+          
+            // Convert patientId to a string if it's an array
+            const actualPatientId = Array.isArray(patientId) ? patientId[0] : patientId;
+
+            if (targetPatientId !== actualPatientId) {
+              console.warn("❌ This call is not for this patient. Ignoring.");
+              return;
+            }
+
+          
+            // ✅ Proceed if the patient is connected to this doctor
+            if (isPatientConnected) {
+              console.log("✅ Incoming call accepted");
+          
+              setStoredOffer(offer);
+              setCallerSocketId(from);
+          
+              setIncomingCall(true);
+            } else {
+              console.warn("❌ Doctor is not connected to the patient. Ignoring call.");
+            }
+          });
+          
+        }
+      } catch (err) {
+        console.error("❌ Error fetching connection data:", err);
+      }
+    };
+  
+    fetchConnectionData();
+  
+    // Listen for when the call is answered
+    socket.on("call-answered", async (answer) => {
+      console.log("✅ Call connected! Setting remote description...");
+      if (peerConnectionRef.current) {
+        await peerConnectionRef.current.setRemoteDescription(answer);
+        setIsConnected(true);
+        setIsCallActive(true);
+        setCallStatus("Connected");
+      } else {
+        console.error("❌ PeerConnection is missing when setting remote description!");
+      }
+    });
+  
+    // Handle ICE candidates
+    socket.on("ice-candidate", async (candidate: RTCIceCandidateInit) => {
+      try {
+        if (peerConnectionRef.current) {
+          await peerConnectionRef.current.addIceCandidate(new RTCIceCandidate(candidate));
+        } else {
+          console.warn("⚠️ Storing ICE candidate as PeerConnection is not ready.");
+          pendingIceCandidatesRef.current.push(candidate);
+        }
+      } catch (error) {
+        console.error("❌ Error adding ICE candidate:", error);
+      }
+    });
+  
+    // Cleanup listeners and peer connection when component unmounts
+    return () => {
+      socket.off("incoming-call");
+      socket.off("call-answered");
+      socket.off("ice-candidate");
+  
+      if (peerConnectionRef.current) {
+        peerConnectionRef.current.close();
+        peerConnectionRef.current = null;
+      }
+    };
+  }, [patientId, isPatientConnected]); // Ensure `isPatientConnected` is included in dependencies  
+
+  useEffect(() => {
+    if (remoteAudioRef.current && remoteStream) {
+      remoteAudioRef.current.srcObject = remoteStream;
+  
+      // ✅ Force autoplay again when remoteStream updates
+      remoteAudioRef.current.play().catch((error) => {
+        console.error("🔇 Autoplay blocked, retrying...", error);
+        setTimeout(() => remoteAudioRef.current?.play(), 500); // Retry after 500ms
+      });
+    }
+  }, [remoteStream]); // Runs whenever remoteStream changes  
+
+  const acceptCall = async () => {
+    console.log("🔍 Checking call data before accepting...");
+    if (!incomingCall || !storedOffer || !callerSocketId) {
+      console.error("❌ No incoming call detected or missing required data.");
+      return;
+    }
+  
+    console.log(`✅ Accepting call from: ${callerSocketId}`);
+    setIncomingCall(false);
+    setCallStatus("Connecting...");
+  
+    try {
+      const localStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      localStreamRef.current = localStream;
+  
+      // 🔄 Ensure any old connection is closed before making a new one
+      if (peerConnectionRef.current) {
+        peerConnectionRef.current.close();
+        peerConnectionRef.current = null; // Prevent potential conflicts
+      }
+  
+      const peerConnection = new RTCPeerConnection({
+        iceServers: [{ urls: "stun:stun.l.google.com:19302" }]
+      });
+  
+      peerConnectionRef.current = peerConnection;
+  
+      // 🎤 Add Local Audio Stream
+      localStream.getTracks().forEach(track => peerConnection.addTrack(track, localStream));
+  
+      // 📡 Handle ICE Candidates
+      peerConnection.onicecandidate = (event) => {
+        if (event.candidate) {
+          console.log("📡 Sending ICE candidate:", event.candidate);
+          socket.emit("ice-candidate", {
+            targetSocketId: callerSocketId,
+            candidate: event.candidate // Send the complete RTCIceCandidate object
+          });
+        } else {
+          console.log("⚠️ ICE candidate gathering complete");
+        }
+      };
+  
+      // 🔄 Handle ICE Connection State Changes
+      peerConnection.oniceconnectionstatechange = () => {
+        console.log("🔄 ICE Connection State:", peerConnection.iceConnectionState);
+        if (peerConnection.iceConnectionState === "connected") {
+          console.log("✅ ICE connection established - Call is live!");
+          setCallStatus("Connected");
+        }
+        if (peerConnection.iceConnectionState === "failed") {
+          console.error("❌ ICE connection failed");
+          setCallStatus("Call Failed - ICE Error");
+        }
+      };
+  
+      peerConnection.ontrack = (event) => {
+        console.log("🔊 Received remote track:", event.streams[0]);
+        setRemoteStream(event.streams[0]);
+      
+        // Wait for remoteAudioRef to be available
+        setTimeout(() => {
+          if (remoteAudioRef.current) {
+            remoteAudioRef.current.srcObject = event.streams[0];
+      
+            remoteAudioRef.current.play()
+              .then(() => {
+                console.log("✅ Audio playback started successfully");
+              })
+              .catch((error) => {
+                console.error("🔇 Autoplay blocked. Waiting for user interaction...", error);
+      
+                // Add a one-time event listener to resume playback on user click
+                document.addEventListener("click", () => {
+                  if (remoteAudioRef.current) {
+                    remoteAudioRef.current.play().catch(err => console.error("🔇 Still blocked", err));
+                  }
+                }, { once: true });
+              });
+          } else {
+            console.warn("⚠️ remoteAudioRef not available yet!");
+          }
+        }, 500); // Small delay to ensure ref is set
+      };      
+  
+      // 📩 Accept Call and Send Answer
+      await peerConnection.setRemoteDescription(new RTCSessionDescription(storedOffer));
+      const answer = await peerConnection.createAnswer();
+      await peerConnection.setLocalDescription(answer);
+  
+      socket.emit("answer-call", { targetSocketId: callerSocketId, answer });
+  
+      // ✅ Update UI State
+      setIsConnected(true);
+      setIsCallActive(true);
+      setCallStatus("Connected");
+    } catch (error) {
+      console.error("❌ Error accepting call:", error);
+      setCallStatus("Call Failed");
+      setIsCallActive(false);
+      setIsConnected(false);
+    }
+  };  
+  
+  const declineCall = () => {
+    console.log("📴 Declining call...");
+    setIncomingCall(false);
+    setIsConnected(false);
+    setIsCallActive(false);
+    if (callerSocketId) {
+      socket.emit("call-declined", { targetSocketId: callerSocketId });
+    }
+  };
+  
+  const endCall = () => {
+    console.log("🔚 Ending call...");
+    setIsConnected(false);
+    setIsCallActive(false);
+    if (peerConnectionRef.current) {
+      peerConnectionRef.current.close();
+      peerConnectionRef.current = null;
+    }
+    if (localStreamRef.current) {
+      localStreamRef.current.getTracks().forEach(track => track.stop());
+      localStreamRef.current = null;
+    }
+    setRemoteStream(null);
+    if (callerSocketId) {
+      socket.emit("end-call", { targetSocketId: callerSocketId });
+    }
+  };
+  
+  if (loading) {
+    return (
+      <div className="h-screen flex justify-center items-center">
+        <div className="animate-spin rounded-full h-16 w-16 border-b-4 border-blue-500"></div>
+      </div>
+    );
+  }
+
   if (!user) {
     return (
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
@@ -318,9 +677,67 @@ const Chat = () => {
       </div>
     );
   }
+  
+  // if (!user) {
+  //   return (
+  //     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+  //       <Auth onSuccess={loadChatHistory} />
+  //     </div>
+  //   );
+  // }
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+      {incomingCall && isPatientConnected &&(
+        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 backdrop-blur-sm z-50">
+          <div className="bg-white p-6 rounded-xl shadow-2xl text-center w-96 transform scale-95 animate-fade-in">
+            <h2 className="text-xl font-bold text-gray-900">📞 Incoming Call</h2>
+            <p className="text-gray-600 mt-2">{doctorName ? `${doctorName} is calling...` : "Doctor is calling..."}</p>
+            
+            <div className="flex justify-between mt-5">
+              <button
+                className="flex items-center px-5 py-2 bg-green-600 text-white rounded-lg shadow-md hover:bg-green-700 transition-transform transform hover:scale-105"
+                onClick={acceptCall}
+              >
+                <CheckCircle className="w-6 h-6 mr-2" />
+                Accept
+              </button>
+              <button
+                className="flex items-center px-5 py-2 bg-red-600 text-white rounded-lg shadow-md hover:bg-red-700 transition-transform transform hover:scale-105"
+                onClick={declineCall}
+              >
+                <XCircle className="w-6 h-6 mr-2" />
+                Decline
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {isCallActive && isConnected && (
+        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 backdrop-blur-sm z-50">
+          <div className="bg-white p-6 rounded-xl shadow-2xl text-center w-96 transform scale-95 animate-fade-in">
+            <h2 className="text-xl font-bold text-gray-900">{callStatus}</h2>
+
+            <div className="mt-4">
+              {remoteStream ? (
+                <audio ref={remoteAudioRef} autoPlay playsInline controls className="w-full" />
+              ) : (
+                <p className="text-gray-500 italic">Waiting for audio...</p>
+              )}
+            </div>
+
+            <button
+              className="mt-5 flex items-center justify-center w-full px-5 py-2 bg-red-600 text-white rounded-lg shadow-md hover:bg-red-700 transition-transform transform hover:scale-105"
+              onClick={endCall}
+            >
+              <XCircle className="w-6 h-6 mr-2" />
+              End Call
+            </button>
+          </div>
+        </div>
+      )}
+
       <div className="bg-white rounded-lg shadow-lg overflow-hidden">
         <div className="flex items-center justify-between border-b p-4">
           <div className="flex">
@@ -357,111 +774,161 @@ const Chat = () => {
 
         <div className="p-4">
           {activeTab === 'ai' ? (
-            <div className="py-8">
-              <Bot className="w-12 h-12 text-blue-500 mx-auto mb-4" />
-              <h2 className="text-xl font-semibold mb-2 text-center">AI Therapy Support</h2>
-              <p className="text-gray-600 mb-4 text-center">
-                Share your thoughts and feelings in a safe space. Get supportive guidance and coping strategies.
-              </p>
-              
-              <div className="max-w-2xl mx-auto mb-8 max-h-[600px] overflow-y-auto">
-                {chatHistory.map((chat) => (
-                  <div key={chat.id} className="mb-6 border-b pb-4">
-                    <div className="bg-gray-50 p-3 rounded-lg mb-2">
-                      <p className="font-medium text-gray-700">You:</p>
-                      <p className="text-gray-600">{chat.message}</p>
-                    </div>
-                    <div className="bg-blue-50 p-3 rounded-lg">
-                      <p className="font-medium text-blue-700">AI Support:</p>
-                      <p className="text-gray-600 whitespace-pre-line">{chat.response}</p>
-                    </div>
-                    <p className="text-xs text-gray-400 mt-2">
-                      {new Date(chat.created_at).toLocaleString()}
-                    </p>
-                  </div>
-                ))}
-                <div ref={chatEndRef} /> {/* Scroll to this element */}
+            <div className="py-8 px-4 md:px-8">
+              <div className="text-center mb-6">
+                <Bot className="w-14 h-14 text-blue-500 mx-auto mb-3" />
+                <h2 className="text-2xl font-bold text-gray-900">AI Therapy Support</h2>
+                <p className="text-gray-600 max-w-lg mx-auto">
+                  Share your thoughts in a safe space. Receive supportive guidance and coping strategies.
+                </p>
               </div>
+            
+              <div className="max-w-3xl mx-auto bg-white shadow-lg rounded-lg p-6 border max-h-[600px] overflow-y-auto">
+              {chatHistory.map((chat, index) => {
+                const nextChat = chatHistory[index + 1];
 
-              <div className="max-w-2xl mx-auto">
-                <textarea
-                  className="w-full p-3 border rounded-lg mb-4"
-                  placeholder="Share your thoughts, feelings, or ask any question. I'm here to help..."
-                  rows={4}
-                  value={message}
-                  onChange={(e) => setMessage(e.target.value)}
-                  disabled={isLoading}
-                />
-                <button
-                  className="w-full bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 disabled:bg-blue-300 flex items-center justify-center"
-                  onClick={handleSendMessage}
-                  disabled={isLoading || !message.trim()}
-                >
-                  {isLoading ? (
-                    <>
-                      <Loader2 className="w-5 h-5 mr-2 animate-spin" />
-                      Processing...
-                    </>
-                  ) : (
-                    'Send Message'
-                  )}
-                </button>
+                // Show timestamp only for the last message in a group
+                const showTimestamp = !nextChat || nextChat;
+
+                // Format the date properly
+                const messageDate = new Date(chat.created_at);
+                const today = new Date();
+                const yesterday = new Date();
+                yesterday.setDate(today.getDate() - 1);
+
+                let formattedDate;
+                if (messageDate.toDateString() === today.toDateString()) {
+                  formattedDate = `Today, ${format(messageDate, "h:mm a")}`;
+                } else if (messageDate.toDateString() === yesterday.toDateString()) {
+                  formattedDate = `Yesterday, ${format(messageDate, "h:mm a")}`;
+                } else {
+                  formattedDate = format(messageDate, "MMMM d, h:mm a");
+                }
+
+                return (
+                  <div key={chat.id} className="mb-6 flex flex-col">
+                    <div className="flex justify-end">
+                      <div className="bg-blue-600 text-white p-3 rounded-xl max-w-[75%] shadow-md">
+                        <p className="font-medium">You</p>
+                        <p className="text-sm">{chat.message}</p>
+                      </div>
+                    </div>
+
+                    <div className="flex justify-start mt-2">
+                      <div className="bg-gray-100 text-gray-800 p-3 rounded-xl max-w-[75%] shadow-md">
+                        <p className="font-medium text-blue-700">AI Support</p>
+                        <p className="text-sm whitespace-pre-line">{chat.response}</p>
+                      </div>
+                    </div>
+
+                    {/* Show timestamp only under the last message in a group */}
+                    {showTimestamp && (
+                      <p className="text-xs text-gray-400 text-center mt-2">{formattedDate}</p>
+                    )}
+                  </div>
+                )}
+              )}
+                <div ref={chatEndRef} />
+              </div>
+            
+              <div className="max-w-3xl mx-auto mt-6">
+                <div className="flex items-center space-x-3">
+                  <textarea
+                    className="flex-grow p-3 border rounded-2xl focus:ring focus:ring-blue-300 shadow-sm"
+                    placeholder="Type your message..."
+                    rows={3}
+                    value={message}
+                    onChange={(e) => setMessage(e.target.value)}
+                    disabled={isLoading}
+                  />
+                  <button
+                    className="bg-blue-600 text-white px-5 py-2.5 rounded-lg hover:bg-blue-700 transition disabled:bg-blue-300 flex items-center justify-center shadow-md"
+                    onClick={handleSendMessage}
+                    disabled={isLoading || !message.trim()}
+                  >
+                    {isLoading ? (
+                      <>
+                        <Loader2 className="w-5 h-5 mr-2 animate-spin" />
+                        Sending...
+                      </>
+                    ) : (
+                      'Send'
+                    )}
+                  </button>
+                </div>
               </div>
             </div>
+            
           ) : activeDoctorChat ? (
-            <div className="py-4">
+            <div className="py-6 px-4 md:px-8">
               <div className="flex items-center mb-6">
                 <button
                   onClick={() => setActiveDoctorChat(null)}
-                  className="mr-4 text-gray-600 hover:text-gray-800"
+                  className="mr-4 text-gray-600 hover:text-gray-900 transition"
                 >
                   <ArrowLeft className="w-6 h-6" />
                 </button>
-                <h2 className="text-xl font-semibold">Chat with Dr. {activeDoctorChat.doctorName}</h2>
+                <h2 className="text-2xl font-semibold text-gray-900">
+                  Chat with Dr. {activeDoctorChat.doctorName}
+                </h2>
               </div>
 
-              <div className="max-h-[600px] overflow-y-auto mb-4 space-y-4">
+              <div className="max-w-3xl mx-auto bg-white shadow-md rounded-lg p-6 border max-h-[600px] overflow-y-auto">
                 {doctorChatLoading ? (
-                  <div className="flex justify-center py-4">
+                  <div className="flex justify-center py-6">
                     <Loader2 className="w-6 h-6 animate-spin text-blue-600" />
                   </div>
                 ) : (
-                  doctorChatMessages.map((msg) => {
+                  doctorChatMessages.map((msg, index) => {
                     const isCurrentUser = msg.sender_id === user?.id;
+                    const nextMessage = doctorChatMessages[index + 1];
+                  
+                    // Show timestamp only for the last message in a group
+                    const showTimestamp = !nextMessage || nextMessage.sender_id !== msg.sender_id;
+                  
+                    // Format the date properly
+                    const messageDate = new Date(msg.created_at);
+                    const today = new Date();
+                    const yesterday = new Date();
+                    yesterday.setDate(today.getDate() - 1);
+                  
+                    let formattedDate;
+                    if (messageDate.toDateString() === today.toDateString()) {
+                      formattedDate = `Today, ${format(messageDate, "h:mm a")}`;
+                    } else if (messageDate.toDateString() === yesterday.toDateString()) {
+                      formattedDate = `Yesterday, ${format(messageDate, "h:mm a")}`;
+                    } else {
+                      formattedDate = format(messageDate, "MMMM d, h:mm a");
+                    }
+                  
                     return (
-                      <div
-                        key={msg.id}
-                        className={`flex ${isCurrentUser ? 'justify-end' : 'justify-start'}`}
-                      >
+                      <div key={msg.id} className={`flex flex-col ${isCurrentUser ? "items-end" : "items-start"} mb-1`}>
                         <div
-                          className={`max-w-[70%] rounded-lg p-3 ${
-                            isCurrentUser
-                              ? 'bg-blue-600 text-white'
-                              : 'bg-gray-100 text-gray-800'
+                          className={`max-w-[75%] rounded-xl p-3 shadow-md ${
+                            isCurrentUser ? "bg-blue-600 text-white" : "bg-gray-100 text-gray-800"
                           }`}
                         >
-                          <p className="text-sm font-medium mb-1">
-                            {isCurrentUser ? 'You' : `Dr. ${msg.connection.doctor.name}`}
-                          </p>
-                          <p>{msg.message}</p>
-                          <p className="text-xs opacity-70 mt-1">
-                            {new Date(msg.created_at).toLocaleString()}
-                          </p>
+                          <p className="text-sm">{msg.message}</p>
                         </div>
+                  
+                        {/* Show timestamp only under the last message in a group */}
+                        {showTimestamp && (
+                          <p className="text-xs text-gray-400 mt-1">{formattedDate}</p>
+                        )}
                       </div>
                     );
-                  })
+                  })          
                 )}
                 <div ref={chatEndRef} />
               </div>
 
-              <div className="flex items-center space-x-2">
+              <div className="max-w-3xl mx-auto mt-6 flex items-center space-x-3">
                 <input
                   type="text"
                   value={message}
                   onChange={(e) => setMessage(e.target.value)}
                   placeholder="Type your message..."
-                  className="flex-1 p-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  className="flex-grow p-3 border rounded-lg shadow-sm focus:ring-2 focus:ring-blue-400 focus:outline-none transition"
                   onKeyPress={(e) => {
                     if (e.key === 'Enter' && !e.shiftKey) {
                       e.preventDefault();
@@ -472,7 +939,7 @@ const Chat = () => {
                 <button
                   onClick={sendDoctorMessage}
                   disabled={!message.trim()}
-                  className="p-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-blue-300"
+                  className="p-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition disabled:bg-blue-300 flex items-center justify-center shadow-md"
                 >
                   <Send className="w-5 h-5" />
                 </button>
@@ -509,32 +976,25 @@ const Chat = () => {
                         <p className="text-sm text-gray-600">
                           <span className="font-medium">Phone:</span> {doctor.phone || 'Not available'}
                         </p>
-                      </div>
+                      </div>                          
                       {isPending ? (
                         <div className="flex items-center justify-center px-4 py-2 bg-yellow-100 text-yellow-800 rounded-lg">
                           <Clock className="w-5 h-5 mr-2" />
                           Connection Pending
                         </div>
                       ) : isConnected ? (
-                        <div className="space-y-2">
-                          <div className="flex items-center justify-center px-4 py-2 bg-green-100 text-green-800 rounded-lg mb-2">
-                            <MessageSquare className="w-5 h-5 mr-2" />
-                            Connected
+                        <div className="space-y-4">
+                          <div className="flex">
+                            <Check className="w-6 h-6 mr-2" />
+                            <span className="text-md font-medium text-green-600">Connected</span>
                           </div>
+
                           <button
                             onClick={() => startDoctorChat(doctor.id, connection.id, doctor.name)}
-                            className="w-full flex items-center justify-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+                            className="w-full flex items-center justify-center px-5 py-3 bg-blue-600 text-white rounded-lg shadow-md hover:bg-blue-700 transition-transform transform hover:scale-105"
                           >
-                            <MessageSquare className="w-5 h-5 mr-2" />
-                            Start Chat
-                          </button>
-                          <button className="w-full flex items-center justify-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
-                            <PhoneCall className="w-5 h-5 mr-2" />
-                            Voice Call
-                          </button>
-                          <button className="w-full flex items-center justify-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
-                            <Video className="w-5 h-5 mr-2" />
-                            Video Call
+                            <MessageSquare className="w-6 h-6 mr-2" />
+                            <span className="text-lg font-medium">Start Chat</span>
                           </button>
                         </div>
                       ) : (

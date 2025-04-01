@@ -10,6 +10,18 @@ const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
+  const [loading, setLoading] = useState(false);
+
+  
+
+  const handleClick = async () => {
+    setLoading(true);
+    try {
+      await handleSignOut(); // Ensure handleSignOut is async if needed
+    } finally {
+      setLoading(false); // Optional: Set to false if you want to allow re-clicking
+    }
+  };
 
   useEffect(() => {
     checkUserRole();
@@ -54,6 +66,10 @@ const Navbar = () => {
     }
     return location.pathname.startsWith(path);
   };
+
+  // Hide the button if the user is on /login or /patient-login
+  const hideButton = location.pathname === "/login" || location.pathname === "/patient-login";
+  const hideSignInButton = !userRole && location.pathname === "/chat";
 
   const renderNavLinks = () => {
     if (userRole === 'admin') {
@@ -179,23 +195,27 @@ const Navbar = () => {
             </div>
           </div>
           <div className="flex items-center">
-            {!isLoading && (
+            {!isLoading && !hideButton &&(
               userRole ? (
                 <button
-                  onClick={handleSignOut}
-                  className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700"
+                  onClick={handleClick}
+                  disabled={loading}
+                  className={`inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 
+                  ${loading ? "opacity-50 cursor-not-allowed" : ""}`}
                 >
-                  <LogOut className="h-5 w-5 mr-2" />
-                  Sign Out
+                  {loading ? <div className="h-5 w-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div> : <LogOut className="h-5 w-5 mr-2" />}
+                  {loading ? "Signing Out..." : "Sign Out"}
                 </button>
               ) : (
-                <button
-                  onClick={() => navigate('/login')}
-                  className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700"
-                >
-                  <LogIn className="h-5 w-5 mr-2" />
-                  Sign In
-                </button>
+                !hideSignInButton && ( // Hide the Sign In button only when on /chat
+                  <button
+                    onClick={() => navigate('/login')}
+                    className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700"
+                  >
+                    <LogIn className="h-5 w-5 mr-2" />
+                    Sign In
+                  </button>
+                )
               )
             )}
             <div className="sm:hidden ml-4">

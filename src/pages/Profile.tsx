@@ -11,7 +11,9 @@ const Profile = () => {
   const [saving, setSaving] = useState(false);
   const [userEmail, setUserEmail] = useState<string | null>(null);
   const [review, setReview] = useState<Review | null>(null);
-  const [questions, setQuestions] = useState<Question[]>([]);
+  const [questions, setQuestions] = useState<
+    { id: number; question: string; created_at: string; answer?: string }[]
+  >([]);
   const [formData, setFormData] = useState({
     username: '',
     name: '',
@@ -29,6 +31,8 @@ const Profile = () => {
   const [newQuestion, setNewQuestion] = useState('');
   const [savingReview, setSavingReview] = useState(false);
 
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
   useEffect(() => {
     loadProfile();
     loadReview();
@@ -40,7 +44,7 @@ const Profile = () => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;
 
-      setUserEmail(user.email);
+      setUserEmail(user.email || null);
 
       const { data, error } = await supabase
         .from('user_profiles')
@@ -193,45 +197,48 @@ const Profile = () => {
   };
 
   const handleQuestionSubmit = async () => {
-    if (!newQuestion.trim()) return;
-
+    if (!newQuestion.trim() || isSubmitting) return; // Prevent multiple clicks
+  
+    setIsSubmitting(true); // Set loading state
+  
     try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) return;
-
-      const { error } = await supabase
-        .from('questions')
-        .insert({
-          user_id: user.id,
-          question: newQuestion.trim(),
-        });
-
-      if (error) throw error;
-      setNewQuestion('');
-      await loadQuestions();
+      // Simulated API call - replace with your actual submission logic
+      await new Promise(resolve => setTimeout(resolve, 1500));
+      
+      const newQuestionObj = {
+        id: Date.now(),
+        question: newQuestion.trim(),
+        created_at: new Date().toISOString(),
+      };
+      
+      setQuestions(prev => [newQuestionObj, ...prev]);
+      setNewQuestion(''); // Clear input
     } catch (error) {
-      console.error('Error submitting question:', error);
-      alert('Failed to submit question');
+      console.error("❌ Error submitting question:", error);
+      alert("Failed to submit question");
+    } finally {
+      setIsSubmitting(false); // Stop loading
     }
   };
 
   if (loading) {
     return (
-      <div className="flex justify-center items-center min-h-screen">
-        <Loader2 className="w-8 h-8 animate-spin text-blue-600" />
+      <div className="h-screen flex justify-center items-center">
+        <div className="animate-spin rounded-full h-16 w-16 border-b-4 border-blue-500"></div>
       </div>
     );
   }
 
   return (
     <div className="max-w-4xl mx-auto px-4 py-8 space-y-8">
-      <div className="bg-white rounded-lg shadow-lg p-6">
-        <div className="flex justify-between items-center mb-6">
-          <h1 className="text-2xl font-bold text-gray-900">My Profile</h1>
+      {/* Profile Section */}
+      <div className="bg-white rounded-2xl shadow-xl p-8">
+        <div className="flex justify-between items-center mb-8">
+          <h1 className="text-3xl font-semibold text-gray-900">My Profile</h1>
           {!isEditing && (
             <button
               onClick={() => setIsEditing(true)}
-              className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+              className="px-6 py-2 bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition-all duration-300"
             >
               Edit Profile
             </button>
@@ -239,163 +246,138 @@ const Profile = () => {
         </div>
 
         {isEditing ? (
-          <form onSubmit={handleSubmit} className="space-y-6">
-            <div className="flex items-center">
+          <form onSubmit={handleSubmit} className="space-y-8">
+            <div className="flex items-center space-x-6">
               <div className="relative">
                 <img
                   src={formData.profile_picture || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=200&h=200&fit=crop'}
                   alt="Profile"
-                  className="w-24 h-24 rounded-full object-cover"
+                  className="w-32 h-32 rounded-full object-cover"
                 />
-                <div className="absolute bottom-0 right-0 bg-white rounded-full p-1 shadow-lg">
-                  <Camera className="w-4 h-4 text-gray-600" />
+                <div className="absolute bottom-0 right-0 bg-white rounded-full p-2 shadow-lg">
+                  <Camera className="w-5 h-5 text-gray-600" />
                 </div>
               </div>
-              <div className="ml-6 flex-1">
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Profile Picture URL
-                </label>
+              <div className="flex-1">
+                <label className="block text-lg font-medium text-gray-700 mb-2">Profile Picture URL</label>
                 <input
                   type="url"
                   value={formData.profile_picture}
                   onChange={(e) => setFormData({ ...formData, profile_picture: e.target.value })}
-                  className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  className="w-full px-4 py-3 border rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                   placeholder="https://example.com/image.jpg"
                 />
               </div>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Username
-                </label>
+                <label className="block text-lg font-medium text-gray-700 mb-2">Username</label>
                 <input
                   type="text"
                   value={formData.username}
                   onChange={(e) => setFormData({ ...formData, username: e.target.value })}
-                  className={`w-full px-3 py-2 border rounded-lg ${
-                    profile?.username
-                      ? 'bg-gray-50'
-                      : 'focus:ring-2 focus:ring-blue-500 focus:border-blue-500'
-                  }`}
+                  className={`w-full px-4 py-3 border rounded-xl ${profile?.username ? 'bg-gray-100' : 'focus:ring-2 focus:ring-blue-500 focus:border-blue-500'}`}
                   disabled={!!profile?.username}
                   placeholder={profile?.username ? undefined : 'Choose a username'}
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Email
-                </label>
+                <label className="block text-lg font-medium text-gray-700 mb-2">Email</label>
                 <input
                   type="email"
                   value={userEmail || ''}
                   disabled
-                  className="w-full px-3 py-2 border rounded-lg bg-gray-50"
+                  className="w-full px-4 py-3 border rounded-xl bg-gray-100"
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Name
-                </label>
+                <label className="block text-lg font-medium text-gray-700 mb-2">Name</label>
                 <input
                   type="text"
                   value={formData.name}
                   onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                  className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  className="w-full px-4 py-3 border rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Phone
-                </label>
+                <label className="block text-lg font-medium text-gray-700 mb-2">Phone</label>
                 <input
                   type="tel"
                   value={formData.phone}
                   onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                  className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  className="w-full px-4 py-3 border rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Date of Birth
-                </label>
+                <label className="block text-lg font-medium text-gray-700 mb-2">Date of Birth</label>
                 <input
                   type="date"
                   value={formData.dateOfBirth}
                   onChange={(e) => setFormData({ ...formData, dateOfBirth: e.target.value })}
-                  className={`w-full px-3 py-2 border rounded-lg ${
-                    profile?.date_of_birth
-                      ? 'bg-gray-50'
-                      : 'focus:ring-2 focus:ring-blue-500 focus:border-blue-500'
-                  }`}
+                  className={`w-full px-4 py-3 border rounded-xl ${profile?.date_of_birth ? 'bg-gray-100' : 'focus:ring-2 focus:ring-blue-500 focus:border-blue-500'}`}
                   disabled={!!profile?.date_of_birth}
                   max={new Date().toISOString().split('T')[0]}
                 />
               </div>
             </div>
 
-            <div className="border-t pt-6">
-              <h3 className="text-lg font-medium text-gray-900 mb-4">Change Password</h3>
-              <div className="space-y-4">
+            {/* Change Password Section */}
+            <div className="border-t pt-8">
+              <h3 className="text-xl font-medium text-gray-900 mb-6">Change Password</h3>
+              <div className="space-y-6">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Current Password
-                  </label>
+                  <label className="block text-lg font-medium text-gray-700 mb-2">Current Password</label>
                   <input
                     type="password"
                     value={formData.currentPassword}
                     onChange={(e) => setFormData({ ...formData, currentPassword: e.target.value })}
-                    className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    className="w-full px-4 py-3 border rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    New Password
-                  </label>
+                  <label className="block text-lg font-medium text-gray-700 mb-2">New Password</label>
                   <input
                     type="password"
                     value={formData.newPassword}
                     onChange={(e) => setFormData({ ...formData, newPassword: e.target.value })}
-                    className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    className="w-full px-4 py-3 border rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Confirm New Password
-                  </label>
+                  <label className="block text-lg font-medium text-gray-700 mb-2">Confirm New Password</label>
                   <input
                     type="password"
                     value={formData.confirmPassword}
                     onChange={(e) => setFormData({ ...formData, confirmPassword: e.target.value })}
-                    className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    className="w-full px-4 py-3 border rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                   />
                 </div>
               </div>
             </div>
 
-            <div className="flex justify-end space-x-4">
+            <div className="flex justify-end space-x-6 mt-8">
               <button
                 type="button"
                 onClick={() => setIsEditing(false)}
-                className="px-4 py-2 text-gray-600 hover:text-gray-800"
+                className="px-6 py-3 text-gray-700 hover:text-gray-900"
               >
                 Cancel
               </button>
               <button
                 type="submit"
                 disabled={saving}
-                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-blue-300 flex items-center"
+                className="px-6 py-3 bg-blue-600 text-white rounded-xl hover:bg-blue-700 disabled:bg-blue-300 flex items-center"
               >
                 {saving ? (
                   <>
-                    <Loader2 className="w-5 h-5 mr-2 animate-spin" />
+                    <Loader2 className="w-6 h-6 mr-3 animate-spin" />
                     Saving...
                   </>
                 ) : (
@@ -405,35 +387,31 @@ const Profile = () => {
             </div>
           </form>
         ) : (
-          <div className="space-y-6">
-            <div className="flex items-center">
+          <div className="space-y-8">
+            <div className="flex items-center space-x-6">
               <img
                 src={profile?.profile_picture || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=200&h=200&fit=crop'}
                 alt="Profile"
-                className="w-24 h-24 rounded-full object-cover"
+                className="w-32 h-32 rounded-full object-cover"
               />
-              <div className="ml-6">
-                <h2 className="text-xl font-semibold text-gray-900">{profile?.name || 'No name set'}</h2>
+              <div>
+                <h2 className="text-2xl font-semibold text-gray-900">{profile?.name || 'No name set'}</h2>
                 <p className="text-gray-600">@{profile?.username || 'Username not set'}</p>
               </div>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
               <div>
-                <label className="block text-sm font-medium text-gray-500">Email</label>
-                <p className="mt-1">{userEmail}</p>
+                <label className="block text-lg font-medium text-gray-600">Email</label>
+                <p className="mt-2">{userEmail}</p>
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-500">Phone</label>
-                <p className="mt-1">{profile?.phone || 'Not set'}</p>
+                <label className="block text-lg font-medium text-gray-600">Phone</label>
+                <p className="mt-2">{profile?.phone || 'Not set'}</p>
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-500">Age</label>
-                <p className="mt-1">
-                  {profile?.date_of_birth 
-                    ? `${calculateAge(profile.date_of_birth)} years old`
-                    : 'Not set'}
-                </p>
+                <label className="block text-lg font-medium text-gray-600">Age</label>
+                <p className="mt-2">{profile?.date_of_birth ? `${calculateAge(profile.date_of_birth)} years old` : 'Not set'}</p>
               </div>
             </div>
           </div>
@@ -441,45 +419,47 @@ const Profile = () => {
       </div>
 
       {/* Review Section */}
-      <div className="bg-white rounded-lg shadow-lg p-6">
-        <h2 className="text-xl font-semibold mb-4">Rate & Review</h2>
-        <div className="space-y-4">
+      <div className="bg-white rounded-2xl shadow-xl p-8">
+        <h2 className="text-2xl font-semibold mb-6">Rate & Review</h2>
+        <div className="space-y-6">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Rating</label>
-            <div className="flex space-x-2">
+            <label className="block text-lg font-medium text-gray-700 mb-2">Rating</label>
+            <div className="flex space-x-3">
               {[1, 2, 3, 4, 5].map((star) => (
                 <button
                   key={star}
                   onClick={() => setReviewData({ ...reviewData, rating: star })}
-                  className="text-2xl focus:outline-none"
+                  className="text-3xl focus:outline-none"
                 >
                   {star <= reviewData.rating ? (
-                    <Star className="w-8 h-8 text-yellow-400 fill-current" />
+                    <Star className="w-10 h-10 text-yellow-400 fill-current" />
                   ) : (
-                    <StarOff className="w-8 h-8 text-gray-300" />
+                    <StarOff className="w-10 h-10 text-gray-300" />
                   )}
                 </button>
               ))}
             </div>
           </div>
+
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Review</label>
+            <label className="block text-lg font-medium text-gray-700 mb-2">Review</label>
             <textarea
               value={reviewData.review_text}
               onChange={(e) => setReviewData({ ...reviewData, review_text: e.target.value })}
-              className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-              rows={4}
+              className="w-full px-4 py-3 border rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              rows={5}
               placeholder="Share your experience with MedConnect..."
             />
           </div>
+
           <button
             onClick={handleReviewSubmit}
             disabled={savingReview || !reviewData.rating || !reviewData.review_text.trim()}
-            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-blue-300 flex items-center justify-center"
+            className="px-6 py-3 bg-blue-600 text-white rounded-xl hover:bg-blue-700 disabled:bg-blue-300 flex items-center justify-center"
           >
             {savingReview ? (
               <>
-                <Loader2 className="w-5 h-5 mr-2 animate-spin" />
+                <Loader2 className="w-6 h-6 mr-3 animate-spin" />
                 Saving...
               </>
             ) : (
@@ -490,7 +470,7 @@ const Profile = () => {
       </div>
 
       {/* Questions Section */}
-      <div className="bg-white rounded-lg shadow-lg p-6">
+      <div className="bg-white rounded-2xl shadow-xl p-8">
         <h2 className="text-xl font-semibold mb-4">Questions</h2>
         <div className="space-y-4">
           <div className="flex space-x-2">
@@ -499,27 +479,57 @@ const Profile = () => {
               value={newQuestion}
               onChange={(e) => setNewQuestion(e.target.value)}
               placeholder="Ask a question..."
-              className="flex-1 px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              className="flex-1 px-3 py-2 border rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              disabled={isSubmitting}
             />
             <button
               onClick={handleQuestionSubmit}
-              disabled={!newQuestion.trim()}
-              className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-blue-300 flex items-center"
+              disabled={isSubmitting || !newQuestion.trim()}
+              className={`px-4 py-2 text-white rounded-xl flex items-center transition-all
+                ${isSubmitting ? "bg-blue-300 cursor-not-allowed" : "bg-blue-600 hover:bg-blue-700"}`}
             >
-              <Send className="w-5 h-5 mr-2" />
-              Ask
+              {isSubmitting ? (
+                <>
+                  <svg
+                    className="animate-spin h-5 w-5 mr-2 text-white"
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                  >
+                    <circle
+                      className="opacity-25"
+                      cx="12"
+                      cy="12"
+                      r="10"
+                      stroke="currentColor"
+                      strokeWidth="4"
+                    ></circle>
+                    <path
+                      className="opacity-75"
+                      fill="currentColor"
+                      d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                    ></path>
+                  </svg>
+                  Submitting...
+                </>
+              ) : (
+                <>
+                  <Send className="w-5 h-5 mr-2" />
+                  Ask
+                </>
+              )}
             </button>
           </div>
 
           <div className="space-y-4">
             {questions.map((question) => (
-              <div key={question.id} className="border rounded-lg p-4">
+              <div key={question.id} className="border rounded-2xl p-4">
                 <div className="flex items-start space-x-2">
                   <MessageCircle className="w-5 h-5 text-blue-600 mt-1" />
                   <div className="flex-1">
                     <p className="font-medium">{question.question}</p>
                     {question.answer ? (
-                      <div className="mt-2 bg-gray-50 p-3 rounded-lg">
+                      <div className="mt-2 bg-blue-50 p-3 rounded-lg">
                         <p className="text-sm text-gray-600">{question.answer}</p>
                       </div>
                     ) : (

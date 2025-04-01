@@ -9,10 +9,20 @@ const ManageUsers = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingUser, setEditingUser] = useState<UserProfile | null>(null);
   const [error, setError] = useState<string | null>(null);
+  
   const [formData, setFormData] = useState({
     username: '',
     name: '',
+    date_of_birth: '',
   });
+  
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setFormData((prevData) => ({
+      ...prevData,
+      [name]: value,
+    }));
+  };
 
   useEffect(() => {
     loadUsers();
@@ -34,6 +44,7 @@ const ManageUsers = () => {
       setLoading(false);
     }
   };
+  
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -49,6 +60,7 @@ const ManageUsers = () => {
         .update({
           username: formData.username,
           name: formData.name,
+          date_of_birth: formData.date_of_birth,
           updated_at: new Date().toISOString(),
         })
         .eq('id', editingUser.id);
@@ -70,6 +82,7 @@ const ManageUsers = () => {
     setFormData({
       username: user.username || '',
       name: user.name || '',
+      date_of_birth: user.date_of_birth || '',
     });
     setError(null);
     setIsModalOpen(true);
@@ -101,7 +114,7 @@ const ManageUsers = () => {
                 Name
               </th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Email
+                DOB
               </th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                 Actions
@@ -112,13 +125,18 @@ const ManageUsers = () => {
             {users.map((user) => (
               <tr key={user.id}>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                  {user.profile_picture ? (
+                    <img src={user.profile_picture} alt="Profile" className="h-8 w-8 rounded-full" />
+                  ) : (
+                    '- '
+                  )}
                   {user.username || '-'}
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                   {user.name || '-'}
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                  {user.email || '-'}
+                  {user.date_of_birth || '-'}
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                   <button
@@ -175,6 +193,18 @@ const ManageUsers = () => {
                   type="text"
                   value={formData.name}
                   onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                  className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Date Of Birth
+                </label>
+                <input
+                  type="date"
+                  value={formData.date_of_birth}
+                  onChange={(e) => setFormData({ ...formData, date_of_birth: e.target.value })}
                   className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                 />
               </div>

@@ -1,8 +1,11 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { supabase } from '../../lib/supabase';
+import { User } from '@supabase/supabase-js';
 import { DoctorPatientConnection, UserProfile, DoctorPatientChat } from '../../lib/types';
-import { MessageSquare, PhoneCall, Video, Check, Clock, UserCircle, X, Send, Loader2 } from 'lucide-react';
-import { v4 as uuidv4 } from 'uuid'; // Import UUID generator
+import { MessageSquare, PhoneCall, Video, Check, Clock, UserCircle, X, Send, Loader2, XCircle } from 'lucide-react';
+import { io } from "socket.io-client";
+
+const socket = io(import.meta.env.VITE_SOCKET_SERVER_URL);
 
 interface ExtendedConnection extends DoctorPatientConnection {
   patient_profile: UserProfile;
@@ -14,7 +17,8 @@ interface ChatMessage extends DoctorPatientChat {
   };
 }
 
-const DoctorChats = () => {
+const DoctorChats: React.FC = () => {
+  const [doctorId, setDoctorId] = useState<string | null>(null);
   const [connections, setConnections] = useState<ExtendedConnection[]>([]);
   const [loading, setLoading] = useState(true);
   const [activeChatConnection, setActiveChatConnection] = useState<ExtendedConnection | null>(null);
@@ -22,28 +26,111 @@ const DoctorChats = () => {
   const [newMessage, setNewMessage] = useState('');
   const [sendingMessage, setSendingMessage] = useState(false);
   const [loadingChat, setLoadingChat] = useState(false);
-  const [currentDoctorId, setCurrentDoctorId] = useState<string | null>(null);
-  const [currentUser, setCurrentUser] = useState<any>(null);
+  const [currentUser, setCurrentUser] = useState<User | null>(null);
   const chatEndRef = useRef<HTMLDivElement | null>(null);
 
+  const [isCalling, setIsCalling] = useState(false);
+  const [callStatus, setCallStatus] = useState("Connecting...");
+  const [remoteStream, setRemoteStream] = useState<MediaStream | null>(null);
+  const localStreamRef = useRef<MediaStream | null>(null);
+  const peerConnectionRef = useRef<RTCPeerConnection | null>(null);
+  const remoteAudioRef = useRef<HTMLAudioElement | null>(null);
+
+  const localAudioRef = useRef<HTMLAudioElement | null>(null);
+
+  const [connectedPatients, setConnectedPatients] = useState<string[]>([]);
+  const [selectedPatientId, setSelectedPatientId] = useState<string | null>(null);
+
+  // const localAudioRef = useRef<HTMLAudioElement | null>(null);
+  // const remoteAudioRef = useRef<HTMLAudioElement | null>(null);
+
+
+  const pendingIceCandidatesRef = useRef<RTCIceCandidateInit[]>([]);
+
+  // Fetch doctor ID and set up auth state
   useEffect(() => {
+    const fetchDoctorId = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+
+      try {
+        const { data: doctorData, error: doctorError } = await supabase
+          .from('doctors')
+          .select('id')
+          .eq('user_id', user.id)
+          .single();
+
+        if (doctorError) {
+          console.error('Error fetching doctor ID:', doctorError);
+          return;
+        }
+
+        if (doctorData) {
+          setDoctorId(doctorData.id);
+          console.log('Doctor ID fetched:', doctorData.id);
+        }
+      } catch (error) {
+        console.error('Error in fetchDoctorId:', error);
+      }
+    };
+
+    // Set up auth state and fetch initial data
     supabase.auth.getUser().then(({ data: { user } }) => {
       setCurrentUser(user);
       if (user) {
-        loadConnections();
+        fetchDoctorId();
       }
     });
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       setCurrentUser(session?.user || null);
       if (session?.user) {
-        loadConnections();
+        fetchDoctorId();
       }
     });
 
     return () => subscription.unsubscribe();
   }, []);
 
+  // Load connections when doctorId changes
+  useEffect(() => {
+    if (!doctorId) {
+      console.log("Waiting for doctor ID to be fetched...");
+      return;
+    }
+
+    console.log("Using doctor ID:", doctorId);
+    loadConnections();
+    fetchConnectedPatients();
+    
+    // Register doctor with signaling server
+    socket.emit("register", { userId: doctorId, role: "doctor" });
+
+    // Set up WebRTC event listeners
+    socket.on("incoming-call", async ({ offer, from }) => {
+      console.log("Received call from:", from);
+      await handleOffer(offer, from);
+    });
+
+    socket.on("call-answered", async (answer) => {
+      console.log("Call answered!");
+      await peerConnectionRef.current?.setRemoteDescription(answer);
+    });
+
+    socket.on("ice-candidate", async (candidate) => {
+      if (peerConnectionRef.current) {
+        await peerConnectionRef.current.addIceCandidate(new RTCIceCandidate(candidate));
+      }
+    });
+
+    return () => {
+      socket.off("incoming-call");
+      socket.off("call-answered");
+      socket.off("ice-candidate");
+    };
+  }, [doctorId]);
+
+  // Chat message real-time updates
   useEffect(() => {
     if (!activeChatConnection) return;
   
@@ -58,7 +145,7 @@ const DoctorChats = () => {
           filter: `connection_id=eq.${activeChatConnection.id}`,
         },
         (payload) => {
-          setChatMessages((prev) => [...prev, payload.new as ChatMessage]); // Explicitly cast payload.new
+          setChatMessages((prev) => [...prev, payload.new as ChatMessage]);
         }
       )
       .subscribe();
@@ -66,36 +153,47 @@ const DoctorChats = () => {
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [activeChatConnection]);  
+  }, [activeChatConnection]);
 
+  // Auto-scroll chat
   useEffect(() => {
     if (chatEndRef.current) {
       chatEndRef.current.scrollIntoView({ behavior: 'smooth' });
     }
   }, [chatMessages]);
 
-  const loadConnections = async () => {
+  const fetchConnectedPatients = async () => {
+    if (!doctorId) return;
+
     try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) return;
+      const { data, error } = await supabase
+        .from("doctor_patient_connections")
+        .select("patient_id")
+        .eq("doctor_id", doctorId)
+        .eq("status", "connected");
 
-      const { data: doctorData, error: doctorError } = await supabase
-        .from('doctors')
-        .select('id')
-        .eq('user_id', user.id)
-        .single();
+      if (error) {
+        console.error("Error fetching connected patients:", error);
+        return;
+      }
 
-      if (doctorError) throw doctorError;
+      setConnectedPatients(data.map(entry => entry.patient_id));
+    } catch (err) {
+      console.error("Unexpected error:", err);
+    }
+  };
 
-      setCurrentDoctorId(doctorData.id);
+  const loadConnections = async () => {
+    if (!doctorId) return;
 
+    try {
       const { data: connectionsData, error: connectionsError } = await supabase
         .from('doctor_patient_connections')
         .select(`
           *,
           patient_profile:user_profiles(*)
         `)
-        .eq('doctor_id', doctorData.id)
+        .eq('doctor_id', doctorId)
         .order('created_at', { ascending: false });
 
       if (connectionsError) throw connectionsError;
@@ -117,39 +215,13 @@ const DoctorChats = () => {
         .order('created_at', { ascending: true });
 
       if (error) throw error;
-      setChatMessages(data || []); // Load initial messages
+      setChatMessages(data || []);
     } catch (error) {
       console.error('Error loading chat messages:', error);
     } finally {
       setLoadingChat(false);
     }
   };
-
-  // Real-time listener for new messages
-  useEffect(() => {
-    if (!activeChatConnection) return;
-
-    const channel = supabase
-      .channel(`doctor-chat-${activeChatConnection.id}`)
-      .on(
-        'postgres_changes',
-        {
-          event: 'INSERT',
-          schema: 'public',
-          table: 'doctor_patient_chats',
-          filter: `connection_id=eq.${activeChatConnection.id}`,
-        },
-        (payload) => {
-          const newMessage = payload.new as ChatMessage; // 👈 Explicit type assertion
-          setChatMessages((prev) => [...prev, newMessage]); // Append new message in real time
-        }
-      )
-      .subscribe();
-
-    return () => {
-      supabase.removeChannel(channel); // Cleanup on unmount
-    };
-  }, [activeChatConnection]);
 
   const startChat = async (connection: ExtendedConnection) => {
     setActiveChatConnection(connection);
@@ -161,33 +233,16 @@ const DoctorChats = () => {
   
     setSendingMessage(true);
     try {
-      // const newChatMessage: ChatMessage = {
-      //   id: uuidv4(), // Generate a new unique ID for the message
-      //   connection_id: activeChatConnection.id,
-      //   sender_id: currentUser.id,
-      //   message: newMessage.trim(),
-      //   created_at: new Date().toISOString(),
-      // };
-  
-      // Only insert the message to the database
-      const { data, error } = await supabase
+      const { error } = await supabase
         .from('doctor_patient_chats')
         .insert({
           connection_id: activeChatConnection.id,
           sender_id: currentUser.id,
           message: newMessage.trim(),
           created_at: new Date().toISOString()
-        })
-        // .select()
-        // .single(); // Get the newly created record
+        });
   
       if (error) throw error;
-  
-      // Add the real message from the database to the chat state
-      if (data) {
-        setChatMessages((prev) => [...prev, data]); // Add the new message to the chat state
-      }
-  
       setNewMessage('');
     } catch (error) {
       console.error('Error sending message:', error);
@@ -195,7 +250,7 @@ const DoctorChats = () => {
     } finally {
       setSendingMessage(false);
     }
-  };  
+  };
 
   const acceptConnection = async (connectionId: string) => {
     try {
@@ -206,11 +261,260 @@ const DoctorChats = () => {
 
       if (error) throw error;
       await loadConnections();
+      await fetchConnectedPatients();
     } catch (error) {
       console.error('Error accepting connection:', error);
       alert('Failed to accept connection');
     }
   };
+
+  const calculateAge = (dateOfBirth: string | number | Date) => {
+    const birthDate = new Date(dateOfBirth);
+    const today = new Date();
+  
+    let age = today.getFullYear() - birthDate.getFullYear();
+    const monthDiff = today.getMonth() - birthDate.getMonth();
+  
+    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
+      age--;
+    }
+  
+    return age;
+  };
+
+  const startCall = async (patientId: string) => {
+    if (!doctorId) {
+      console.error("❌ Doctor ID not available");
+      return;
+    }
+  
+    if (!connectedPatients.includes(patientId)) {
+      console.error("❌ Cannot call: Patient is not connected!");
+      setCallStatus("Call Failed - Patient not connected");
+      return;
+    }
+  
+    setIsCalling(true);
+    setCallStatus("Connecting...");
+    setSelectedPatientId(patientId);
+  
+    try {
+      console.log("🎙️ Requesting microphone access...");
+      const localStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+  
+      if (!localStream || localStream.getAudioTracks().length === 0) {
+        console.error("❌ No audio tracks found!");
+        setCallStatus("Microphone Issue - No Audio");
+        return;
+      }
+  
+      console.log("🎤 Microphone access granted. Tracks:", localStream.getAudioTracks());
+  
+      // 🔹 Store the local stream reference
+      localStreamRef.current = localStream;
+  
+      // 🔹 Attach local stream to an <audio> element (for testing)
+      if (localAudioRef.current) {
+        localAudioRef.current.srcObject = localStream;
+        localAudioRef.current.muted = true; // Prevent echo issues
+        localAudioRef.current.play().catch((error) => {
+          console.warn("🔇 Autoplay blocked. You might need to manually start playback.", error);
+        });
+      }
+  
+      const peerConnection = new RTCPeerConnection({
+        iceServers: [{ urls: "stun:stun.l.google.com:19302" }],
+      });
+      peerConnectionRef.current = peerConnection;
+  
+      // 🔹 Add tracks to PeerConnection
+      localStream.getTracks().forEach((track) => {
+        peerConnection.addTrack(track, localStream);
+        console.log("📌 Added track:", track.label);
+      });
+  
+      // ✅ Handle ICE Candidates
+      peerConnection.onicecandidate = (event) => {
+        if (event.candidate) {
+          console.log("📡 Sending ICE Candidate:", event.candidate);
+          socket.emit("ice-candidate", { 
+            targetSocketId: patientId, 
+            candidate: event.candidate // Send the complete candidate object
+          });
+        }
+      };
+  
+      peerConnection.oniceconnectionstatechange = () => {
+        console.log("🔄 ICE Connection State:", peerConnection.iceConnectionState);
+        if (peerConnection.iceConnectionState === "connected") {
+          console.log("✅ ICE connection established - Call is live!");
+          setCallStatus("Connected");
+        }
+        if (peerConnection.iceConnectionState === "failed") {
+          console.error("❌ ICE connection failed");
+          setCallStatus("Call Failed - ICE Error");
+        }
+      };
+  
+      // 🔹 Handle remote audio stream
+      peerConnection.ontrack = (event) => {
+        console.log("🔊 Received remote track:", event.streams[0]);
+        setRemoteStream(event.streams[0]);
+  
+        if (remoteAudioRef.current) {
+          remoteAudioRef.current.srcObject = event.streams[0];
+          remoteAudioRef.current.play().catch((error) => {
+            console.error("🔇 Autoplay blocked. Playing manually...", error);
+          });
+        }
+        setCallStatus("Connected");
+      };
+  
+      const offer = await peerConnection.createOffer();
+      await peerConnection.setLocalDescription(offer);
+      console.log("📨 Sending offer:", offer);
+  
+      socket.emit("call-user", { doctorId, targetUserId: patientId, offer });
+    } catch (error) {
+      console.error("❌ Error starting call:", error);
+      setCallStatus("Call Failed");
+    }
+  };
+  
+  
+  // ✅ Handle the answer from the patient
+  socket.on("answer-call", async ({ answer }) => {
+    console.log("📩 Received answer from patient!");
+    if (!peerConnectionRef.current) return;
+    await peerConnectionRef.current.setRemoteDescription(new RTCSessionDescription(answer));
+  });
+  
+  // ✅ Handle ICE Candidates
+  socket.on("ice-candidate", async (data) => {
+    try {
+      if (!data || !data.candidate) {
+        console.warn("⚠️ Received ICE candidate is missing or invalid:", data);
+        return;
+      }
+  
+      console.log("📡 Received ICE candidate:", data);
+  
+      // Ensure the candidate is properly structured
+      const candidateData: RTCIceCandidateInit = {
+        candidate: typeof data.candidate === "string" ? data.candidate : data.candidate.candidate,
+        sdpMid: data.sdpMid ?? null,
+        sdpMLineIndex: data.sdpMLineIndex ?? null,
+        usernameFragment: data.usernameFragment ?? undefined, // Optional
+      };
+  
+      console.log("🔍 Parsed ICE candidate:", candidateData);
+  
+      // Ensure required fields are present
+      if (!candidateData.candidate || (candidateData.sdpMid === null && candidateData.sdpMLineIndex === null)) {
+        console.error("❌ Invalid ICE candidate received (missing sdpMid and sdpMLineIndex)", candidateData);
+        return;
+      }
+  
+      const candidate = new RTCIceCandidate(candidateData);
+  
+      if (peerConnectionRef.current) {
+        await peerConnectionRef.current.addIceCandidate(candidate);
+        console.log("✅ ICE candidate added successfully!");
+      } else {
+        console.warn("⚠️ PeerConnection not ready. Storing ICE candidate.");
+        pendingIceCandidatesRef.current.push(candidateData);
+      }
+    } catch (error) {
+      console.error("❌ Error adding ICE candidate:", error, "Candidate data:", data);
+    }
+  });  
+  
+  // ✅ Handle the offer from the doctor (Patient Side)
+  const handleOffer = async (offer: RTCSessionDescriptionInit, from: string) => {
+    try {
+      console.log("📞 Incoming call offer...");
+  
+      const peerConnection = new RTCPeerConnection();
+      peerConnectionRef.current = peerConnection;
+  
+      const localStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      localStreamRef.current = localStream;
+  
+      localStream.getTracks().forEach(track => peerConnection.addTrack(track, localStream));
+  
+      peerConnection.onicecandidate = (event) => {
+        if (event.candidate) {
+          console.log("📡 Sending ICE Candidate:", event.candidate);
+          socket.emit("ice-candidate", {
+            targetSocketId: from,
+            candidate: event.candidate // Send the complete candidate object
+          });
+        }
+      };
+  
+      peerConnection.ontrack = (event) => {
+        console.log("🔊 Received remote track:", event.streams[0]);
+  
+        setRemoteStream(event.streams[0]);
+  
+        if (remoteAudioRef.current) {
+          remoteAudioRef.current.srcObject = event.streams[0];
+          remoteAudioRef.current.play().catch((error) => {
+            console.error("🔇 Autoplay blocked. Playing manually...", error);
+          });
+        }
+  
+        console.log("✅ Call is now connected!");
+        setCallStatus("Connected");
+      };
+  
+      peerConnection.oniceconnectionstatechange = () => {
+        console.log("🔄 ICE Connection State:", peerConnection.iceConnectionState);
+        if (peerConnection.iceConnectionState === "connected") {
+          console.log("✅ ICE connection established - Call is live!");
+          setCallStatus("Connected");
+        }
+        if (peerConnection.iceConnectionState === "failed") {
+          console.error("❌ ICE connection failed");
+          setCallStatus("Call Failed - ICE Error");
+        }
+      };
+  
+      await peerConnection.setRemoteDescription(new RTCSessionDescription(offer));
+      const answer = await peerConnection.createAnswer();
+      await peerConnection.setLocalDescription(answer);
+  
+      console.log("📨 Sending answer back to doctor...");
+      socket.emit("answer-call", { targetSocketId: from, answer });
+    } catch (error) {
+      console.error("❌ Error handling offer:", error);
+    }
+  };
+
+  useEffect(() => {
+    if (remoteAudioRef.current && remoteStream) {
+      remoteAudioRef.current.srcObject = remoteStream;
+    }
+  }, [remoteStream]); // Runs when remoteStream updates
+  
+  // ✅ End call function
+  const endCall = () => {
+    setIsCalling(false);
+    setCallStatus("Call Ended");
+    setSelectedPatientId(null);
+  
+    if (peerConnectionRef.current) {
+      peerConnectionRef.current.close();
+      peerConnectionRef.current = null;
+    }
+  
+    if (localStreamRef.current) {
+      localStreamRef.current.getTracks().forEach(track => track.stop());
+      localStreamRef.current = null;
+    }
+  
+    setRemoteStream(null);
+  };  
 
   if (loading) {
     return (
@@ -229,25 +533,20 @@ const DoctorChats = () => {
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {connections.map((connection) => (
-          <div key={connection.id} className="bg-white rounded-lg shadow p-6 border">
-            <div className="flex items-center mb-4">
-              <div className="w-16 h-16 bg-gray-200 rounded-full flex items-center justify-center">
-                <UserCircle className="w-10 h-10 text-gray-400" />
+          <div key={connection.id} className="bg-white rounded-xl shadow-lg p-6 border border-gray-200 transition-transform hover:scale-[1.02]">
+            <div className="flex items-center mb-5">
+              <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center shadow-sm">
+                <UserCircle className="w-12 h-12 text-gray-400" />
               </div>
               <div className="ml-4">
                 <h3 className="text-lg font-semibold text-gray-900">
                   Patient #{connection.patient_id.slice(0, 8)}
                 </h3>
                 {connection.patient_profile && (
-                  <div>
-                    <p className="text-sm text-gray-600">
-                      Age: {connection.patient_profile.age || 'Not specified'}
-                    </p>
-                    {connection.patient_profile.medical_history && (
-                      <p className="text-sm text-gray-600 mt-1">
-                        History: {connection.patient_profile.medical_history.slice(0, 50)}
-                        {connection.patient_profile.medical_history.length > 50 ? '...' : ''}
-                      </p>
+                  <div className="text-sm text-gray-600">
+                    <p>📞 {connection.patient_profile.phone || 'Not specified'}</p>
+                    {connection.patient_profile.date_of_birth && (
+                      <p className="mt-1">🎂 Age: {calculateAge(connection.patient_profile.date_of_birth)}</p>
                     )}
                   </div>
                 )}
@@ -256,13 +555,13 @@ const DoctorChats = () => {
 
             {connection.status === 'pending' ? (
               <div className="mb-4">
-                <div className="flex items-center mb-2">
+                <div className="flex items-center text-yellow-700 mb-2">
                   <Clock className="w-5 h-5 text-yellow-500 mr-2" />
-                  <span className="text-yellow-700">Connection Request Pending</span>
+                  <span>Connection Request Pending</span>
                 </div>
                 <button
                   onClick={() => acceptConnection(connection.id)}
-                  className="w-full bg-green-600 text-white py-2 px-4 rounded-lg hover:bg-green-700 flex items-center justify-center"
+                  className="w-full bg-green-600 text-white py-2 px-4 rounded-lg shadow-md hover:bg-green-700 transition-transform transform hover:scale-105 flex items-center justify-center"
                 >
                   <Check className="w-5 h-5 mr-2" />
                   Accept Connection
@@ -270,24 +569,26 @@ const DoctorChats = () => {
               </div>
             ) : (
               <div className="space-y-3">
-                <div className="flex items-center mb-2">
+                <div className="flex items-center text-green-700 mb-2">
                   <Check className="w-5 h-5 text-green-500 mr-2" />
-                  <span className="text-green-700">Connected</span>
+                  <span>Connected</span>
                 </div>
-                <button 
+
+                <button
                   onClick={() => startChat(connection)}
-                  className="w-full bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 flex items-center justify-center"
+                  className="w-full bg-blue-600 text-white py-2 px-4 rounded-lg shadow-md hover:bg-blue-700 transition-transform transform hover:scale-105 flex items-center justify-center"
                 >
                   <MessageSquare className="w-5 h-5 mr-2" />
                   Chat
                 </button>
-                <button className="w-full bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 flex items-center justify-center">
+
+                <button
+                  className="w-full bg-blue-600 text-white py-2 px-4 rounded-lg shadow-md hover:bg-blue-700 transition-transform transform hover:scale-105 flex items-center justify-center"
+                  onClick={() => startCall(connection.patient_id)}
+                  disabled={isCalling}
+                >
                   <PhoneCall className="w-5 h-5 mr-2" />
                   Voice Call
-                </button>
-                <button className="w-full bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 flex items-center justify-center">
-                  <Video className="w-5 h-5 mr-2" />
-                  Video Call
                 </button>
               </div>
             )}
@@ -301,86 +602,107 @@ const DoctorChats = () => {
         )}
       </div>
 
-      {/* Chat Modal */}
-      {activeChatConnection && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-lg w-full max-w-2xl h-[600px] flex flex-col">
-            <div className="p-4 border-b flex justify-between items-center">
-              <div>
-                <h3 className="text-lg font-semibold">
-                  Chat with Patient #{activeChatConnection.patient_id.slice(0, 8)}
-                </h3>
-                {activeChatConnection.patient_profile?.age && (
-                  <p className="text-sm text-gray-600">
-                    Age: {activeChatConnection.patient_profile.age}
-                  </p>
-                )}
-              </div>
-              <button
-                onClick={() => setActiveChatConnection(null)}
-                className="text-gray-400 hover:text-gray-600"
-              >
-                <X className="w-6 h-6" />
-              </button>
-            </div>
+      {isCalling && selectedPatientId && (
+        <div className="fixed top-0 left-0 w-full h-full flex justify-center items-center bg-black bg-opacity-50">
+          <div className="bg-white p-5 rounded-lg shadow-lg text-center w-80">
+            <h2 className="text-lg font-bold mb-3">{callStatus}</h2>
 
-            <div className="flex-1 overflow-y-auto p-4 space-y-4">
-              {loadingChat ? (
-                <div className="flex justify-center py-4">
-                  <Loader2 className="w-6 h-6 animate-spin text-blue-600" />
-                </div>
-              ) : (
-                chatMessages.map((msg) => {
-                  const isDoctor = msg.sender_id === currentUser?.id;
-                  return (
-                    <div key={msg.id} className={`flex ${isDoctor ? "justify-end" : "justify-start"}`}>
-                      <div
-                        className={`max-w-[70%] rounded-lg p-3 ${
-                          isDoctor ? "bg-blue-600 text-white" : "bg-gray-100 text-gray-800"
-                        }`}
-                      >
-                        <p className="text-sm font-medium mb-1">{isDoctor ? "You" : "Patient"}</p>
-                        <p>{msg.message}</p>
-                        <p className="text-xs opacity-70 mt-1">{new Date(msg.created_at).toLocaleString()}</p>
-                      </div>
-                    </div>
-                  );
-                })
-              )}
-              <div ref={chatEndRef} />
-            </div>
+            {/* 🔊 Ensure audio plays when remote stream is available */}
+            {remoteStream ? (
+              <audio ref={remoteAudioRef} autoPlay playsInline controls />
+            ) : (
+              <p className="text-gray-500">Waiting for audio...</p>
+            )}
 
-            <div className="p-4 border-t">
-              <div className="flex space-x-2">
-                <input
-                  type="text"
-                  value={newMessage}
-                  onChange={(e) => setNewMessage(e.target.value)}
-                  placeholder="Type your message..."
-                  className="flex-1 px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                  onKeyPress={(e) => {
-                    if (e.key === 'Enter' && !e.shiftKey) {
-                      e.preventDefault();
-                      sendMessage();
-                    }
-                  }}
-                />
-                <button
-                  onClick={sendMessage}
-                  disabled={sendingMessage || !newMessage.trim()}
-                  className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-blue-300 flex items-center"
-                >
-                  {sendingMessage ? (
-                    <Loader2 className="w-5 h-5 animate-spin" />
-                  ) : (
-                    <Send className="w-5 h-5" />
-                  )}
-                </button>
-              </div>
-            </div>
+            <button
+              className="mt-3 bg-red-600 text-white py-2 px-4 rounded-lg hover:bg-red-700 flex items-center justify-center w-full"
+              onClick={endCall}
+            >
+              <XCircle className="w-5 h-5 mr-2" />
+              End Call
+            </button>
           </div>
         </div>
       )}
+
+      {activeChatConnection && (
+  <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4">
+    <div className="bg-white rounded-xl shadow-xl w-full max-w-2xl h-[800px] flex flex-col overflow-hidden">
+      <div className="p-5 border-b flex justify-between items-center bg-gradient-to-r text-gray-900">
+        <div>
+          <h3 className="text-lg font-semibold">
+            Chat with Patient #{activeChatConnection.patient_id.slice(0, 8)}
+          </h3>
+          {activeChatConnection.patient_profile?.date_of_birth && (
+            <p className="text-sm opacity-80">
+              Age: {calculateAge(activeChatConnection.patient_profile.date_of_birth)}
+            </p>
+          )}
+        </div>
+        <button
+          onClick={() => setActiveChatConnection(null)}
+          className="text-gray-500 hover:text-gray-900 transition duration-300"
+        >
+          <X className="w-6 h-6" />
+        </button>
+      </div>
+
+      <div className="flex-1 overflow-y-auto p-5 space-y-5 bg-gray-50">
+        {loadingChat ? (
+          <div className="flex justify-center py-6">
+            <Loader2 className="w-6 h-6 animate-spin text-blue-600" />
+          </div>
+        ) : (
+          chatMessages.map((msg) => {
+            const isDoctor = msg.sender_id === currentUser?.id;
+            return (
+              <div key={msg.id} className={`flex ${isDoctor ? "justify-end" : "justify-start"}`}>
+                <div
+                  className={`max-w-[70%] rounded-xl p-4 shadow-lg ${isDoctor ? "bg-blue-700 text-white" : "bg-gray-700 text-white"}`}
+                >
+                  {/* <p className="text-sm font-semibold mb-1">{isDoctor ? "You" : "Patient"}</p> */}
+                  <p className="text-sm">{msg.message}</p>
+                  <p className="text-xs text-gray-300 mt-1">{new Date(msg.created_at).toLocaleString()}</p>
+                </div>
+              </div>
+            );
+          })
+        )}
+        <div ref={chatEndRef} />
+      </div>
+
+      <div className="p-5 border-t bg-white">
+        <div className="flex items-center space-x-4">
+          <input
+            type="text"
+            value={newMessage}
+            onChange={(e) => setNewMessage(e.target.value)}
+            placeholder="Type your message..."
+            className="flex-grow p-3 border rounded-lg shadow-sm focus:ring-2 focus:ring-blue-400 focus:outline-none transition"
+            onKeyPress={(e) => {
+              if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                sendMessage();
+              }
+            }}
+          />
+          <button
+            onClick={sendMessage}
+            disabled={sendingMessage || !newMessage.trim()}
+            className="p-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition disabled:bg-blue-300 flex items-center justify-center shadow-md"
+          >
+            {sendingMessage ? (
+              <Loader2 className="w-6 h-6 animate-spin" />
+            ) : (
+              <Send className="w-6 h-6" />
+            )}
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+)}
+
     </div>
   );
 };
