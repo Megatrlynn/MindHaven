@@ -214,10 +214,10 @@ const ManageDoctors = () => {
         <div className="flex-1 w-full md:mr-4">
           <input
             type="text"
-            placeholder="🔍 Search by name, profession, or phone..."
+            placeholder="🔍 Search by Name, Profession, or Phone..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full px-4 py-2 rounded-lg border border-gray-300 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 transition"
+            className="w-full ml-4 px-4 py-2 rounded-[100px] border border-gray-300 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 transition"
           />
         </div>
 

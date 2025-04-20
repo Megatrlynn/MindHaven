@@ -207,10 +207,8 @@ const Overview = () => {
   
   return (
     <div className="p-6 w-full">
-        <h2 className="text-2xl font-semibold text-gray-800">Platform Overview</h2>
-        <p className="mt-4 text-gray-600">
-            Here’s a quick overview of the platform’s key metrics.
-        </p>
+        <h2 className="text-3xl font-semibold text-gray-800">Platform Overview</h2>
+        <h2 className="text-2xl font-bold text-gray-900 mt-4">Quick Overview</h2>
 
         <div className="mt-6 flex flex-wrap space-x-3">
 

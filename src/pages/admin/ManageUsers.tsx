@@ -9,7 +9,7 @@ const ManageUsers = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingUser, setEditingUser] = useState<UserProfile | null>(null);
   const [error, setError] = useState<string | null>(null);
-  
+  const [searchQuery, setSearchQuery] = useState('');
   const [formData, setFormData] = useState({
     username: '',
     name: '',
@@ -45,6 +45,13 @@ const ManageUsers = () => {
     }
   };
   
+  const filteredUsers = users.filter((user) => {
+    const query = searchQuery.toLowerCase();
+    return (
+      (user.name || '').toLowerCase().includes(query) ||
+      (user.username || '').toLowerCase().includes(query)
+    );
+  }); 
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -97,9 +104,20 @@ const ManageUsers = () => {
 
   return (
     <div className="p-6">
-      <div className="mb-6">
+      <div className="flex flex-col md:flex-row justify-between items-center mb-6 gap-4">
         <h2 className="text-xl font-semibold text-gray-900">Manage Users</h2>
-        <p className="text-gray-600">Update user profiles</p>
+        {/* <p className="text-gray-600">Update user profiles</p> */}
+
+        <div className="flex-1 w-full md:mr-4">
+          <input
+            type="text"
+            placeholder="🔍 Search by Name or Username"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="w-full ml-4 px-4 py-2 rounded-[100px] border border-gray-300 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 transition"
+          />
+        </div>
+
       </div>
 
       <div className="overflow-x-auto">
@@ -121,7 +139,7 @@ const ManageUsers = () => {
             </tr>
           </thead>
           <tbody className="bg-white divide-y divide-gray-200">
-            {users.map((user) => (
+            {filteredUsers.map((user) => (
               <tr key={user.id}>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                   {user.profile_picture ? (
