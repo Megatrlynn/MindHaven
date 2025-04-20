@@ -11,7 +11,6 @@ const ResetPassword: React.FC = () => {
   const [searchParams] = useSearchParams();
 
   useEffect(() => {
-    // Get the token from the URL query parameters
     const token = searchParams.get('token');
     
     if (!token) {
@@ -19,7 +18,6 @@ const ResetPassword: React.FC = () => {
       return;
     }
 
-    // Verify the token is valid
     const verifyToken = async () => {
       try {
         const { error } = await supabase.auth.verifyOtp({
@@ -56,7 +54,6 @@ const ResetPassword: React.FC = () => {
 
       if (error) throw error;
 
-      // Show success message and redirect
       alert('Password successfully reset! Please log in with your new password.');
       navigate('/login');
     } catch (error) {

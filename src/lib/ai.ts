@@ -40,7 +40,7 @@ export async function searchInternet(query: string) {
       engine: "google",
       q: query,
       api_key: SEARCH_API_KEY,
-      num: 3, // Limit to top 3 results
+      num: 3,
     });
 
     return (response.organic_results || []).map((result: any) => ({
@@ -84,7 +84,6 @@ Respond with JSON only in this format:
       throw new Error("AI did not return a valid response.");
     }
 
-    // 🔥 Extract only the JSON part (from '{' to '}')
     const jsonMatch = analysisResponse.match(/\{[\s\S]*\}/);
 
     if (!jsonMatch) {
@@ -94,7 +93,7 @@ Respond with JSON only in this format:
 
     let analysis;
     try {
-      analysis = JSON.parse(jsonMatch[0]); // ✅ Only parse the extracted JSON
+      analysis = JSON.parse(jsonMatch[0]); 
     } catch (parseError) {
       console.error("JSON Parse Error:", parseError, "Response:", jsonMatch[0]);
       throw new Error("AI response was not in the expected format.");
@@ -112,12 +111,8 @@ Respond with JSON only in this format:
         `Best books or videos on ${analysis.recommendationTopic}`
       );
 
-      // Filter out Amazon links and non-working video links (like YouTube videos that no longer exist)
       bookOrVideoResults = bookOrVideoResults.filter((result: any) => {
-        // Remove Amazon links (we are looking for free books or alternative resources)
         const isNotAmazon = !result.link.includes("amazon");
-        
-        // Ensure video links are valid and working (basic check for YouTube video existence)
         const isValidVideoLink = result.link.includes("youtube.com") ? isValidYouTubeLink(result.link) : true;
 
         return isNotAmazon && isValidVideoLink;
@@ -191,11 +186,11 @@ Remember to always be direct and relevant to the specific question asked.`
 // Function to validate YouTube links (to check if the video exists)
 async function isValidYouTubeLink(link: string) {
   try {
-    const videoId = link.split("v=")[1]?.split("&")[0]; // Extract video ID from URL
-    if (!videoId) return false; // If there's no video ID, return false
+    const videoId = link.split("v=")[1]?.split("&")[0];
+    if (!videoId) return false;
 
     const response = await fetch(`https://www.youtube.com/oembed?url=https://www.youtube.com/watch?v=${videoId}&format=json`);
-    return response.ok; // If the response is OK, the video exists
+    return response.ok;
   } catch (error) {
     console.error("YouTube link validation error:", error);
     return false;

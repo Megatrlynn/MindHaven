@@ -14,7 +14,6 @@ const Login = () => {
     const parts = email.split('@');
     if (parts.length !== 2) return false;
     
-    // Get the part after @ and remove any domain extension (e.g., .com)
     const domain = parts[1].split('.')[0];
     return domain === 'admin' || domain === 'doc';
   };
@@ -57,7 +56,7 @@ const Login = () => {
     <div className="min-h-screen flex flex-col justify-center bg-gradient-to-br px-6 lg:px-8">
       <div className="sm:mx-auto sm:w-full sm:max-w-md">
         <h2 className="text-center text-4xl font-extrabold text-gray-900 drop-shadow-md">
-          {loading ? "Signing In..." : "Admin/Doctor Login"}
+          {loading ? "Signing In..." : "Admin/Therapist Login"}
         </h2>
         <p className="mt-2 text-center text-lg text-gray-600">
           Access your dashboard to manage your related data
@@ -67,7 +66,6 @@ const Login = () => {
       <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
         <div className="bg-white/50 backdrop-blur-md p-8 rounded-2xl shadow-2xl border border-white/40">
           
-          {/* Error Message */}
           {error && (
             <div className="mb-4 bg-red-100 border border-red-300 text-red-700 p-4 rounded-lg shadow-md">
               <div className="flex items-center">
@@ -77,7 +75,6 @@ const Login = () => {
             </div>
           )}
 
-          {/* Login Form */}
           <form className="space-y-6" onSubmit={handleSubmit}>
             {/* Email Input */}
             <div>
@@ -169,11 +166,11 @@ const Login = () => {
             <div className="mt-6 grid grid-cols-2 gap-4">
               <div className="text-center text-sm text-gray-700 bg-gray-100 p-3 rounded-lg shadow">
                 <code className="font-semibold text-gray-800">username@admin.com</code>
-                <p className="mt-1">For administrators</p>
+                <p className="mt-1">For admins</p>
               </div>
               <div className="text-center text-sm text-gray-700 bg-gray-100 p-3 rounded-lg shadow">
                 <code className="font-semibold text-gray-800">username@doc.com</code>
-                <p className="mt-1">For doctors</p>
+                <p className="mt-1">For therapists</p>
               </div>
             </div>
           </div>

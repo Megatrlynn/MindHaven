@@ -13,7 +13,7 @@ const Auth = ({ onSuccess }: AuthProps) => {
   const [loading, setLoading] = useState(false);
   const [isSignUp, setIsSignUp] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const navigate = useNavigate(); // 🔥 For redirection
+  const navigate = useNavigate();
 
   const [showForgotPassword, setShowForgotPassword] = useState(false);
   const [resetEmail, setResetEmail] = useState('');
@@ -24,7 +24,6 @@ const Auth = ({ onSuccess }: AuthProps) => {
     setLoading(true);
     setError(null);
 
-    // Extract domain part of the email
     const emailParts = email.split('@');
     if (emailParts.length !== 2) {
       setError('Invalid email format');
@@ -32,7 +31,7 @@ const Auth = ({ onSuccess }: AuthProps) => {
       return;
     }
 
-    const domain = emailParts[1].split('.')[0]; // Get the domain before the first '.'
+    const domain = emailParts[1].split('.')[0];
 
     if (domain === 'admin' || domain === 'doc') {
       setError('This login is for patients only.');
@@ -53,7 +52,7 @@ const Auth = ({ onSuccess }: AuthProps) => {
 
       if (authResponse.data.user) {
         if (onSuccess) onSuccess();
-        navigate('/profile'); // 🔥 Redirect patient to Profile page after login/signup
+        navigate('/profile');
       }
     } catch (err: any) {
       setError(err.message);
@@ -71,13 +70,14 @@ const Auth = ({ onSuccess }: AuthProps) => {
       alert("Error: " + error.message);
     } else {
       alert("Password reset link sent! Check your email.");
-      setShowForgotPassword(false); // Close modal
+      setShowForgotPassword(false);
     }
   };
   
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br">
       <div className="max-w-md w-full bg-white/50 backdrop-blur-md p-8 rounded-2xl shadow-2xl border border-white/40">
+        
         {/* Title */}
         <h2 className="text-3xl font-bold text-center text-gray-800 mb-6">
           {isSignUp ? 'Create Account' : 'Welcome Back'}
@@ -92,7 +92,6 @@ const Auth = ({ onSuccess }: AuthProps) => {
 
         {/* Form */}
         <form className="space-y-6" onSubmit={handleSubmit}>
-          {/* Email Input */}
           <div>
             <label htmlFor="email" className="block text-sm font-medium text-gray-700">
               Email Address
@@ -110,8 +109,6 @@ const Auth = ({ onSuccess }: AuthProps) => {
               />
             </div>
           </div>
-
-          {/* Password Input */}
           <div>
             <label htmlFor="password" className="block text-sm font-medium text-gray-700">
               Password
@@ -129,8 +126,6 @@ const Auth = ({ onSuccess }: AuthProps) => {
               />
             </div>
           </div>
-
-          {/* Submit Button */}
           <div>
             <button
               type="submit"
@@ -177,11 +172,11 @@ const Auth = ({ onSuccess }: AuthProps) => {
           </p>
         </form>
       </div>
+
       {/* Forgot Password Modal */}
       {showForgotPassword && (
         <div className="fixed inset-0 flex items-center justify-center bg-black/50 backdrop-blur-sm">
           <div className="bg-white p-6 rounded-lg shadow-2xl w-96 text-center relative">
-            {/* Close Button */}
             <button
               onClick={() => setShowForgotPassword(false)}
               className="absolute top-3 right-4 text-gray-500 hover:text-gray-800"
@@ -193,8 +188,6 @@ const Auth = ({ onSuccess }: AuthProps) => {
             <p className="text-gray-600 text-sm mt-1">
               Enter your email and we'll send you a reset link.
             </p>
-
-            {/* Email Input */}
             <input
               type="email"
               placeholder="Enter your email"

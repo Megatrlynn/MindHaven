@@ -8,7 +8,7 @@ const PrivacyPolicy = () => {
         className="relative bg-cover bg-center bg-no-repeat h-[600px] flex items-center justify-center text-center"
         style={{
           backgroundImage: "url('https://plus.unsplash.com/premium_photo-1677093905956-bf103e4532f6?q=80&w=1932&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D')",
-          backgroundColor: '#e5e7eb' // Gray fallback color
+          backgroundColor: '#e5e7eb' 
         }}
         >
          <div className="absolute inset-0 bg-black bg-opacity-50"></div> 

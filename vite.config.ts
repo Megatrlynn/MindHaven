@@ -12,7 +12,7 @@ export default defineConfig({
       },
     },
   ],
-  assetsInclude: ['**/_redirects'], // Ensure Vite includes _redirects
+  assetsInclude: ['**/_redirects'],
   optimizeDeps: {
     exclude: ['lucide-react'],
   },

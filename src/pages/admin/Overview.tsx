@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { supabase } from '../../lib/supabase'; // Make sure to configure your Supabase client
+import { supabase } from '../../lib/supabase'; 
 import { CalendarClock, MessageCircle, Star, User, FileText, Loader2 } from "lucide-react";
 import StatisticsChart from './components/StatisticsChart';
 
@@ -13,14 +13,14 @@ interface ActivityCardProps {
   }
 
 interface OverviewData {
-     date: string; // or Date if it's a proper Date object
+     date: string;
      signUps: number;
      questions: number;
      reviews: number;
 }
 
 type DataItem = {
-    created_at: string; // the date string in ISO format (e.g., "2025-03-31T14:23:00")
+    created_at: string;
 };
 
 const Overview = () => {
@@ -34,7 +34,7 @@ const Overview = () => {
   });
 
   const [overviewData, setOverviewData] = useState<OverviewData[]>([]);
-  const [loading, setLoading] = useState<boolean>(true); // 👈 Add loading state
+  const [loading, setLoading] = useState<boolean>(true);
 
   const [activity, setActivity] = useState({
     doctorz: [] as { id: string; name: string; profile_picture: string; created_at: string }[], 
@@ -46,41 +46,34 @@ const Overview = () => {
 
   useEffect(() => {
 
-    setLoading(true); // 👈 Show loading before fetching
+    setLoading(true);
 
     const fetchData = async () => {
       try {
-        // Fetch number of admins
         const { count: adminCount } = await supabase
             .from('admins')
             .select('id', { count: 'exact' });
 
-        // Fetch number of doctors
         const { count: doctorCount } = await supabase
           .from('doctors')
           .select('id', { count: 'exact' });
 
-        // Fetch number of patients (user profiles)
         const { count: patientCount } = await supabase
           .from('user_profiles')
           .select('id', { count: 'exact' });
 
-        // Fetch number of questions
         const { count: questionCount } = await supabase
           .from('questions')
           .select('id', { count: 'exact' });
 
-        // Fetch number of reviews
         const { count: reviewCount } = await supabase
           .from('reviews')
           .select('id', { count: 'exact' });
 
-        // Fetch number of health articles
         const { count: healthArticleCount } = await supabase
           .from('health_articles')
           .select('id', { count: 'exact' });
 
-        // Set the data in state
         setData({
             admins: adminCount || 0,
             doctors: doctorCount || 0,
@@ -92,7 +85,7 @@ const Overview = () => {
       } catch (error) {
         console.error("Error fetching data:", error);
       } finally {
-        setLoading(false); // 👈 Hide loading after fetching
+        setLoading(false);
       }
     };
 
@@ -102,7 +95,7 @@ const Overview = () => {
   useEffect(() => {
     const fetchData = async () => {
 
-        setLoading(true); // 👈 Show loading before fetching
+        setLoading(true);
 
       try {
         const [{ data: doctorz }, { data: patientz }, { data: articlez }, { data: reviewz }, { data: questionz }] =
@@ -124,7 +117,7 @@ const Overview = () => {
       } catch (error) {
         console.error("Error fetching data:", error);
       } finally {
-        setLoading(false); // 👈 Hide loading after fetching
+        setLoading(false);
       }
     };
 
@@ -134,10 +127,9 @@ const Overview = () => {
   useEffect(() => {
     const fetchData = async () => {
 
-        setLoading(true); // 👈 Show loading before fetching
+        setLoading(true);
 
       try {
-        // Fetch user sign-ups (user_profiles and doctors)
         const { data: userSignUps } = await supabase
           .from('user_profiles')
           .select('created_at')
@@ -148,24 +140,21 @@ const Overview = () => {
           .select('created_at')
           .order('created_at', { ascending: true });
 
-        // Fetch questions
         const { data: questions } = await supabase
           .from('questions')
           .select('created_at')
           .order('created_at', { ascending: true });
 
-        // Fetch reviews
         const { data: reviews } = await supabase
           .from('reviews')
           .select('created_at')
           .order('created_at', { ascending: true });
 
-        // Aggregate the data by date
         const aggregateData = (data: DataItem[]) => {
-            const aggregated: { [key: string]: number } = {}; // { date: count }
+            const aggregated: { [key: string]: number } = {}; 
         
             data.forEach((item: DataItem) => {
-            const date = item.created_at.split('T')[0]; // Extract the date (YYYY-MM-DD)
+            const date = item.created_at.split('T')[0];
             if (!aggregated[date]) {
                 aggregated[date] = 1;
             } else {
@@ -176,13 +165,11 @@ const Overview = () => {
             return aggregated;
         };
 
-        // Ensure that the data is not null before passing it to aggregateData
-        const userSignUpsData = userSignUps ? aggregateData(userSignUps) : {};  // Return empty object if null
+        const userSignUpsData = userSignUps ? aggregateData(userSignUps) : {};
         const doctorSignUpsData = doctorSignUps ? aggregateData(doctorSignUps) : {};
         const questionsData = questions ? aggregateData(questions) : {};
         const reviewsData = reviews ? aggregateData(reviews) : {};
 
-        // Merge the aggregated data
         const allDates = [
           ...new Set([
             ...Object.keys(userSignUpsData),
@@ -203,7 +190,7 @@ const Overview = () => {
       } catch (error) {
         console.error('Error fetching data: ', error);
       } finally {
-        setLoading(false); // 👈 Hide loading after fetching
+        setLoading(false); 
       }
     };
 
@@ -227,7 +214,7 @@ const Overview = () => {
 
         <div className="mt-6 flex flex-wrap space-x-3">
 
-            {/* Doctor Card */}
+            {/* Admin Card */}
             <div className="mt-2 bg-gradient-to-r from-yellow-600 to-yellow-400 text-white p-6 rounded-xl shadow-xl transform hover:scale-105 transition-all duration-300 ease-in-out flex items-center justify-between">
                 <div>
                     <h3 className="text-xl font-bold text-white">Admins</h3>
@@ -236,10 +223,10 @@ const Overview = () => {
                 <div className="text-6xl opacity-70 transform hover:scale-110 transition-all duration-300 ease-in-out">⚙️</div>
             </div>
 
-            {/* Doctor Card */}
+            {/* Therapist Card */}
             <div className="mt-2 bg-gradient-to-r from-blue-600 to-blue-400 text-white p-6 rounded-xl shadow-xl transform hover:scale-105 transition-all duration-300 ease-in-out flex items-center justify-between">
                 <div>
-                    <h3 className="text-xl font-bold text-white">Doctors</h3>
+                    <h3 className="text-xl font-bold text-white">Therapists</h3>
                     <p className="text-4xl font-semibold mt-2">{data.doctors}</p>
                 </div>
                 <div className="text-6xl opacity-70 transform hover:scale-110 transition-all duration-300 ease-in-out">👨‍⚕️</div>
@@ -288,7 +275,7 @@ const Overview = () => {
             <div className="grid gap-8">
                 {/* Doctors Section */}
                 <div>
-                    <h2 className="text-xl font-bold text-blue-700 mb-4">👨‍⚕️ New Doctors</h2>
+                    <h2 className="text-xl font-bold text-blue-700 mb-4">👨‍⚕️ New Therapists</h2>
                     <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
                     {activity.doctorz.map((doc) => (
                         <ActivityCard key={doc.id} icon={<User className="text-blue-500" />} title={doc.name} subtitle="New Doctor Added" time={doc.created_at} image={doc.profile_picture} rating={''} />
@@ -341,7 +328,6 @@ const Overview = () => {
         
         <div className="bg-white p-6 rounded-lg shadow-lg mt-6">
             <h1 className="text-2xl font-bold text-gray-900 mb-4">Engagement Trends</h1>
-            {/* Pass the overviewData to your chart component */}
             <StatisticsChart data={overviewData} />
         </div>
 

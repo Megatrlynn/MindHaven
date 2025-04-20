@@ -38,14 +38,12 @@ const StatisticsChart = ({ data }: { data: OverviewData[] }) => {
     ],
   });
 
-  const [chartType, setChartType] = useState<'signUps' | 'questions' | 'reviews'>('signUps'); // Default to 'signUps'
+  const [chartType, setChartType] = useState<'signUps' | 'questions' | 'reviews'>('signUps'); 
 
   // Prepare data for the chart
   const prepareChartData = (dataType: 'signUps' | 'questions' | 'reviews'): ChartData => {
-    // Sort the data by date in ascending order
     const sortedData = [...data].sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
-
-    const labels = sortedData.map(item => item.date); // Assuming 'date' is a property in the data
+    const labels = sortedData.map(item => item.date);
 
     let values: number[];
     switch (dataType) {
@@ -130,13 +128,13 @@ const StatisticsChart = ({ data }: { data: OverviewData[] }) => {
             y: {
               ticks: {
                 callback: (value) => {
-                  const numValue = Number(value); // Ensure value is a number
-                  return numValue % 1 === 0 ? numValue : ''; // Return only integers
+                  const numValue = Number(value);
+                  return numValue % 1 === 0 ? numValue : '';
                 },
-                stepSize: 1, // Step size for the ticks (smaller step size for closer ticks)
+                stepSize: 1, 
               },
-              min: Math.min(...chartData.datasets[0].data) - 1, // Adjust min value to be a bit smaller than the smallest data point
-              max: Math.max(...chartData.datasets[0].data) + 1, // Adjust max value to be a bit larger than the largest data point
+              min: Math.min(...chartData.datasets[0].data) - 1,
+              max: Math.max(...chartData.datasets[0].data) + 1,
             },
           },
         }}

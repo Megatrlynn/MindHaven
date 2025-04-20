@@ -7,7 +7,6 @@ export const isAdmin = async () => {
   const emailParts = user.email.split('@');
   if (emailParts.length !== 2) return false;
   
-  // Get the part after @ and remove any domain extension (e.g., .com)
   const domain = emailParts[1].split('.')[0];
   return domain === 'admin';
 };
@@ -19,7 +18,6 @@ export const isDoctor = async () => {
   const emailParts = user.email.split('@');
   if (emailParts.length !== 2) return false;
   
-  // Get the part after @ and remove any domain extension (e.g., .com)
   const domain = emailParts[1].split('.')[0];
   return domain === 'doc';
 };

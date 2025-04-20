@@ -54,7 +54,6 @@ const ManageUsers = () => {
     setError(null);
 
     try {
-      // Update user profile
       const { error: profileError } = await supabase
         .from('user_profiles')
         .update({

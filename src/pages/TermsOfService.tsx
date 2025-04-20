@@ -8,7 +8,7 @@ const TermsOfService = () => {
         className="relative bg-cover bg-center bg-no-repeat h-[600px] flex items-center justify-center text-center"
         style={{
         backgroundImage: "url('https://images.unsplash.com/photo-1505243542579-da5adfe8338f?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D')",
-        backgroundColor: '#e5e7eb' // Gray fallback color
+        backgroundColor: '#e5e7eb' 
         }}
     >
         <div className="absolute inset-0 bg-black bg-opacity-50"></div> 

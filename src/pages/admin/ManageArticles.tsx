@@ -15,7 +15,7 @@ type Article = {
   const ManageArticles = () => {
     const [selectedCategory, setSelectedCategory] = useState('');
     const [articles, setArticles] = useState<Article[]>([]);
-    const [loading, setLoading] = useState<boolean>(true); // 👈 Add loading state
+    const [loading, setLoading] = useState<boolean>(true); 
 
     const predefinedCategories = [
         "Mental Health",
@@ -59,7 +59,7 @@ type Article = {
         e.preventDefault();
         if (!editingArticle) return;
 
-        setLoading(true); // 👈 Show loading animation during update
+        setLoading(true);
         await supabase
             .from("health_articles")
             .update(updatedArticle)
@@ -74,7 +74,7 @@ type Article = {
     }, [selectedCategory]);
 
     const fetchArticles = async () => {
-        setLoading(true); // 👈 Show loader while fetching
+        setLoading(true);
         let query = supabase
             .from('health_articles')
             .select('*')
@@ -86,18 +86,18 @@ type Article = {
 
         const { data, error } = await query;
         if (!error) setArticles(data);
-        setLoading(false); // 👈 Hide loader after data fetch
+        setLoading(false);
     };
 
     const handleDelete = async (id: number) => {
-        setLoading(true); // 👈 Show loader during delete
+        setLoading(true);
         await supabase.from('health_articles').delete().match({ id });
         await fetchArticles();
     };
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        setLoading(true); // 👈 Show loader during submission
+        setLoading(true);
         await supabase.from('health_articles').insert([newArticle]);
         setNewArticle({ title: '', content: '', excerpt: '', image_url: '', category: '' });
         await fetchArticles();
@@ -198,15 +198,12 @@ type Article = {
                     <p className="text-gray-500">{article.category}</p>
                   </div>
                   <div className="flex items-center space-x-3">
-                    {/* Edit Button */}
                     <button
                       className="p-3 bg-yellow-500 text-white rounded-lg hover:bg-yellow-600 transition duration-200"
                       onClick={() => handleEditClick(article)}
                     >
                       ✏️
                     </button>
-      
-                    {/* Delete Button */}
                     <button
                       className="p-3 bg-red-500 text-white rounded-lg hover:bg-red-600 transition duration-200"
                       onClick={() => {

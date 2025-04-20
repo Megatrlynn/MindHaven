@@ -17,9 +17,9 @@ const Navbar = () => {
   const handleClick = async () => {
     setLoading(true);
     try {
-      await handleSignOut(); // Ensure handleSignOut is async if needed
+      await handleSignOut();
     } finally {
-      setLoading(false); // Optional: Set to false if you want to allow re-clicking
+      setLoading(false); 
     }
   };
 
@@ -67,7 +67,6 @@ const Navbar = () => {
     return location.pathname.startsWith(path);
   };
 
-  // Hide the button if the user is on /login or /patient-login
   const hideButton = location.pathname === "/login" || location.pathname === "/patient-login";
   const hideSignInButton = !userRole && location.pathname === "/chat";
 
@@ -207,7 +206,7 @@ const Navbar = () => {
                   {loading ? "Signing Out..." : "Sign Out"}
                 </button>
               ) : (
-                !hideSignInButton && ( // Hide the Sign In button only when on /chat
+                !hideSignInButton && (
                   <button
                     onClick={() => navigate('/login')}
                     className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700"

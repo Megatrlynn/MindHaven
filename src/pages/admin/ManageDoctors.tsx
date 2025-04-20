@@ -46,7 +46,6 @@ const ManageDoctors = () => {
 
     try {
       if (editingDoctor) {
-        // Update existing doctor
         const { error } = await supabase
           .from('doctors')
           .update({
@@ -59,13 +58,11 @@ const ManageDoctors = () => {
 
         if (error) throw error;
       } else {
-        // First check if the email domain is correct
         const emailDomain = formData.email.split('@')[1]?.split('.')[0];
         if (emailDomain !== 'doc') {
           throw new Error('Doctor email must use the format: username@doc.com');
         }
 
-        // Create new doctor account
         const { data: authData, error: authError } = await supabase.auth.signUp({
           email: formData.email,
           password: formData.password,
@@ -73,7 +70,6 @@ const ManageDoctors = () => {
 
         if (authError) {
           if (authError.message === 'User already registered') {
-            // If user exists, try to get their ID
             const { data: userData, error: userError } = await supabase.auth.admin.getUserById(formData.email);
             if (userError) throw userError;
             
@@ -81,7 +77,6 @@ const ManageDoctors = () => {
               throw new Error('Could not find user with this email');
             }
 
-            // Check if doctor profile already exists
             const { data: existingDoctor } = await supabase
               .from('doctors')
               .select('id')
@@ -92,7 +87,6 @@ const ManageDoctors = () => {
               throw new Error('A doctor profile already exists for this email');
             }
 
-            // Create doctor profile for existing user
             const { error: profileError } = await supabase
               .from('doctors')
               .insert({
@@ -108,7 +102,6 @@ const ManageDoctors = () => {
             throw authError;
           }
         } else if (authData.user) {
-          // Create doctor profile for new user
           const { error: profileError } = await supabase
             .from('doctors')
             .insert({
@@ -155,8 +148,8 @@ const ManageDoctors = () => {
     if (doctor) {
       setEditingDoctor(doctor);
       setFormData({
-        email: '', // Can't edit email
-        password: '', // Can't edit password
+        email: '',
+        password: '',
         name: doctor.name,
         profession: doctor.profession,
         phone: doctor.phone || '',
@@ -187,13 +180,13 @@ const ManageDoctors = () => {
   return (
     <div className="p-6">
       <div className="flex justify-between items-center mb-6">
-        <h2 className="text-xl font-semibold text-gray-900">Manage Doctors</h2>
+        <h2 className="text-xl font-semibold text-gray-900">Manage Therapists</h2>
         <button
           onClick={() => openModal()}
           className="flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
         >
           <Plus className="w-5 h-5 mr-2" />
-          Add Doctor
+          Add Therapist
         </button>
       </div>
 

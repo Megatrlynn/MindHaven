@@ -40,7 +40,7 @@ const DoctorProfile = () => {
         name: data.name || '',
         phone: data.phone || '',
         profile_picture: data.profile_picture || '',
-        current_password: '',  // Ensure password fields exist in state
+        current_password: '',  
         new_password: '',
         confirm_password: ''
       });
@@ -65,7 +65,6 @@ const DoctorProfile = () => {
         updated_at: new Date().toISOString(),
       };
   
-      // Check if user wants to update password
       if (formData.current_password && formData.new_password && formData.confirm_password) {
         if (formData.new_password !== formData.confirm_password) {
           alert('New password and confirmation do not match.');
@@ -80,9 +79,8 @@ const DoctorProfile = () => {
           return;
         }
 
-        // Reauthenticate user before password update
         const { error: signInError } = await supabase.auth.signInWithPassword({
-          email: user.email, // ✅ Fetches email from Supabase Auth
+          email: user.email, 
           password: formData.current_password,
         });
   
@@ -92,7 +90,6 @@ const DoctorProfile = () => {
           return;
         }
   
-        // Update password
         const { error: passwordError } = await supabase.auth.updateUser({
           password: formData.new_password,
         });
@@ -100,7 +97,6 @@ const DoctorProfile = () => {
         if (passwordError) throw passwordError;
       }
   
-      // Update profile in database
       const { error } = await supabase.from('doctors').update(updates).eq('id', profile.id);
       if (error) throw error;
   

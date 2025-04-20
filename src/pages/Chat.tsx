@@ -43,7 +43,7 @@ const Chat: React.FC = () => {
   const [doctorChatLoading, setDoctorChatLoading] = useState(false);
   const chatEndRef = useRef<HTMLDivElement | null>(null);
 
-  const [loading, setLoading] = useState(true); // Added loading state
+  const [loading, setLoading] = useState(true);
 
   const [incomingCall, setIncomingCall] = useState(false);
   const [isCallActive, setIsCallActive] = useState(false);
@@ -60,7 +60,7 @@ const Chat: React.FC = () => {
   const [storedOffer, setStoredOffer] = useState<RTCSessionDescriptionInit | null>(null);
   const [callStatus, setCallStatus] = useState("Waiting for call...");
   const [doctorId, setDoctorId] = useState<string[] | null>(null);
-  const [isPatientConnected, setIsPatientConnected] = useState(false); // Track if the patient is connected to a doctor
+  const [isPatientConnected, setIsPatientConnected] = useState(false); 
 
   const pendingIceCandidatesRef = useRef<RTCIceCandidateInit[]>([]);
 
@@ -79,7 +79,7 @@ const Chat: React.FC = () => {
         const { data, error } = await supabase
           .from('doctor_patient_connections')
           .select('patient_id')
-          .eq('patient_id', user.id); // Fetch all connections
+          .eq('patient_id', user.id); 
   
         if (error) {
           console.error('Error fetching patient IDs:', error);
@@ -87,9 +87,9 @@ const Chat: React.FC = () => {
         }
   
         if (data?.length) {
-          const patientIds = data.map(row => row.patient_id); // Extract all patient IDs
-          const uniquePatientIds = Array.from(new Set(patientIds)); // Remove duplicates using Set
-          setPatientId(uniquePatientIds); // Set as an array of unique patient IDs
+          const patientIds = data.map(row => row.patient_id);
+          const uniquePatientIds = Array.from(new Set(patientIds)); 
+          setPatientId(uniquePatientIds); 
           console.log('Unique Patient IDs fetched:', uniquePatientIds);
         }
       } catch (error) {
@@ -102,22 +102,21 @@ const Chat: React.FC = () => {
 
   useEffect(() => {
     const fetchConnectedDoctors = async () => {
-      if (!doctorId) return; // Ensure doctorId exists
+      if (!doctorId) return; 
   
       try {
         const { data, error } = await supabase
           .from("doctors")
-          .select("id, name") // Fetch all connected doctors
-          .in("id", doctorId); // Fetch only doctors connected to the patient
+          .select("id, name") 
+          .in("id", doctorId); 
   
         if (error) throw error;
   
         if (data?.length) {
-          // Find the doctor that matches the calling doctor ID
           const callingDoctor = data.find((doc) => doc.id === callerSocketId);
   
           if (callingDoctor) {
-            setDoctorName(callingDoctor.name); // Store the doctor's name
+            setDoctorName(callingDoctor.name); 
           }
         }
       } catch (err) {
@@ -126,10 +125,10 @@ const Chat: React.FC = () => {
     };
   
     fetchConnectedDoctors();
-  }, [doctorId, callerSocketId]); // Rerun when doctorId or caller changes
+  }, [doctorId, callerSocketId]);
 
   useEffect(() => {
-    console.log("UserID ID in useEffect:", user); // Debugging log
+    console.log("UserID ID in useEffect:", user); 
     supabase.auth.getUser().then(({ data: { user } }) => {
       setUser(user);
       if (user) {
@@ -140,20 +139,19 @@ const Chat: React.FC = () => {
     });
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      setUser(session?.user || null); // Set the user
-      setLoading(false); // Stop loading when session is checked
+      setUser(session?.user || null); 
+      setLoading(false); 
       if (session?.user) {
-        loadChatHistory(); // Load chat history
-        loadDoctors(); // Load doctors
-        loadConnections(); // Load connections
+        loadChatHistory(); 
+        loadDoctors();
+        loadConnections();
       } else {
-        setChatHistory([]); // Clear chat history
-        setDoctors([]); // Clear doctors list
-        setConnections([]); // Clear connections list
+        setChatHistory([]);
+        setDoctors([]); 
+        setConnections([]); 
       }
     });
 
-    // Subscribe to AI chat updates
     const aiChatChannel = supabase
       .channel('ai-chat-updates')
       .on(
@@ -206,7 +204,6 @@ const Chat: React.FC = () => {
   useEffect(() => {
     if (!activeDoctorChat) return;
 
-    // Subscribe to doctor chat updates
     const doctorChatChannel = supabase
       .channel(`doctor-chat-${activeDoctorChat.connectionId}`)
       .on(
@@ -416,27 +413,25 @@ const Chat: React.FC = () => {
         const { data, error } = await supabase
           .from("doctor_patient_connections")
           .select("doctor_id, status")
-          .in("patient_id", patientId); // Fetch for all patient IDs
+          .in("patient_id", patientId);
   
         if (error) throw error;
   
         if (data?.length) {
           console.log("🔄 Fetched connection data:", data);
   
-          // Store only connected doctor IDs
           const connectedDoctors = data
             .filter((entry) => entry.status === "connected")
             .map((entry) => entry.doctor_id);
   
           if (connectedDoctors.length > 0) {
-            setDoctorId(connectedDoctors); // Store doctor IDs
-            setIsPatientConnected(true); // Set patient as connected
+            setDoctorId(connectedDoctors);
+            setIsPatientConnected(true); 
             console.log("✅ Patient connected to doctors:", connectedDoctors);
           } else {
-            setIsPatientConnected(false); // No connection
+            setIsPatientConnected(false); 
           }
   
-          // Register each patient in the socket
           patientId.forEach((id) => {
             socket.emit("register", { userId: id, role: "patient" });
           });
@@ -448,7 +443,6 @@ const Chat: React.FC = () => {
             console.log("🟢 Checking patient connection:", isPatientConnected);
             console.log("✅ Connected doctors:", connectedDoctors);
           
-            // Convert patientId to a string if it's an array
             const actualPatientId = Array.isArray(patientId) ? patientId[0] : patientId;
 
             if (targetPatientId !== actualPatientId) {
@@ -456,8 +450,6 @@ const Chat: React.FC = () => {
               return;
             }
 
-          
-            // ✅ Proceed if the patient is connected to this doctor
             if (isPatientConnected) {
               console.log("✅ Incoming call accepted");
           
@@ -478,7 +470,6 @@ const Chat: React.FC = () => {
   
     fetchConnectionData();
   
-    // Listen for when the call is answered
     socket.on("call-answered", async (answer) => {
       console.log("✅ Call connected! Setting remote description...");
       if (peerConnectionRef.current) {
@@ -491,7 +482,6 @@ const Chat: React.FC = () => {
       }
     });
   
-    // Handle ICE candidates
     socket.on("ice-candidate", async (candidate: RTCIceCandidateInit) => {
       try {
         if (peerConnectionRef.current) {
@@ -505,7 +495,6 @@ const Chat: React.FC = () => {
       }
     });
   
-    // Cleanup listeners and peer connection when component unmounts
     return () => {
       socket.off("incoming-call");
       socket.off("call-answered");
@@ -516,19 +505,17 @@ const Chat: React.FC = () => {
         peerConnectionRef.current = null;
       }
     };
-  }, [patientId, isPatientConnected]); // Ensure `isPatientConnected` is included in dependencies  
+  }, [patientId, isPatientConnected]); 
 
   useEffect(() => {
     if (remoteAudioRef.current && remoteStream) {
       remoteAudioRef.current.srcObject = remoteStream;
-  
-      // ✅ Force autoplay again when remoteStream updates
       remoteAudioRef.current.play().catch((error) => {
         console.error("🔇 Autoplay blocked, retrying...", error);
-        setTimeout(() => remoteAudioRef.current?.play(), 500); // Retry after 500ms
+        setTimeout(() => remoteAudioRef.current?.play(), 500);
       });
     }
-  }, [remoteStream]); // Runs whenever remoteStream changes  
+  }, [remoteStream]);
 
   const acceptCall = async () => {
     console.log("🔍 Checking call data before accepting...");
@@ -545,10 +532,9 @@ const Chat: React.FC = () => {
       const localStream = await navigator.mediaDevices.getUserMedia({ audio: true });
       localStreamRef.current = localStream;
   
-      // 🔄 Ensure any old connection is closed before making a new one
       if (peerConnectionRef.current) {
         peerConnectionRef.current.close();
-        peerConnectionRef.current = null; // Prevent potential conflicts
+        peerConnectionRef.current = null; 
       }
   
       const peerConnection = new RTCPeerConnection({
@@ -557,23 +543,20 @@ const Chat: React.FC = () => {
   
       peerConnectionRef.current = peerConnection;
   
-      // 🎤 Add Local Audio Stream
       localStream.getTracks().forEach(track => peerConnection.addTrack(track, localStream));
   
-      // 📡 Handle ICE Candidates
       peerConnection.onicecandidate = (event) => {
         if (event.candidate) {
           console.log("📡 Sending ICE candidate:", event.candidate);
           socket.emit("ice-candidate", {
             targetSocketId: callerSocketId,
-            candidate: event.candidate // Send the complete RTCIceCandidate object
+            candidate: event.candidate 
           });
         } else {
           console.log("⚠️ ICE candidate gathering complete");
         }
       };
   
-      // 🔄 Handle ICE Connection State Changes
       peerConnection.oniceconnectionstatechange = () => {
         console.log("🔄 ICE Connection State:", peerConnection.iceConnectionState);
         if (peerConnection.iceConnectionState === "connected") {
@@ -590,7 +573,6 @@ const Chat: React.FC = () => {
         console.log("🔊 Received remote track:", event.streams[0]);
         setRemoteStream(event.streams[0]);
       
-        // Wait for remoteAudioRef to be available
         setTimeout(() => {
           if (remoteAudioRef.current) {
             remoteAudioRef.current.srcObject = event.streams[0];
@@ -602,7 +584,6 @@ const Chat: React.FC = () => {
               .catch((error) => {
                 console.error("🔇 Autoplay blocked. Waiting for user interaction...", error);
       
-                // Add a one-time event listener to resume playback on user click
                 document.addEventListener("click", () => {
                   if (remoteAudioRef.current) {
                     remoteAudioRef.current.play().catch(err => console.error("🔇 Still blocked", err));
@@ -612,17 +593,15 @@ const Chat: React.FC = () => {
           } else {
             console.warn("⚠️ remoteAudioRef not available yet!");
           }
-        }, 500); // Small delay to ensure ref is set
+        }, 500); 
       };      
   
-      // 📩 Accept Call and Send Answer
       await peerConnection.setRemoteDescription(new RTCSessionDescription(storedOffer));
       const answer = await peerConnection.createAnswer();
       await peerConnection.setLocalDescription(answer);
   
       socket.emit("answer-call", { targetSocketId: callerSocketId, answer });
   
-      // ✅ Update UI State
       setIsConnected(true);
       setIsCallActive(true);
       setCallStatus("Connected");
@@ -692,7 +671,7 @@ const Chat: React.FC = () => {
         <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 backdrop-blur-sm z-50">
           <div className="bg-white p-6 rounded-xl shadow-2xl text-center w-96 transform scale-95 animate-fade-in">
             <h2 className="text-xl font-bold text-gray-900">📞 Incoming Call</h2>
-            <p className="text-gray-600 mt-2">{doctorName ? `${doctorName} is calling...` : "Doctor is calling..."}</p>
+            <p className="text-gray-600 mt-2">{doctorName ? `${doctorName} is calling...` : "Therapist is calling..."}</p>
             
             <div className="flex justify-between mt-5">
               <button
@@ -787,10 +766,8 @@ const Chat: React.FC = () => {
               {chatHistory.map((chat, index) => {
                 const nextChat = chatHistory[index + 1];
 
-                // Show timestamp only for the last message in a group
                 const showTimestamp = !nextChat || nextChat;
 
-                // Format the date properly
                 const messageDate = new Date(chat.created_at);
                 const today = new Date();
                 const yesterday = new Date();
@@ -821,7 +798,6 @@ const Chat: React.FC = () => {
                       </div>
                     </div>
 
-                    {/* Show timestamp only under the last message in a group */}
                     {showTimestamp && (
                       <p className="text-xs text-gray-400 text-center mt-2">{formattedDate}</p>
                     )}
@@ -883,10 +859,8 @@ const Chat: React.FC = () => {
                     const isCurrentUser = msg.sender_id === user?.id;
                     const nextMessage = doctorChatMessages[index + 1];
                   
-                    // Show timestamp only for the last message in a group
                     const showTimestamp = !nextMessage || nextMessage.sender_id !== msg.sender_id;
                   
-                    // Format the date properly
                     const messageDate = new Date(msg.created_at);
                     const today = new Date();
                     const yesterday = new Date();
@@ -911,7 +885,6 @@ const Chat: React.FC = () => {
                           <p className="text-sm">{msg.message}</p>
                         </div>
                   
-                        {/* Show timestamp only under the last message in a group */}
                         {showTimestamp && (
                           <p className="text-xs text-gray-400 mt-1">{formattedDate}</p>
                         )}

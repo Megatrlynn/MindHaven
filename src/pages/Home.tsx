@@ -38,14 +38,12 @@ const Home = () => {
   useEffect(() => {
     loadReviews();
 
-    // Start auto-scroll if enabled and reviews are available
     if (autoScrollEnabled && reviews.length > 0) {
       intervalRef.current = window.setInterval(() => {
         setCurrentReviewIndex((prev) => (prev + 1) % reviews.length);
       }, 10000);
     }
 
-    // Clean up interval on unmount or change
     return () => {
       if (intervalRef.current) {
         clearInterval(intervalRef.current);
@@ -55,7 +53,6 @@ const Home = () => {
 
   const loadReviews = async () => {
     try {
-      // First, get all reviews
       const { data: reviewsData, error: reviewsError } = await supabase
         .from('reviews')
         .select('*')
@@ -66,7 +63,6 @@ const Home = () => {
       if (reviewsData.length > 0) {
         const userIds = reviewsData.map(review => review.user_id);
         
-        // Fetch user profiles, but this should NOT block showing reviews
         const { data: profilesData, error: profilesError } = await supabase
           .from('user_profiles')
           .select('user_id, name, profile_picture')
@@ -74,7 +70,6 @@ const Home = () => {
   
         if (profilesError) console.error('Error fetching profiles:', profilesError);
   
-        // Ensure every review is included
         const reviewsWithProfiles = reviewsData.map(review => ({
           ...review,
           user_profile: profilesData?.find(profile => profile.user_id === review.user_id) || null
@@ -97,27 +92,25 @@ const Home = () => {
       if (user) {
         const emailParts = user.email?.split('@');
         if (emailParts?.length === 2) {
-          const domain = emailParts[1].split('.')[0]; // Extracts 'admin' or 'doc'
+          const domain = emailParts[1].split('.')[0];
           setUserDomain(domain);
         }
       }
 
-      setLoading(false); // Stop loading after checking user
+      setLoading(false); 
     };
 
     fetchUser();
   }, []);
 
-  // Filtered articles based on category selection
   const filteredArticles =
     selectedCategory === "All"
       ? articles
       : articles.filter((article) => article.category === selectedCategory);
 
-       // Handle Category Change
   const handleCategoryChange = (category: string) => {
     setSelectedCategory(category);
-    setCurrentIndex(0); // Reset to the first article when category changes
+    setCurrentIndex(0); 
   };
 
   const fetchArticles = async () => {
@@ -133,31 +126,27 @@ const Home = () => {
   };
 
   useEffect(() => {
-    fetchArticles(); // Initial data load
+    fetchArticles();
 
-    // Listen for when the page visibility changes
     const handleVisibilityChange = () => {
       if (document.visibilityState === 'visible') {
-        fetchArticles(); // Reload articles if the page is visible again
+        fetchArticles(); 
       }
     };
 
-    // Add event listener for visibility change
     document.addEventListener('visibilitychange', handleVisibilityChange);
 
-    // Cleanup the event listener on unmount
     return () => {
       document.removeEventListener('visibilitychange', handleVisibilityChange);
     };
   }, []);
 
-  // Auto fade through the carousel
   useEffect(() => {
     const interval = setInterval(() => {
       setCurrentIndex((prevIndex) => (prevIndex + 1) % filteredArticles.length);
-    }, 30000); // Change article every 5 seconds
+    }, 30000); 
 
-    return () => clearInterval(interval); // Clean up the interval on component unmount
+    return () => clearInterval(interval); 
   }, [filteredArticles]);
 
   const toggleReadMore = (id: string) => {
@@ -184,7 +173,6 @@ const Home = () => {
     </div>
   ))}  
 
-  // Navigate to the next or previous article in the category
   const handleNext = () => {
     if (selectedCategory === "All") {
       setCurrentIndex((prevIndex) => (prevIndex === 0 ? articles.length - 1 : prevIndex - 1));
@@ -242,16 +230,16 @@ const Home = () => {
         className="relative bg-cover bg-center bg-no-repeat h-[600px] flex items-center justify-center text-center"
         style={{
           backgroundImage: "url('https://images.unsplash.com/photo-1625134673337-519d4d10b313?q=80&w=2138&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D')",
-          backgroundColor: '#e5e7eb' // Gray fallback color
+          backgroundColor: '#e5e7eb' 
         }}
       >
-        <div className="absolute inset-0 bg-black bg-opacity-50"></div> {/* Overlay */}
+        <div className="absolute inset-0 bg-black bg-opacity-50"></div>
         <div className="relative z-10 px-6">
           <h1 className="text-4xl font-bold text-blue-600 sm:text-5xl md:text-6xl">
             Your Health, Our Priority
           </h1>
           <p className="mt-3 max-w-md mx-auto text-base text-white sm:text-lg md:mt-5 md:text-xl md:max-w-3xl">
-            Connect with qualified doctors instantly through chat, voice, or through AI assistance.
+            Connect with qualified therapists instantly through chat, voice, or through AI assistance.
             Get the medical attention you need, when you need it.
           </p>
         </div>
@@ -268,7 +256,6 @@ const Home = () => {
                 src={imgSrc}
                 alt={title}
               />
-              {/* Ribbon with Glassmorphism Effect */}
               <div className="absolute bottom-0 left-0 right-0 p-6 bg-blue-600/80 text-white rounded-t-lg">
                 <div className="flex items-center space-x-3 mb-2">
                   <Icon className="h-6 w-6 text-white drop-shadow-lg" />
@@ -282,19 +269,14 @@ const Home = () => {
       </div>
 
       <div className="mt-12 text-center">
-        {/* Only show if user is NOT admin or doc */}
         {userDomain !== "admin" && userDomain !== "doc" && (
           <Link
             to="/chat"
             className="inline-flex items-center gap-3 px-6 py-3 text-base font-medium text-white bg-blue-600 rounded-md border border-transparent 
                       transition-all duration-300 ease-in-out transform hover:bg-blue-700 hover:scale-105 focus:outline-none focus:ring-4 focus:ring-blue-300 "
           >
-            {/* Chat Icon */}
             <MessageCircle className="w-5 h-5 text-white animate-bounce" />
-            
             Start Consultation
-
-            {/* Right Arrow Icon */}
             <ArrowRight className="w-5 h-5 text-white transition-transform duration-300 group-hover:translate-x-1" />
           </Link>
         )}
@@ -400,7 +382,7 @@ const Home = () => {
           <div
             className="flex transition-opacity duration-700 ease-in-out"
             style={{
-              transform: `translateX(-${currentIndex * 100}%)`, // Slide to the next article
+              transform: `translateX(-${currentIndex * 100}%)`, 
             }}
           >
             {filteredArticles.map((article, index) => (
@@ -409,13 +391,11 @@ const Home = () => {
                 className="flex-shrink-0 w-full bg-white rounded-lg shadow-lg p-6 mx-auto"
               >
                 <div className="relative">
-                  {/* Image */}
                   <img
                     src={article.image_url}
                     alt={article.title}
                     className="w-full h-[500px] object-cover rounded-md"
                   />
-                  {/* Ribbon with Title, Excerpt, and Read More */}
                   <div className="absolute rounded-lg bottom-0 left-0 w-full bg-black bg-opacity-50 text-white p-4">
                     <h3 className="text-lg font-semibold">{article.title}</h3>
                     <p className="text-gray-300 mt-2">
@@ -434,7 +414,6 @@ const Home = () => {
           </div>
         </div>
 
-        {/* Navigation Buttons */}
         {filteredArticles.length > 1 && (
           <div className="flex justify-center space-x-4 mt-4">
             <button
@@ -457,7 +436,7 @@ const Home = () => {
 
       <div className="bg-gray-100 py-12 mt-16">
         <div className="max-w-7xl mx-auto px-4 text-center">
-          <h2 className="text-2xl font-bold mb-6">Trusted by Thousands</h2>
+          <h2 className="text-2xl font-bold mb-6">Building Trust as we expand</h2>
           <p className="text-gray-600 mb-8">
             We will be having partnership with leading hospitals, verified doctors, and accredited health institutions.
           </p>

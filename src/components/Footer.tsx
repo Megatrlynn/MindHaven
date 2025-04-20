@@ -6,11 +6,7 @@ const Footer = () => {
   return (
     <footer className="bg-gradient-to-b from-gray-900 to-gray-800 text-white py-12 mt-16">
   <div className="max-w-7xl mx-auto px-6">
-    
-    {/* Grid Layout */}
     <div className="grid grid-cols-1 md:grid-cols-4 gap-8 text-center md:text-left">
-      
-      {/* Column 1 - Branding */}
       <div>
         <h3 className="text-lg font-semibold flex justify-center md:justify-start items-center">
           <span className="font-bold flex items-center">
@@ -22,8 +18,6 @@ const Footer = () => {
           Connecting you with trusted doctors and health resources.
         </p>
       </div>
-
-      {/* Column 2 - Quick Links */}
       <div>
         <h3 className="text-lg font-semibold">Quick Links</h3>
         <ul className="mt-3 space-y-3">
@@ -39,8 +33,6 @@ const Footer = () => {
           </li>
         </ul>
       </div>
-
-      {/* Column 3 - Social Media */}
       <div>
         <h3 className="text-lg font-semibold">Follow Us</h3>
         <div className="flex justify-center md:justify-start space-x-5 mt-3">
@@ -58,8 +50,6 @@ const Footer = () => {
           </a>
         </div>
       </div>
-
-      {/* Column 4 - Contact Us */}
       <div>
         <h3 className="text-lg font-semibold">Contact Us</h3>
         <ul className="mt-3 space-y-3">
@@ -72,11 +62,7 @@ const Footer = () => {
         </ul>
       </div>
     </div>
-
-    {/* Stylish Divider */}
     <div className="mt-10 border-t border-gray-700 opacity-50"></div>
-
-    {/* Bottom Note */}
     <p className="text-center text-gray-500 text-sm mt-6 flex justify-center items-center">
       &copy; {new Date().getFullYear()} 
       <span className="font-bold text-gray-400 flex items-center ml-2">

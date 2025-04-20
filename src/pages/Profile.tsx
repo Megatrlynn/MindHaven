@@ -197,12 +197,11 @@ const Profile = () => {
   };
 
   const handleQuestionSubmit = async () => {
-    if (!newQuestion.trim() || isSubmitting) return; // Prevent multiple clicks
+    if (!newQuestion.trim() || isSubmitting) return;
   
-    setIsSubmitting(true); // Set loading state
+    setIsSubmitting(true);
   
     try {
-      // Simulated API call - replace with your actual submission logic
       await new Promise(resolve => setTimeout(resolve, 1500));
       
       const newQuestionObj = {
@@ -212,12 +211,12 @@ const Profile = () => {
       };
       
       setQuestions(prev => [newQuestionObj, ...prev]);
-      setNewQuestion(''); // Clear input
+      setNewQuestion(''); 
     } catch (error) {
       console.error("❌ Error submitting question:", error);
       alert("Failed to submit question");
     } finally {
-      setIsSubmitting(false); // Stop loading
+      setIsSubmitting(false); 
     }
   };
 

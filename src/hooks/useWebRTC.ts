@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import io from "socket.io-client";
 
-const socket = io("http://localhost:5000"); // Replace with your actual server URL
+const socket = io("http://localhost:5000");
 
 export function useWebRTC() {
   const peerRef = useRef<RTCPeerConnection | null>(null);

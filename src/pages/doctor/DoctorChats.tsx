@@ -47,7 +47,6 @@ const DoctorChats: React.FC = () => {
 
   const pendingIceCandidatesRef = useRef<RTCIceCandidateInit[]>([]);
 
-  // Fetch doctor ID and set up auth state
   useEffect(() => {
     const fetchDoctorId = async () => {
       const { data: { user } } = await supabase.auth.getUser();
@@ -74,7 +73,6 @@ const DoctorChats: React.FC = () => {
       }
     };
 
-    // Set up auth state and fetch initial data
     supabase.auth.getUser().then(({ data: { user } }) => {
       setCurrentUser(user);
       if (user) {
@@ -92,7 +90,6 @@ const DoctorChats: React.FC = () => {
     return () => subscription.unsubscribe();
   }, []);
 
-  // Load connections when doctorId changes
   useEffect(() => {
     if (!doctorId) {
       console.log("Waiting for doctor ID to be fetched...");
@@ -103,10 +100,8 @@ const DoctorChats: React.FC = () => {
     loadConnections();
     fetchConnectedPatients();
     
-    // Register doctor with signaling server
     socket.emit("register", { userId: doctorId, role: "doctor" });
 
-    // Set up WebRTC event listeners
     socket.on("incoming-call", async ({ offer, from }) => {
       console.log("Received call from:", from);
       await handleOffer(offer, from);
@@ -130,7 +125,6 @@ const DoctorChats: React.FC = () => {
     };
   }, [doctorId]);
 
-  // Chat message real-time updates
   useEffect(() => {
     if (!activeChatConnection) return;
   
@@ -155,7 +149,6 @@ const DoctorChats: React.FC = () => {
     };
   }, [activeChatConnection]);
 
-  // Auto-scroll chat
   useEffect(() => {
     if (chatEndRef.current) {
       chatEndRef.current.scrollIntoView({ behavior: 'smooth' });
@@ -310,13 +303,11 @@ const DoctorChats: React.FC = () => {
   
       console.log("🎤 Microphone access granted. Tracks:", localStream.getAudioTracks());
   
-      // 🔹 Store the local stream reference
       localStreamRef.current = localStream;
   
-      // 🔹 Attach local stream to an <audio> element (for testing)
       if (localAudioRef.current) {
         localAudioRef.current.srcObject = localStream;
-        localAudioRef.current.muted = true; // Prevent echo issues
+        localAudioRef.current.muted = true;
         localAudioRef.current.play().catch((error) => {
           console.warn("🔇 Autoplay blocked. You might need to manually start playback.", error);
         });
@@ -327,19 +318,17 @@ const DoctorChats: React.FC = () => {
       });
       peerConnectionRef.current = peerConnection;
   
-      // 🔹 Add tracks to PeerConnection
       localStream.getTracks().forEach((track) => {
         peerConnection.addTrack(track, localStream);
         console.log("📌 Added track:", track.label);
       });
   
-      // ✅ Handle ICE Candidates
       peerConnection.onicecandidate = (event) => {
         if (event.candidate) {
           console.log("📡 Sending ICE Candidate:", event.candidate);
           socket.emit("ice-candidate", { 
             targetSocketId: patientId, 
-            candidate: event.candidate // Send the complete candidate object
+            candidate: event.candidate 
           });
         }
       };
@@ -356,7 +345,6 @@ const DoctorChats: React.FC = () => {
         }
       };
   
-      // 🔹 Handle remote audio stream
       peerConnection.ontrack = (event) => {
         console.log("🔊 Received remote track:", event.streams[0]);
         setRemoteStream(event.streams[0]);
@@ -381,15 +369,12 @@ const DoctorChats: React.FC = () => {
     }
   };
   
-  
-  // ✅ Handle the answer from the patient
   socket.on("answer-call", async ({ answer }) => {
     console.log("📩 Received answer from patient!");
     if (!peerConnectionRef.current) return;
     await peerConnectionRef.current.setRemoteDescription(new RTCSessionDescription(answer));
   });
   
-  // ✅ Handle ICE Candidates
   socket.on("ice-candidate", async (data) => {
     try {
       if (!data || !data.candidate) {
@@ -399,17 +384,15 @@ const DoctorChats: React.FC = () => {
   
       console.log("📡 Received ICE candidate:", data);
   
-      // Ensure the candidate is properly structured
       const candidateData: RTCIceCandidateInit = {
         candidate: typeof data.candidate === "string" ? data.candidate : data.candidate.candidate,
         sdpMid: data.sdpMid ?? null,
         sdpMLineIndex: data.sdpMLineIndex ?? null,
-        usernameFragment: data.usernameFragment ?? undefined, // Optional
+        usernameFragment: data.usernameFragment ?? undefined, 
       };
   
       console.log("🔍 Parsed ICE candidate:", candidateData);
   
-      // Ensure required fields are present
       if (!candidateData.candidate || (candidateData.sdpMid === null && candidateData.sdpMLineIndex === null)) {
         console.error("❌ Invalid ICE candidate received (missing sdpMid and sdpMLineIndex)", candidateData);
         return;
@@ -429,7 +412,6 @@ const DoctorChats: React.FC = () => {
     }
   });  
   
-  // ✅ Handle the offer from the doctor (Patient Side)
   const handleOffer = async (offer: RTCSessionDescriptionInit, from: string) => {
     try {
       console.log("📞 Incoming call offer...");
@@ -447,7 +429,7 @@ const DoctorChats: React.FC = () => {
           console.log("📡 Sending ICE Candidate:", event.candidate);
           socket.emit("ice-candidate", {
             targetSocketId: from,
-            candidate: event.candidate // Send the complete candidate object
+            candidate: event.candidate 
           });
         }
       };
@@ -495,9 +477,8 @@ const DoctorChats: React.FC = () => {
     if (remoteAudioRef.current && remoteStream) {
       remoteAudioRef.current.srcObject = remoteStream;
     }
-  }, [remoteStream]); // Runs when remoteStream updates
+  }, [remoteStream]); 
   
-  // ✅ End call function
   const endCall = () => {
     setIsCalling(false);
     setCallStatus("Call Ended");
@@ -606,8 +587,6 @@ const DoctorChats: React.FC = () => {
         <div className="fixed top-0 left-0 w-full h-full flex justify-center items-center bg-black bg-opacity-50">
           <div className="bg-white p-5 rounded-lg shadow-lg text-center w-80">
             <h2 className="text-lg font-bold mb-3">{callStatus}</h2>
-
-            {/* 🔊 Ensure audio plays when remote stream is available */}
             {remoteStream ? (
               <audio ref={remoteAudioRef} autoPlay playsInline controls />
             ) : (
@@ -660,7 +639,6 @@ const DoctorChats: React.FC = () => {
                 <div
                   className={`max-w-[70%] rounded-xl p-4 shadow-lg ${isDoctor ? "bg-blue-700 text-white" : "bg-gray-700 text-white"}`}
                 >
-                  {/* <p className="text-sm font-semibold mb-1">{isDoctor ? "You" : "Patient"}</p> */}
                   <p className="text-sm">{msg.message}</p>
                   <p className="text-xs text-gray-300 mt-1">{new Date(msg.created_at).toLocaleString()}</p>
                 </div>

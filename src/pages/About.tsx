@@ -10,7 +10,7 @@ const About = () => {
         className="relative bg-cover bg-center bg-no-repeat h-[600px] flex items-center justify-center text-center"
         style={{
           backgroundImage: "url('https://images.unsplash.com/photo-1577563908411-5077b6dc7624?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D')",
-          backgroundColor: '#e5e7eb' // Gray fallback color
+          backgroundColor: '#e5e7eb'
         }}
       >
         <div className="absolute inset-0 bg-black bg-opacity-50"></div> 
@@ -40,15 +40,11 @@ const About = () => {
                 key={index}
                 className="relative bg-white/80 backdrop-blur-lg rounded-2xl shadow-lg p-6 overflow-hidden group transition-transform duration-300 hover:scale-105 hover:shadow-2xl"
               >
-                {/* Glowing Gradient Background Effect */}
                 <div className="absolute inset-0 bg-gradient-to-r from-blue-100 to-blue-50 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-                
-                {/* Icon */}
                 <div className="flex justify-center relative z-10">
                   <feature.icon className="h-14 w-14 text-white p-3 rounded-full bg-gradient-to-r from-blue-500 to-blue-700 shadow-lg" />
                 </div>
                 
-                {/* Title & Description */}
                 <h3 className="mt-5 text-xl font-semibold text-center text-gray-900 relative z-10">{feature.title}</h3>
                 <p className="mt-3 text-gray-600 text-center relative z-10">{feature.desc}</p>
               </div>
