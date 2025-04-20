@@ -278,7 +278,7 @@ const Overview = () => {
                     <h2 className="text-xl font-bold text-blue-700 mb-4">👨‍⚕️ New Therapists</h2>
                     <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
                     {activity.doctorz.map((doc) => (
-                        <ActivityCard key={doc.id} icon={<User className="text-blue-500" />} title={doc.name} subtitle="New Doctor Added" time={doc.created_at} image={doc.profile_picture} rating={''} />
+                        <ActivityCard key={doc.id} icon={<User className="text-blue-500" />} title={doc.name} subtitle="New Therapist Added" time={doc.created_at} image={doc.profile_picture} rating={''} />
                     ))}
                     </div>
                 </div>

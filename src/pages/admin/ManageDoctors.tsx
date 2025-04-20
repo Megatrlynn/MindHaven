@@ -169,6 +169,25 @@ const ManageDoctors = () => {
     setIsModalOpen(true);
   };
 
+  const therapistProfessions = [
+    "Clinical Psychologist",
+    "Counseling Psychologist",
+    "Marriage and Family Therapist",
+    "Licensed Clinical Social Worker",
+    "Psychiatrist",
+    "Addiction Counselor",
+    "Child Psychologist",
+    "School Counselor",
+    "Rehabilitation Counselor",
+    "Art Therapist",
+    "Music Therapist",
+    "Behavioral Therapist",
+    "Trauma Therapist",
+    "Grief Counselor",
+    "Sex Therapist",
+    "Occupational Therapist",
+  ];
+  
   if (loading && doctors.length === 0) {
     return (
       <div className="flex justify-center items-center p-8">
@@ -289,7 +308,7 @@ const ManageDoctors = () => {
                         setFormData({ ...formData, email: e.target.value })
                       }
                       className="w-full px-3 py-2 border rounded-lg"
-                      placeholder="doctor@doc.com"
+                      placeholder="example@doc.com"
                     />
                   </div>
                   <div className="mb-4">
@@ -328,15 +347,23 @@ const ManageDoctors = () => {
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   Profession
                 </label>
-                <input
-                  type="text"
+                <select
                   required
                   value={formData.profession}
                   onChange={(e) =>
                     setFormData({ ...formData, profession: e.target.value })
                   }
                   className="w-full px-3 py-2 border rounded-lg"
-                />
+                >
+                  <option value="" disabled>
+                    Select a profession
+                  </option>
+                  {therapistProfessions.map((profession) => (
+                    <option key={profession} value={profession}>
+                      {profession}
+                    </option>
+                  ))}
+                </select>
               </div>
 
               <div className="mb-4">
