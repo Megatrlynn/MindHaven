@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { supabase } from '../../lib/supabase'; 
-import { CalendarClock, MessageCircle, Star, User, FileText, Loader2 } from "lucide-react";
+import { CalendarClock, MessageCircle, Star, User, FileText, Loader2, MenuIcon, Home, Users, LayoutDashboard, Clock, UserPlus, UserCheck, BookOpenText, HelpCircle, Activity, XIcon } from "lucide-react";
 import StatisticsChart from './components/StatisticsChart';
 
 interface ActivityCardProps {
@@ -35,6 +35,7 @@ const Overview = () => {
 
   const [overviewData, setOverviewData] = useState<OverviewData[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
+  const [isNavOpen, setIsNavOpen] = useState(false);
 
   const [activity, setActivity] = useState({
     doctorz: [] as { id: string; name: string; profile_picture: string; created_at: string }[], 
@@ -44,6 +45,21 @@ const Overview = () => {
     questionz: [] as { id: string; question: string; created_at: string }[],
   });
 
+  const navItems = [
+    { id: 'quick-overview', label: 'Quick Overview', icon: LayoutDashboard },
+    { id: 'recent-activity', label: 'Recent Activity', icon: Clock },
+    { id: 'new-therapists', label: 'New Therapists', icon: UserPlus },
+    { id: 'new-patients', label: 'New Patients', icon: UserCheck },
+    { id: 'health-articles', label: 'Health Articles', icon: BookOpenText },
+    { id: 'latest-reviews', label: 'Latest Reviews', icon: Star },
+    { id: 'new-questions', label: 'New Questions', icon: HelpCircle },
+    { id: 'engagement-trends', label: 'Engagement Trends', icon: Activity }
+  ];
+
+  const scrollToSection = (id: string) => {
+    document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' });
+  };
+  
   useEffect(() => {
 
     setLoading(true);
@@ -208,127 +224,195 @@ const Overview = () => {
   return (
     <div className="p-6 w-full">
         <h2 className="text-3xl font-semibold text-gray-800">Platform Overview</h2>
-        <h2 className="text-2xl font-bold text-gray-900 mt-4">Quick Overview</h2>
-
-        <div className="mt-6 flex flex-wrap space-x-3">
-
-            {/* Admin Card */}
-            <div className="mt-2 bg-gradient-to-r from-yellow-600 to-yellow-400 text-white p-6 rounded-xl shadow-xl transform hover:scale-105 transition-all duration-300 ease-in-out flex items-center justify-between">
-                <div>
-                    <h3 className="text-xl font-bold text-white">Admins</h3>
-                    <p className="text-4xl font-semibold mt-2">{data.admins}</p>
-                </div>
-                <div className="text-6xl opacity-70 transform hover:scale-110 transition-all duration-300 ease-in-out">⚙️</div>
-            </div>
-
-            {/* Therapist Card */}
-            <div className="mt-2 bg-gradient-to-r from-blue-600 to-blue-400 text-white p-6 rounded-xl shadow-xl transform hover:scale-105 transition-all duration-300 ease-in-out flex items-center justify-between">
-                <div>
-                    <h3 className="text-xl font-bold text-white">Therapists</h3>
-                    <p className="text-4xl font-semibold mt-2">{data.doctors}</p>
-                </div>
-                <div className="text-6xl opacity-70 transform hover:scale-110 transition-all duration-300 ease-in-out">👨‍⚕️</div>
-            </div>
-
-            {/* Patient Card */}
-            <div className="mt-2 bg-gradient-to-r from-green-600 to-green-400 text-white p-6 rounded-xl shadow-xl transform hover:scale-105 transition-all duration-300 ease-in-out flex items-center justify-between">
-            <div>
-                <h3 className="text-xl font-semibold">Patients</h3>
-                <p className="text-4xl font-semibold mt-2">{data.patients}</p>
-            </div>
-            <div className="text-6xl opacity-70 transform hover:scale-110 transition-all duration-300 ease-in-out">🤒</div>
-            </div>
-
-            {/* Questions Card */}
-            <div className="mt-2 bg-gradient-to-r from-purple-600 to-purple-400 text-white p-6 rounded-xl shadow-xl transform hover:scale-105 transition-all duration-300 ease-in-out flex items-center justify-between">
-            <div>
-                <h3 className="text-xl font-semibold">Questions</h3>
-                <p className="text-4xl font-semibold mt-2">{data.questions}</p>
-            </div>
-            <div className="text-6xl opacity-70 transform hover:scale-110 transition-all duration-300 ease-in-out">❓</div>
-            </div>
-
-            {/* Reviews Card */}
-            <div className="mt-2 bg-gradient-to-r from-gray-600 to-gray-400 text-white p-6 rounded-xl shadow-xl transform hover:scale-105 transition-all duration-300 ease-in-out flex items-center justify-between">
-            <div>
-                <h3 className="text-xl font-semibold">Reviews</h3>
-                <p className="text-4xl font-semibold mt-2">{data.reviews}</p>
-            </div>
-            <div className="text-6xl opacity-70 transform hover:scale-110 transition-all duration-300 ease-in-out">⭐</div>
-            </div>
-
-            {/* Health Articles Card */}
-            <div className="mt-2 bg-gradient-to-r from-red-600 to-red-400 text-white p-6 rounded-xl shadow-xl transform hover:scale-105 transition-all duration-300 ease-in-out flex items-center justify-between">
-            <div>
-                <h3 className="text-xl font-semibold">Articles</h3>
-                <p className="text-4xl font-semibold mt-2">{data.healthArticles}</p>
-            </div>
-            <div className="text-6xl opacity-70 transform hover:scale-110 transition-all duration-300 ease-in-out">📚</div>
-            </div>
-        </div>
         
-        <div className="bg-white p-6 rounded-lg shadow-lg mt-6">
+        <div className="fixed top-1/2 left-4 transform -translate-y-1/2 z-50">
+          <button
+            onClick={() => setIsNavOpen(!isNavOpen)}
+            className="bg-blue-600 text-white p-3 rounded-full shadow-lg hover:bg-blue-700 transition-all relative w-12 h-12 flex items-center justify-center"
+          >
+            <MenuIcon
+              className={`absolute w-6 h-6 transition-all duration-300 transform ${
+                isNavOpen ? 'opacity-0 scale-75 rotate-45' : 'opacity-100 scale-100 rotate-0'
+              }`}
+            />
+            <XIcon
+              className={`absolute w-6 h-6 transition-all duration-300 transform ${
+                isNavOpen ? 'opacity-100 scale-100 rotate-0' : 'opacity-0 scale-75 -rotate-45'
+              }`}
+            />
+          </button>
+        </div>
+
+        {isNavOpen && (
+          <div className="fixed top-1/2 left-[50px] transform -translate-y-1/2 z-40 bg-blue-50 rounded-3xl shadow-xl py-4 px-2 transition-all w-16 hover:w-48 group h-[400px] overflow-hidden space-y-2">
+            {navItems.map((item) => (
+              <button
+                key={item.id}
+                onClick={() => scrollToSection(item.id)}
+                className="flex items-center w-full px-2 py-2 rounded-full hover:bg-blue-100 transition-all"
+              >
+                <item.icon className="w-6 h-6 text-blue-600 flex-shrink-0" />
+                <span className="ml-3 text-sm text-gray-700 font-medium opacity-0 group-hover:opacity-100 transition-opacity duration-200 whitespace-nowrap">
+                  {item.label}
+                </span>
+              </button>
+            ))}
+          </div>
+        )}
+
+        <section id="quick-overview" aria-label="Quick Overview">
+
+          <h2 className="text-2xl font-bold text-gray-900 mt-4">Quick Overview</h2>
+
+          <div className="mt-6 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-6 place-items-center">
+
+              {/* Admin Card */}
+              <div className="w-[200px] sm:w-[220px] md:w-[240px] lg:w-[260px] mt-2 bg-gradient-to-r from-yellow-600 to-yellow-400 text-white p-6 rounded-xl shadow-xl transform hover:scale-105 transition-all duration-300 ease-in-out flex items-center justify-between">
+                  <div>
+                      <h3 className="text-xl font-bold text-white">Admins</h3>
+                      <p className="text-4xl font-semibold mt-2">{data.admins}</p>
+                  </div>
+                  <div className="text-6xl opacity-70 transform hover:scale-110 transition-all duration-300 ease-in-out">⚙️</div>
+              </div>
+
+              {/* Therapist Card */}
+              <div className="w-[200px] sm:w-[220px] md:w-[240px] lg:w-[260px] mt-2 bg-gradient-to-r from-blue-600 to-blue-400 text-white p-6 rounded-xl shadow-xl transform hover:scale-105 transition-all duration-300 ease-in-out flex items-center justify-between">
+                  <div>
+                      <h3 className="text-xl font-bold text-white">Therapists</h3>
+                      <p className="text-4xl font-semibold mt-2">{data.doctors}</p>
+                  </div>
+                  <div className="text-6xl opacity-70 transform hover:scale-110 transition-all duration-300 ease-in-out">👨‍⚕️</div>
+              </div>
+
+              {/* Patient Card */}
+              <div className="w-[200px] sm:w-[220px] md:w-[240px] lg:w-[260px] mt-2 bg-gradient-to-r from-green-600 to-green-400 text-white p-6 rounded-xl shadow-xl transform hover:scale-105 transition-all duration-300 ease-in-out flex items-center justify-between">
+              <div>
+                  <h3 className="text-xl font-semibold">Patients</h3>
+                  <p className="text-4xl font-semibold mt-2">{data.patients}</p>
+              </div>
+              <div className="text-6xl opacity-70 transform hover:scale-110 transition-all duration-300 ease-in-out">🤒</div>
+              </div>
+
+              {/* Questions Card */}
+              <div className="w-[200px] sm:w-[220px] md:w-[240px] lg:w-[260px] mt-2 bg-gradient-to-r from-purple-600 to-purple-400 text-white p-6 rounded-xl shadow-xl transform hover:scale-105 transition-all duration-300 ease-in-out flex items-center justify-between">
+              <div>
+                  <h3 className="text-xl font-semibold">Questions</h3>
+                  <p className="text-4xl font-semibold mt-2">{data.questions}</p>
+              </div>
+              <div className="text-6xl opacity-70 transform hover:scale-110 transition-all duration-300 ease-in-out">❓</div>
+              </div>
+
+              {/* Reviews Card */}
+              <div className="w-[200px] sm:w-[220px] md:w-[240px] lg:w-[260px] mt-2 bg-gradient-to-r from-gray-600 to-gray-400 text-white p-6 rounded-xl shadow-xl transform hover:scale-105 transition-all duration-300 ease-in-out flex items-center justify-between">
+              <div>
+                  <h3 className="text-xl font-semibold">Reviews</h3>
+                  <p className="text-4xl font-semibold mt-2">{data.reviews}</p>
+              </div>
+              <div className="text-6xl opacity-70 transform hover:scale-110 transition-all duration-300 ease-in-out">⭐</div>
+              </div>
+
+              {/* Health Articles Card */}
+              <div className="w-[200px] sm:w-[220px] md:w-[240px] lg:w-[260px] mt-2 bg-gradient-to-r from-red-600 to-red-400 text-white p-6 rounded-xl shadow-xl transform hover:scale-105 transition-all duration-300 ease-in-out flex items-center justify-between">
+              <div>
+                  <h3 className="text-xl font-semibold">Articles</h3>
+                  <p className="text-4xl font-semibold mt-2">{data.healthArticles}</p>
+              </div>
+              <div className="text-6xl opacity-70 transform hover:scale-110 transition-all duration-300 ease-in-out">📚</div>
+              </div>
+          </div>
+
+        </section>
+
+        <section id="recent-activity" aria-label="Recent Activity">
+
+          <div className="bg-white p-6 rounded-lg shadow-lg mt-6">
             <h2 className="text-2xl font-bold text-gray-900 mb-4">Recent Activity</h2>
             
             <div className="grid gap-8">
+
+              <section id="new-therapists" aria-label="New Therapists">
+                
                 {/* Doctors Section */}
                 <div>
-                    <h2 className="text-xl font-bold text-blue-700 mb-4">👨‍⚕️ New Therapists</h2>
-                    <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  <h2 className="text-xl font-bold text-blue-700 mb-4">👨‍⚕️ New Therapists</h2>
+                  <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
                     {activity.doctorz.map((doc) => (
-                        <ActivityCard key={doc.id} icon={<User className="text-blue-500" />} title={doc.name} subtitle="New Therapist Added" time={doc.created_at} image={doc.profile_picture} rating={''} />
+                      <ActivityCard key={doc.id} icon={<User className="text-blue-500" />} title={doc.name} subtitle="New Therapist Added" time={doc.created_at} image={doc.profile_picture} rating={''} />
                     ))}
-                    </div>
+                  </div>
                 </div>
 
+              </section>
+
+              <section id="new-patients" aria-label="New Patients">
+                
                 {/* Patients Section */}
                 <div>
-                    <h2 className="text-xl font-bold text-green-700 mb-4">🧑‍🤝‍🧑 New Patients</h2>
-                    <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  <h2 className="text-xl font-bold text-green-700 mb-4">🧑‍🤝‍🧑 New Patients</h2>
+                  <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
                     {activity.patientz.map((user) => (
-                        <ActivityCard key={user.id} icon={<User className="text-green-500" />} title={`${user.name} (${user.username})`} subtitle="New Patient Joined" time={user.created_at} image={user.profile_picture} rating={''} />
+                      <ActivityCard key={user.id} icon={<User className="text-green-500" />} title={`${user.name} (${user.username})`} subtitle="New Patient Joined" time={user.created_at} image={user.profile_picture} rating={''} />
                     ))}
-                    </div>
+                  </div>
                 </div>
 
+              </section>
+
+              <section id="health-articles" aria-label="Health Articles">
+                
                 {/* Health Articles Section */}
                 <div>
-                    <h2 className="text-xl font-bold text-purple-700 mb-4">📖 Health Articles</h2>
-                    <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  <h2 className="text-xl font-bold text-purple-700 mb-4">📖 Health Articles</h2>
+                  <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
                     {activity.articlez.map((article) => (
-                        <ActivityCard key={article.id} icon={<FileText className="text-purple-500" />} title={article.title} subtitle="New Health Article" time={article.created_at} rating={''} />
+                      <ActivityCard key={article.id} icon={<FileText className="text-purple-500" />} title={article.title} subtitle="New Health Article" time={article.created_at} rating={''} />
                     ))}
-                    </div>
+                  </div>
                 </div>
 
+              </section>
+
+              <section id="latest-reviews" aria-label="Latest Reviews">
+                
                 {/* Reviews Section */}
                 <div>
-                    <h2 className="text-xl font-bold text-yellow-700 mb-4">⭐ Latest Reviews</h2>
-                    <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  <h2 className="text-xl font-bold text-yellow-700 mb-4">⭐ Latest Reviews</h2>
+                  <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
                     {activity.reviewz.map((review) => (
-                        <ActivityCard key={review.id} icon={<Star className="text-yellow-500" />} title="New Review" subtitle={review.review_text} rating={review.rating} time={review.created_at} />
+                      <ActivityCard key={review.id} icon={<Star className="text-yellow-500" />} title="New Review" subtitle={review.review_text} rating={review.rating} time={review.created_at} />
                     ))}
-                    </div>
+                  </div>
                 </div>
 
+              </section>
+
+              <section id="new-questions" aria-label="New Questions">
+                
                 {/* Questions Section */}
                 <div>
-                    <h2 className="text-xl font-bold text-red-700 mb-4">❓ New Questions</h2>
-                    <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  <h2 className="text-xl font-bold text-red-700 mb-4">❓ New Questions</h2>
+                  <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
                     {activity.questionz.map((question) => (
-                        <ActivityCard key={question.id} icon={<MessageCircle className="text-red-500" />} title="New Question" subtitle={question.question} time={question.created_at} rating={''} />
+                      <ActivityCard key={question.id} icon={<MessageCircle className="text-red-500" />} title="New Question" subtitle={question.question} time={question.created_at} rating={''} />
                     ))}
-                    </div>
+                  </div>
                 </div>
 
-            </div>
-        </div>
-        
-        <div className="bg-white p-6 rounded-lg shadow-lg mt-6">
-            <h1 className="text-2xl font-bold text-gray-900 mb-4">Engagement Trends</h1>
-            <StatisticsChart data={overviewData} />
-        </div>
+              </section>
 
+            </div>
+          </div>
+
+        </section>
+
+        <section id="engagement-trends" aria-label="Engagement Trends">
+
+          <div className="bg-white p-6 rounded-lg shadow-lg mt-6">
+              <h1 className="text-2xl font-bold text-gray-900 mb-4">Engagement Trends</h1>
+              <StatisticsChart data={overviewData} />
+          </div>
+
+        </section>
     </div>
   );
 };

@@ -17,6 +17,7 @@
     "deno": "^2.2.6",
     "dotenv": "^16.4.7",
     "express": "^4.21.2",
+    "framer-motion": "^12.7.4",
     "http": "^0.0.1-security",
     "lucide-react": "^0.344.0",
     "openai": "^4.28.0",
@@ -29,6 +30,7 @@
     "simple-peer": "^9.11.1",
     "socket.io": "^4.8.1",
     "socket.io-client": "^4.8.1",
+    "tailwind-scrollbar-hide": "^2.0.0",
     "uuid": "^11.1.0"
   },
   "devDependencies": {
