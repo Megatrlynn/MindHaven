@@ -1,10 +1,109 @@
 import { getJson } from "serpapi";
+import { supabase } from "./supabase";
 
 const OPENROUTER_API_KEY = import.meta.env.VITE_OPENROUTER_API_KEY;
 const SEARCH_API_KEY = import.meta.env.VITE_SERPAPI_KEY;
 
 const API_URL = "https://openrouter.ai/api/v1/chat/completions";
-const AI_MODEL = "deepseek/deepseek-r1-distill-llama-70b:free";
+const AI_MODEL = "mistralai/mistral-small-3.1-24b-instruct:free";
+
+// 🧠 Fetch chat memory
+async function fetchChatSummaries(userId: string) {
+  const { data, error } = await supabase
+    .from("chat_history")
+    .select("summary")
+    .eq("user_id", userId)
+    .order("created_at", { ascending: true });
+
+  if (error) {
+    console.error("Fetch memory error:", error);
+    return [];
+  }
+
+  return data.map((item: any) => ({
+    role: "system",
+    content: `Memory: ${item.summary}`,
+  }));
+}
+
+// 🧠 Save a summary
+async function saveChatSummary(userId: string, summary: string) {
+  const { error } = await supabase.from("chat_history").insert([
+    { user_id: userId, summary },
+  ]);
+  if (error) console.error("Save summary error:", error);
+}
+
+// 💬 Summarize conversation
+async function summarizeChat(prompt: string, answer: string) {
+  const summaryMessages = [
+    {
+      role: "system",
+      content: "Summarize the following conversation briefly:",
+    },
+    { role: "user", content: `Q: ${prompt}\nA: ${answer}` },
+  ];
+
+  const response = await fetchAIResponse(summaryMessages);
+  return response.slice(0, 500); // Keep summaries short
+}
+
+async function getQuestionCount(userId: string) {
+  const { count, error } = await supabase
+    .from("ai_chats")
+    .select("*", { count: "exact", head: true })
+    .eq("user_id", userId);
+
+  if (error) {
+    console.error("Question count error:", error);
+    return 0;
+  }
+
+  return count || 0;
+}
+
+async function suggestDoctor(userId: string) {
+  const { data: connections, error: connectionError } = await supabase
+    .from("doctor_patient_connections")
+    .select("doctor_id, status")
+    .eq("patient_id", userId);
+
+  if (connectionError) {
+    console.error("Connection fetch error:", connectionError);
+    return null;
+  }
+
+  const connectedDoctorIds = connections
+    .filter((conn) => conn.status === "connected")
+    .map((conn) => conn.doctor_id);
+
+  const { data: doctors, error: docError } = await supabase
+    .from("doctors")
+    .select("id, name, profession");
+
+  if (docError) {
+    console.error("Doctor fetch error:", docError);
+    return null;
+  }
+
+  // Pick a doctor based on profession keywords from memory
+  const memory = await fetchChatSummaries(userId);
+  const memoryText = memory.map((m) => m.content).join(" ").toLowerCase();
+
+  const suitableDoctor = doctors.find((doc) =>
+    memoryText.includes(doc.profession.toLowerCase())
+  );
+
+  const isConnected = suitableDoctor && connectedDoctorIds.includes(suitableDoctor.id);
+
+  return suitableDoctor
+    ? {
+        name: suitableDoctor.name,
+        profession: suitableDoctor.profession,
+        isConnected,
+      }
+    : null;
+}
 
 // Function to fetch AI response from OpenRouter
 async function fetchAIResponse(messages: any) {
@@ -55,8 +154,13 @@ export async function searchInternet(query: string) {
 }
 
 // Main function to process user queries
-export async function getAIResponse(prompt: string) {
+export async function getAIResponse(prompt: string, userId: string) {
+  if (!userId) throw new Error("Missing userId! Cannot proceed.");
+  console.log("🆔 Using userId:", userId);
+
   try {
+    const memoryMessages = await fetchChatSummaries(userId);
+
     const analysisMessages = [
       {
         role: "system",
@@ -75,29 +179,22 @@ Respond with JSON only in this format:
   "recommendationTopic": string or null
 }`
       },
-      { role: "user", content: prompt },
+      ...memoryMessages,
+      { role: "user", content: prompt }
     ];
 
     const analysisResponse = await fetchAIResponse(analysisMessages);
-
-    if (!analysisResponse) {
-      throw new Error("AI did not return a valid response.");
-    }
-
-    const jsonMatch = analysisResponse.match(/\{[\s\S]*\}/);
-
-    if (!jsonMatch) {
-      console.error("Unexpected AI response format:", analysisResponse);
-      throw new Error("AI response was not in the expected format.");
-    }
+    console.log("🤖 AI Raw Output:", analysisResponse);
 
     let analysis;
-    try {
-      analysis = JSON.parse(jsonMatch[0]); 
-    } catch (parseError) {
-      console.error("JSON Parse Error:", parseError, "Response:", jsonMatch[0]);
-      throw new Error("AI response was not in the expected format.");
-    }
+      try {
+        const jsonMatch = analysisResponse.match(/\{[\s\S]*\}/);
+        if (!jsonMatch) throw new Error("No JSON object found in AI response.");
+        analysis = JSON.parse(jsonMatch[0]);
+      } catch (e) {
+        console.error("🛑 Failed to parse AI analysis JSON:", analysisResponse);
+        throw new Error("AI response format is invalid.");
+      }
 
     let searchResults = [];
     let bookOrVideoResults = [];
@@ -113,43 +210,65 @@ Respond with JSON only in this format:
 
       bookOrVideoResults = bookOrVideoResults.filter((result: any) => {
         const isNotAmazon = !result.link.includes("amazon");
-        const isValidVideoLink = result.link.includes("youtube.com") ? isValidYouTubeLink(result.link) : true;
-
+        const isValidVideoLink = result.link.includes("youtube.com")
+          ? isValidYouTubeLink(result.link)
+          : true;
         return isNotAmazon && isValidVideoLink;
       });
+    }
+
+    // 🧠 New Feature: Check if user has asked 3+ questions, then suggest doctor
+    let doctorSuggestion = "";
+    const { data: pastChats, error: chatError } = await supabase
+      .from("chat_history")
+      .select("*")
+      .eq("user_id", userId);
+
+    if (!chatError && pastChats.length >= 3 && analysis.isTherapyRelated) {
+      // Fetch connected doctors
+      const { data: connections } = await supabase
+        .from("doctor_patient_connections")
+        .select("doctor_id")
+        .eq("patient_id", userId)
+        .eq("status", "connected");
+
+        const connectedDoctorIds = Array.isArray(connections) ? connections.map((conn) => conn.doctor_id) : [];
+
+      // If connected, get their info
+      if (connectedDoctorIds.length > 0) {
+        const { data: connectedDoctors } = await supabase
+          .from("doctors")
+          .select("id, name, profession")
+          .in("id", connectedDoctorIds);
+
+          if ((connectedDoctors ?? []).length > 0) {
+            const nameList = (connectedDoctors ?? [])
+            .map((doc) => `Dr. ${doc.name} (${doc.profession})`)
+            .join(", ");
+          
+          doctorSuggestion = `👩‍⚕️ Based on our records, you're already connected with ${nameList}. You might consider reaching out to them for more personalized support.`;          
+        }
+      } else {
+        // Not connected – fetch based on context
+        const { data: suggestedDoctors } = await supabase
+          .from("doctors")
+          .select("id, name, profession")
+          .ilike("profession", `%${analysis.recommendationTopic || "therapy"}%`)
+          .limit(1);
+
+        if ((suggestedDoctors ?? []).length > 0) {
+          const doctor = (suggestedDoctors ?? [])[0];
+          doctorSuggestion = `💡 You're not currently connected to any doctor. However, based on your concerns, you might want to connect with Dr. ${doctor.name}, a specialist in ${doctor.profession}.`;
+        }
+      }
     }
 
     const finalMessages = [
       {
         role: "system",
-        content: `You are a supportive AI therapy assistant. Your task is to provide helpful, relevant responses with these guidelines:
-
-1. For therapy-related questions:
-   - Show empathy and validate feelings.
-   - Provide specific coping strategies.
-   - Use a warm, supportive tone.
-   - Suggest professional help when appropriate.
-
-2. For general questions:
-   - Provide clear, accurate information.
-   - Keep the tone supportive.
-   - Make complex topics understandable.
-   - Include relevant examples when helpful.
-
-3. When using search results:
-   - Synthesize the information clearly.
-   - Focus on the most relevant points.
-   - Explain in simple terms.
-   - Credit sources when appropriate.
-
-4. When recommending books or videos:
-   - Ensure they are relevant to the user's situation.
-   - Provide brief descriptions of why they are helpful.
-   - Include links when possible.
-   - Suggest a mix of books and videos based on the topic.
-
-Remember to always be direct and relevant to the specific question asked.`
+        content: `You are a supportive AI therapy assistant. Always provide generalized advice unless the user specifically mentions a country, culture, or region. Avoid referencing specific nations unless context makes it necessary. Be empathetic, clear, and helpful.`
       },
+      ...memoryMessages,
       {
         role: "user",
         content: `User question: ${prompt}${
@@ -157,8 +276,8 @@ Remember to always be direct and relevant to the specific question asked.`
             ? "\n\nRelevant search results:\n" +
               searchResults
                 .map(
-                  (result: any) =>
-                    `- ${result.title}\n  ${result.snippet}\n  Link: ${result.link}`
+                  (r: any) =>
+                    `- ${r.title}\n  ${r.snippet}\n  Link: ${r.link}`
                 )
                 .join("\n")
             : ""
@@ -167,21 +286,26 @@ Remember to always be direct and relevant to the specific question asked.`
             ? "\n\nRecommended books or videos:\n" +
               bookOrVideoResults
                 .map(
-                  (result: any) =>
-                    `- ${result.title}\n  ${result.snippet}\n  Link: ${result.link}`
+                  (r: any) =>
+                    `- ${r.title}\n  ${r.snippet}\n  Link: ${r.link}`
                 )
                 .join("\n")
             : ""
-        }`,
-      },
+        }${doctorSuggestion ? "\n\n" + doctorSuggestion : ""}`
+      }
     ];
 
-    return await fetchAIResponse(finalMessages);
+    const aiResponse = await fetchAIResponse(finalMessages);
+    const summary = await summarizeChat(prompt, aiResponse);
+    await saveChatSummary(userId, summary);
+
+    return aiResponse;
   } catch (error) {
     console.error("AI Error:", error);
-    throw new Error("AI analysis failed.");
+    throw new Error("AI processing failed.");
   }
 }
+
 
 // Function to validate YouTube links (to check if the video exists)
 async function isValidYouTubeLink(link: string) {

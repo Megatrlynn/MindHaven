@@ -27,7 +27,7 @@
 // testOpenRouter();
 
 const API_URL = "https://openrouter.ai/api/v1/chat/completions";
-const OPENROUTER_API_KEY = process.env.VITE_OPENROUTER_API_KEY;
+const OPENROUTER_API_KEY = "RB-26";
 
 async function testOpenRouter() {
   try {
@@ -57,3 +57,4 @@ async function testOpenRouter() {
 }
 
 testOpenRouter();
+

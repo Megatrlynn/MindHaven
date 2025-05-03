@@ -23,7 +23,7 @@ const About = () => {
             </span>
           </h1>
           <p className="mt-3 max-w-md mx-auto text-base text-white sm:text-lg md:mt-5 md:text-xl md:max-w-3xl">
-            Revolutionizing healthcare through technology
+            Revolutionizing Mental healthcare through technology
           </p>
         </div>
       </div>

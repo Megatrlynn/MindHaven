@@ -367,38 +367,44 @@ const Chat: React.FC = () => {
   
     setIsLoading(true);
   
-    const { data: { user }, error: authError } = await supabase.auth.getUser();
-    
+    const {
+      data: { user },
+      error: authError,
+    } = await supabase.auth.getUser();
+  
     if (authError || !user) {
-      alert('Please sign in to use the AI chat feature');
+      alert("Please sign in to use the AI chat feature");
       setIsLoading(false);
       return;
     }
   
     try {
-      const aiResponse = await getAIResponse(message);
+      const aiResponse = await getAIResponse(message, user.id); // ✅ PASS user.id here
   
       if (!aiResponse || aiResponse.startsWith("Error")) {
         throw new Error("AI response failed. Please try again.");
       }
   
-      const { error } = await supabase
-        .from('ai_chats')
-        .insert({
-          user_id: user.id,
-          message: message,
-          response: aiResponse.trim(),
-        });
+      const { error } = await supabase.from("ai_chats").insert({
+        user_id: user.id,
+        message: message,
+        response: aiResponse.trim(),
+      });
   
       if (error) throw error;
-      setMessage('');
+  
+      setMessage("");
     } catch (error) {
       console.error("Chat Error:", error);
-      alert(error instanceof Error ? error.message : "An error occurred. Please try again.");
+      alert(
+        error instanceof Error
+          ? error.message
+          : "An error occurred. Please try again."
+      );
     } finally {
       setIsLoading(false);
     }
-  };
+  };  
 
   useEffect(() => {
     if (!patientId || patientId.length === 0) {

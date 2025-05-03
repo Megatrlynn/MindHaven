@@ -191,7 +191,7 @@ const Home = () => {
 
   const services = [
     {
-      title: "Connect with Doctors",
+      title: "Connect with Therapists",
       description: "Choose from our network of verified medical professionals specializing in various fields. Connect instantly!",
       imgSrc: "https://images.unsplash.com/photo-1666214280465-a40313304801?q=80&w=2070&auto=format&fit=crop",
       icon: Users
@@ -236,7 +236,7 @@ const Home = () => {
         <div className="absolute inset-0 bg-black bg-opacity-50"></div>
         <div className="relative z-10 px-6">
           <h1 className="text-4xl font-bold text-blue-600 sm:text-5xl md:text-6xl">
-            Your Health, Our Priority
+            Your Mental Health, Our Priority
           </h1>
           <p className="mt-3 max-w-md mx-auto text-base text-white sm:text-lg md:mt-5 md:text-xl md:max-w-3xl">
             Connect with qualified therapists instantly through chat, voice, or through AI assistance.

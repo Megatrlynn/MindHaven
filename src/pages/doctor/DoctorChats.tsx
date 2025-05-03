@@ -4,6 +4,7 @@ import { User } from '@supabase/supabase-js';
 import { DoctorPatientConnection, UserProfile, DoctorPatientChat } from '../../lib/types';
 import { MessageSquare, PhoneCall, Video, Check, Clock, UserCircle, X, Send, Loader2, XCircle } from 'lucide-react';
 import { io } from "socket.io-client";
+import { format } from 'date-fns';
 
 const socket = io(import.meta.env.VITE_SOCKET_SERVER_URL);
 
@@ -632,16 +633,36 @@ const DoctorChats: React.FC = () => {
             <Loader2 className="w-6 h-6 animate-spin text-blue-600" />
           </div>
         ) : (
-          chatMessages.map((msg) => {
+          chatMessages.map((msg, index) => {
             const isDoctor = msg.sender_id === currentUser?.id;
+            const nextMessage = chatMessages[index + 1];
+                              
+            const showTimestamp = !nextMessage || nextMessage.sender_id !== msg.sender_id;
+          
+            const messageDate = new Date(msg.created_at);
+            const today = new Date();
+            const yesterday = new Date();
+            yesterday.setDate(today.getDate() - 1);
+          
+            let formattedDate;
+            if (messageDate.toDateString() === today.toDateString()) {
+              formattedDate = `Today, ${format(messageDate, "h:mm a")}`;
+            } else if (messageDate.toDateString() === yesterday.toDateString()) {
+              formattedDate = `Yesterday, ${format(messageDate, "h:mm a")}`;
+            } else {
+              formattedDate = format(messageDate, "MMMM d, h:mm a");
+            }
             return (
-              <div key={msg.id} className={`flex ${isDoctor ? "justify-end" : "justify-start"}`}>
+              <div key={msg.id} className={`flex flex-col ${isDoctor ? "items-end" : "items-start"} mb-1`}>
                 <div
-                  className={`max-w-[70%] rounded-xl p-4 shadow-lg ${isDoctor ? "bg-blue-700 text-white" : "bg-gray-700 text-white"}`}
+                  className={`max-w-[75%] rounded-xl p-3 shadow-md ${
+                    isDoctor ? "bg-blue-600 text-white" : "bg-gray-100 text-gray-800"}`}
                 >
                   <p className="text-sm">{msg.message}</p>
-                  <p className="text-xs text-gray-300 mt-1">{new Date(msg.created_at).toLocaleString()}</p>
                 </div>
+                {showTimestamp && (
+                  <p className="text-xs text-gray-400 mt-1">{formattedDate}</p>
+                )}
               </div>
             );
           })
