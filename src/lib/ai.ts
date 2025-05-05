@@ -187,15 +187,16 @@ Respond with JSON only in this format:
     console.log("🤖 AI Raw Output:", analysisResponse);
 
     let analysis;
-      try {
-        const jsonMatch = analysisResponse.match(/\{[\s\S]*\}/);
-        if (!jsonMatch) throw new Error("No JSON object found in AI response.");
-        analysis = JSON.parse(jsonMatch[0]);
-      } catch (e) {
-        console.error("🛑 Failed to parse AI analysis JSON:", analysisResponse);
-        throw new Error("AI response format is invalid.");
-      }
+    try {
+      const jsonMatch = analysisResponse.match(/\{[\s\S]*\}/);
+      if (!jsonMatch) throw new Error("No JSON object found in AI response.");
+      analysis = JSON.parse(jsonMatch[0]);
+    } catch (e) {
+      console.error("🛑 Failed to parse AI analysis JSON:", analysisResponse);
+      throw new Error("AI response format is invalid.");
+    }
 
+    // 🌐 Search & 📚 Book/Video Rec
     let searchResults = [];
     let bookOrVideoResults = [];
 
@@ -204,69 +205,101 @@ Respond with JSON only in this format:
     }
 
     if (analysis.recommendBookOrVideo && analysis.recommendationTopic) {
-      bookOrVideoResults = await searchInternet(
+      const rawResults = await searchInternet(
         `Best books or videos on ${analysis.recommendationTopic}`
       );
+    
+      if (rawResults && rawResults.length > 0) {
+        const filtered = rawResults.filter((result: any) => {
+          const isNotAmazon = !result.link.includes("amazon");
+          const isValidVideoLink = result.link.includes("youtube.com")
+            ? isValidYouTubeLink(result.link)
+            : true;
+          return isNotAmazon && isValidVideoLink;
+        });
+    
+        // Set fallback safely
+        bookOrVideoResults =
+          filtered.length > 0 ? filtered : [rawResults[0]].filter(Boolean);
+      } else {
+        bookOrVideoResults = []; // No results at all
+      }
+    }    
 
-      bookOrVideoResults = bookOrVideoResults.filter((result: any) => {
-        const isNotAmazon = !result.link.includes("amazon");
-        const isValidVideoLink = result.link.includes("youtube.com")
-          ? isValidYouTubeLink(result.link)
-          : true;
-        return isNotAmazon && isValidVideoLink;
-      });
+    // 📊 Question counter logic (now safe!)
+    let questionCount = 1;
+    let isEligible = false;
+
+    const { data: counterData } = await supabase
+      .from("ai_question_counter")
+      .select("question_count")
+      .eq("user_id", userId)
+      .single();
+
+    if (counterData) {
+      questionCount = typeof counterData.question_count === "number" ? counterData.question_count : 1;
+      
+      const updatedCount = questionCount + 1;
+
+      isEligible = updatedCount >= 3 && analysis.isTherapyRelated;
+
+      await supabase
+        .from("ai_question_counter")
+        .update({
+          question_count: isEligible ? 1 : updatedCount,
+          updated_at: new Date().toISOString()
+        })
+        .eq("user_id", userId);
+
+      await supabase
+        .from("ai_question_counter")
+        .update({
+          question_count: updatedCount,
+          updated_at: new Date().toISOString()
+        })
+        .eq("user_id", userId);
+    } else {
+      await supabase
+        .from("ai_question_counter")
+        .insert([{ user_id: userId, question_count: 1 }]);
     }
 
-    // 🧠 New Feature: Check if user has asked 3+ questions, then suggest doctor
+    // 🧠 Doctor suggestion if 3 therapy-related questions reached
     let doctorSuggestion = "";
-    const { data: pastChats, error: chatError } = await supabase
-      .from("chat_history")
-      .select("*")
-      .eq("user_id", userId);
 
-    if (!chatError && pastChats.length >= 3 && analysis.isTherapyRelated) {
-      // Fetch connected doctors
-      const { data: connections } = await supabase
-        .from("doctor_patient_connections")
-        .select("doctor_id")
-        .eq("patient_id", userId)
-        .eq("status", "connected");
+    if (isEligible) {
+      const suggestion = await suggestDoctor(userId);
 
-        const connectedDoctorIds = Array.isArray(connections) ? connections.map((conn) => conn.doctor_id) : [];
-
-      // If connected, get their info
-      if (connectedDoctorIds.length > 0) {
-        const { data: connectedDoctors } = await supabase
-          .from("doctors")
-          .select("id, name, profession")
-          .in("id", connectedDoctorIds);
-
-          if ((connectedDoctors ?? []).length > 0) {
-            const nameList = (connectedDoctors ?? [])
-            .map((doc) => `Dr. ${doc.name} (${doc.profession})`)
-            .join(", ");
-          
-          doctorSuggestion = `👩‍⚕️ Based on our records, you're already connected with ${nameList}. You might consider reaching out to them for more personalized support.`;          
+      if (suggestion) {
+        if (suggestion.isConnected) {
+          doctorSuggestion = `👩‍⚕️ You're already connected to Dr. ${suggestion.name} (${suggestion.profession}). Consider reaching out for personalized help.`;
+        } else {
+          doctorSuggestion = `🕓 You've requested to connect with Dr. ${suggestion.name} (${suggestion.profession}), but it’s still pending. Please wait for confirmation.`;
         }
       } else {
-        // Not connected – fetch based on context
-        const { data: suggestedDoctors } = await supabase
+        const fallbackDocs = await supabase
           .from("doctors")
-          .select("id, name, profession")
+          .select("name, profession")
           .ilike("profession", `%${analysis.recommendationTopic || "therapy"}%`)
           .limit(1);
 
-        if ((suggestedDoctors ?? []).length > 0) {
-          const doctor = (suggestedDoctors ?? [])[0];
-          doctorSuggestion = `💡 You're not currently connected to any doctor. However, based on your concerns, you might want to connect with Dr. ${doctor.name}, a specialist in ${doctor.profession}.`;
+        if (fallbackDocs.data && fallbackDocs.data.length > 0) {
+          const doc = fallbackDocs.data[0];
+          doctorSuggestion = `💡 You're not connected to any doctor yet. Based on your queries, Dr. ${doc.name} (${doc.profession}) might be a good fit.`;
         }
       }
+
+      // ⏱️ Reset the counter after suggesting
+      await supabase
+        .from("ai_question_counter")
+        .update({ question_count: 1, updated_at: new Date().toISOString() })
+        .eq("user_id", userId);
     }
 
     const finalMessages = [
       {
         role: "system",
-        content: `You are a supportive AI therapy assistant. Always provide generalized advice unless the user specifically mentions a country, culture, or region. Avoid referencing specific nations unless context makes it necessary. Be empathetic, clear, and helpful.`
+        content: `You are a supportive AI therapy assistant. Always provide generalized advice unless the user specifically mentions a country, culture, or region. Be empathetic, clear, and helpful.`
       },
       ...memoryMessages,
       {
@@ -299,13 +332,30 @@ Respond with JSON only in this format:
     const summary = await summarizeChat(prompt, aiResponse);
     await saveChatSummary(userId, summary);
 
-    return aiResponse;
+    console.log("💬 Final AI Response:", aiResponse);
+    console.log("🧑‍⚕️ Doctor Suggestion:", doctorSuggestion);
+
+    return (
+      aiResponse +
+      (bookOrVideoResults.length > 0
+        ? `\n\n📚 Recommended books or videos for you:\n` +
+          bookOrVideoResults
+            .map(
+              (r: any) =>
+                `- ${r.title}\n  ${r.snippet}\n  👉 ${r.link}`
+            )
+            .join("\n")
+        : "") +
+      (doctorSuggestion
+        ? `\n\n🧑‍⚕️ Based on your recent questions:\n${doctorSuggestion}`
+        : "")
+    );    
+    
   } catch (error) {
     console.error("AI Error:", error);
     throw new Error("AI processing failed.");
   }
 }
-
 
 // Function to validate YouTube links (to check if the video exists)
 async function isValidYouTubeLink(link: string) {
