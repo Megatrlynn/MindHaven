@@ -1,6 +1,8 @@
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 import { copyFileSync } from 'fs';
+import Pages from 'vite-plugin-pages'
+import Sitemap from 'vite-plugin-sitemap'
 
 export default defineConfig({
   plugins: [
@@ -11,6 +13,10 @@ export default defineConfig({
         copyFileSync('public/_redirects', 'dist/_redirects');
       },
     },
+    Pages(),
+    Sitemap({
+      hostname: 'https://mind-haven.netlify.app',
+    })
   ],
   assetsInclude: ['**/_redirects'],
   optimizeDeps: {
