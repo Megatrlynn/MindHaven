@@ -19,7 +19,7 @@ const AdminDashboard = () => {
             }`
           }
         >
-          <Home className="w-5 h-5 mr-2" />
+          <Home className="w-5 h-5 mr-2"  />
           Overview
         </NavLink>
         <NavLink
