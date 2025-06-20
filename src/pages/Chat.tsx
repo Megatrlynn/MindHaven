@@ -959,7 +959,7 @@ const Chat: React.FC = () => {
                       {formatTitle(type)}s
                     </h3>
                     <p className="text-gray-600 text-center mb-4">
-                      {formatTitle(type)}s –{" "}
+                      {" "}
                       {type === "psychologist"
                         ? "Experts in diagnosing and treating mental disorders through evaluation and therapy."
                         : type === "psychotherapist"
