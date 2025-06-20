@@ -946,7 +946,7 @@ const Chat: React.FC = () => {
               <MessageSquare className="w-12 h-12 text-blue-500 mx-auto mb-4" />
               <h2 className="text-xl font-semibold mb-2 text-center">Connect with a Therapist</h2>
               <p className="text-gray-600 mb-8 text-center">
-                Choose a therapist to start your mental health journey
+                Choose a therapist to start your mental health journey 
               </p>
               
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-10">
