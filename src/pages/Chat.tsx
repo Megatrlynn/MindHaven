@@ -959,13 +959,19 @@ const Chat: React.FC = () => {
                       {formatTitle(type)}s
                     </h3>
                     <p className="text-gray-600 text-center mb-4">
-                      View all available {formatTitle(type)}s and connect
+                      {formatTitle(type)}s –{" "}
+                      {type === "psychologist"
+                        ? "Experts in diagnosing and treating mental disorders through evaluation and therapy."
+                        : type === "psychotherapist"
+                        ? "Specialists trained to help individuals navigate emotional and psychological challenges through talk therapy."
+                        : ""}
                     </p>
+
                     <button
                       onClick={() => openDoctorModal(type)}
                       className="mx-auto block px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-all"
                     >
-                      View {formatTitle(type)}s
+                      Click to View
                     </button>
                   </div>
                   ))}
