@@ -33,6 +33,10 @@ const Profile = () => {
 
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  const [missingFields, setMissingFields] = useState<string[]>([]);
+  const [loadingProfile, setLoadingProfile] = useState(true);
+  const [userId, setUserId] = useState<string | null>(null);
+
   useEffect(() => {
     loadProfile();
     loadReview();
@@ -71,6 +75,46 @@ const Profile = () => {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    const getUserId = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) setUserId(user.id);
+    };
+
+    getUserId();
+  }, []);
+
+  useEffect(() => {
+    const fetchProfile = async () => {
+      const { data, error } = await supabase
+        .from("user_profiles")
+        .select("username, name, phone, date_of_birth, profile_picture")
+        .eq("user_id", userId)
+        .single();
+
+      if (error) {
+        console.error("Error fetching profile:", error);
+        return;
+      }
+
+      const requiredFields = [
+        { key: "username", label: "Username" },
+        { key: "name", label: "Name" },
+        { key: "phone", label: "Phone" },
+        { key: "date_of_birth", label: "Date of Birth" },
+        { key: "profile_picture", label: "Profile Picture" },
+      ];
+
+      const missing = requiredFields
+        .filter(field => !(data as Record<string, any>)?.[field.key])
+        .map(field => field.label);
+
+      setMissingFields(missing);
+    };
+
+    if (userId) fetchProfile();
+  }, [userId]);
 
   const loadReview = async () => {
     try {
@@ -232,6 +276,26 @@ const Profile = () => {
     <div className="max-w-4xl mx-auto px-4 py-8 space-y-8">
       {/* Profile Section */}
       <div className="bg-white rounded-2xl shadow-xl p-8">
+        
+          <>
+            {missingFields.length > 0 && (
+              <div className="bg-yellow-100 border-l-4 border-yellow-500 text-yellow-800 p-4 rounded-md shadow-md animate-pulse mb-4">
+                <p className="font-semibold mb-1">⚠️ Some of your profile details are missing!</p>
+                <p>
+                  Please update the following fields to complete your profile:{" "}
+                  <span className="font-medium">{missingFields.join(", ")}</span>
+                </p>
+              </div>
+            )}
+
+            <div className="bg-blue-100 border-l-4 border-blue-500 text-blue-800 p-4 rounded-md shadow mb-4">
+              <p className="font-medium">🔒 Your personal information is private</p>
+              <p className="text-sm">
+                Your details will never be shared unless you explicitly choose to do so.
+              </p>
+            </div>
+          </>
+
         <div className="flex justify-between items-center mb-8">
           <h1 className="text-3xl font-semibold text-gray-900">My Profile</h1>
           {!isEditing && (

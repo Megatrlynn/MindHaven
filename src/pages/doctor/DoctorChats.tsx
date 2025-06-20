@@ -526,7 +526,7 @@ const DoctorChats: React.FC = () => {
                 </h3>
                 {connection.patient_profile && (
                   <div className="text-sm text-gray-600">
-                    <p>📞 {connection.patient_profile.phone || 'Not specified'}</p>
+                    {/* <p>📞 {connection.patient_profile.phone || 'Not specified'}</p> */}
                     {connection.patient_profile.date_of_birth && (
                       <p className="mt-1">🎂 Age: {calculateAge(connection.patient_profile.date_of_birth)}</p>
                     )}

@@ -647,6 +647,23 @@ const Chat: React.FC = () => {
     }
   };
   
+  const [activeProfession, setActiveProfession] = useState<string | null>(null);
+  const [modalVisible, setModalVisible] = useState(false);
+
+  const openDoctorModal = (profession: string) => {
+    setActiveProfession(profession);
+    setModalVisible(true);
+  };
+
+  const closeDoctorModal = () => {
+    setModalVisible(false);
+    setActiveProfession(null);
+  };
+
+  // Optional: Format title
+  const formatTitle = (title: string) =>
+    title.charAt(0).toUpperCase() + title.slice(1);
+
   if (loading) {
     return (
       <div className="h-screen flex justify-center items-center">
@@ -932,67 +949,120 @@ const Chat: React.FC = () => {
                 Choose a therapist to start your mental health journey
               </p>
               
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {doctors.map((doctor) => {
-                  const connection = connections.find(conn => conn.doctor_id === doctor.id);
-                  const isPending = connection?.status === 'pending';
-                  const isConnected = connection?.status === 'connected';
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-10">
+                {["psychologist", "psychotherapist"].map((type) => (
+                  <div
+                    key={type}
+                    className="bg-white border border-blue-400 rounded-xl shadow-lg p-6 hover:shadow-xl transition-all"
+                  >
+                    <h3 className="text-2xl font-bold text-blue-600 mb-2 text-center">
+                      {formatTitle(type)}s
+                    </h3>
+                    <p className="text-gray-600 text-center mb-4">
+                      View all available {formatTitle(type)}s and connect
+                    </p>
+                    <button
+                      onClick={() => openDoctorModal(type)}
+                      className="mx-auto block px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-all"
+                    >
+                      View {formatTitle(type)}s
+                    </button>
+                  </div>
+                  ))}
+                </div>
 
-                  return (
-                    <div key={doctor.id} className="bg-white rounded-lg shadow p-6 border">
-                      <div className="flex items-center mb-4">
-                        <img
-                          src={doctor.profile_picture || 'https://images.unsplash.com/photo-1612349317150-e413f6a5b16d?w=200&h=200&fit=crop'}
-                          alt={doctor.name}
-                          className="w-16 h-16 rounded-full object-cover mr-4"
-                        />
-                        <div>
-                          <h3 className="text-lg font-semibold text-gray-900">{doctor.name}</h3>
-                          <p className="text-sm text-gray-600">{doctor.profession}</p>
-                        </div>
-                      </div>
-                      <div className="mb-4">
-                        <p className="text-sm text-gray-600">
-                          <span className="font-medium">Phone:</span> {doctor.phone || 'Not available'}
-                        </p>
-                      </div>                          
-                      {isPending ? (
-                        <div className="flex items-center justify-center px-4 py-2 bg-yellow-100 text-yellow-800 rounded-lg">
-                          <Clock className="w-5 h-5 mr-2" />
-                          Connection Pending
-                        </div>
-                      ) : isConnected ? (
-                        <div className="space-y-4">
-                          <div className="flex">
-                            <Check className="w-6 h-6 mr-2" />
-                            <span className="text-md font-medium text-green-600">Connected</span>
-                          </div>
-
-                          <button
-                            onClick={() => startDoctorChat(doctor.id, connection.id, doctor.name)}
-                            className="w-full flex items-center justify-center px-5 py-3 bg-blue-600 text-white rounded-lg shadow-md hover:bg-blue-700 transition-transform transform hover:scale-105"
-                          >
-                            <MessageSquare className="w-6 h-6 mr-2" />
-                            <span className="text-lg font-medium">Start Chat</span>
-                          </button>
-                        </div>
-                      ) : (
-                        <button
-                          onClick={() => connectWithDoctor(doctor.id)}
-                          className="w-full flex items-center justify-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
-                        >
-                          <UserPlus className="w-5 h-5 mr-2" />
-                          Connect
-                        </button>
-                      )}
-                    </div>
-                  );
-                })}
-              </div>
             </div>
           )}
         </div>
       </div>
+
+      {modalVisible && activeProfession && (
+  <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex justify-center items-center">
+    <div className="bg-white p-8 rounded-lg max-w-3xl w-full max-h-[90vh] overflow-y-auto relative">
+      <button
+        onClick={closeDoctorModal}
+        className="absolute top-4 right-4 text-gray-600 hover:text-red-500"
+      >
+        ❌
+      </button>
+      <h2 className="text-2xl font-bold text-blue-600 mb-6 text-center">
+        {formatTitle(activeProfession)}s
+      </h2>
+
+      {["connected", "pending", "not_connected"].map((status) => {
+        const filtered = doctors
+          .filter((doc) => doc.profession.toLowerCase() === activeProfession)
+          .filter((doc) => {
+            const conn = connections.find(c => c.doctor_id === doc.id);
+            if (status === "connected") return conn?.status === "connected";
+            if (status === "pending") return conn?.status === "pending";
+            return !conn;
+          });
+
+        if (filtered.length === 0) return null;
+
+        return (
+          <div key={status} className="mb-6">
+            <h3 className="text-lg font-semibold text-gray-800 mb-3">
+              {status === "connected" && "✅ Connected Doctors"}
+              {status === "pending" && "⏳ Pending Connections"}
+              {status === "not_connected" && "➕ Available to Connect"}
+            </h3>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {filtered.map((doctor) => {
+                const connection = connections.find(conn => conn.doctor_id === doctor.id);
+                return (
+                  <div
+                    key={doctor.id}
+                    className="bg-gray-50 border rounded-lg p-4 flex items-center"
+                  >
+                    <img
+                      src={
+                        doctor.profile_picture ||
+                        "https://images.unsplash.com/photo-1612349317150-e413f6a5b16d?w=200&h=200&fit=crop"
+                      }
+                      alt={doctor.name}
+                      className="w-12 h-12 rounded-full object-cover mr-4"
+                    />
+                    <div>
+                      <h4 className="text-md font-semibold">{doctor.name}</h4>
+                      <p className="text-sm text-gray-600 mb-2">{doctor.profession}</p>
+                      {connection?.status === "connected" ? (
+                        <button
+                          onClick={() => {
+                            startDoctorChat(doctor.id, connection.id, doctor.name);
+                            closeDoctorModal();
+                          }}
+                          className="px-4 py-1 text-sm bg-green-600 text-white rounded hover:bg-green-700"
+                        >
+                          Chat
+                        </button>
+
+                      ) : connection?.status === "pending" ? (
+                        <span className="text-yellow-700 text-sm font-medium">
+                          Pending...
+                        </span>
+                      ) : (
+                        <button
+                          onClick={() => connectWithDoctor(doctor.id)}
+                          className="px-4 py-1 text-sm bg-blue-600 text-white rounded hover:bg-blue-700"
+                        >
+                          Connect
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        );
+      })}
+    </div>
+  </div>
+)}
+
     </div>
   );
 };

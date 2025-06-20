@@ -180,22 +180,9 @@ const ManageDoctors = () => {
   };
 
   const therapistProfessions = [
-    "Clinical Psychologist",
-    "Counseling Psychologist",
-    "Marriage and Family Therapist",
-    "Licensed Clinical Social Worker",
-    "Psychiatrist",
-    "Addiction Counselor",
-    "Child Psychologist",
-    "School Counselor",
-    "Rehabilitation Counselor",
-    "Art Therapist",
-    "Music Therapist",
-    "Behavioral Therapist",
-    "Trauma Therapist",
-    "Grief Counselor",
-    "Sex Therapist",
-    "Occupational Therapist",
+    "Select a profession",
+    "Psychotherapist",
+    "Psychologist",
   ];
   
   if (loading && doctors.length === 0) {
