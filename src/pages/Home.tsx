@@ -193,6 +193,7 @@ const Home = () => {
   };
 
   const visibleArticles = getVisibleArticles(filteredArticles, currentIndex, 3);
+  const consultationPath = userDomain ? '/chat' : '/patient-login';
 
   if (loading) {
     return (
@@ -222,7 +223,7 @@ const Home = () => {
 
               <div className="relative mt-8 flex flex-wrap gap-3">
                 {userDomain !== 'admin' && userDomain !== 'doc' && (
-                  <Link to="/chat" className="btn-primary text-base">
+                  <Link to={consultationPath} className="btn-primary text-base">
                     <MessageCircle className="h-5 w-5" />
                     Start Consultation
                     <ArrowRight className="h-5 w-5" />

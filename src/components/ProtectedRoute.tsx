@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
 import { getUserRole, isPatientProfileComplete } from '../lib/auth';
+import { supabase } from '../lib/supabase';
 import { Loader2 } from 'lucide-react';
 
 interface ProtectedRouteProps {
@@ -16,6 +17,13 @@ export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children, requir
 
   useEffect(() => {
     const checkAuth = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        setNeedsProfileCompletion(false);
+        setIsAuthorized(false);
+        return;
+      }
+
       const role = await getUserRole();
 
       if (role !== requiredRole) {
