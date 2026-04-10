@@ -2,8 +2,15 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
 import { KeyRound, Loader2 } from 'lucide-react';
+import { usePageSEO } from '../hooks/usePageSEO';
 
 const ResetPassword: React.FC = () => {
+  usePageSEO({
+    title: 'Reset Password | MindHaven',
+    description: 'Reset your MindHaven account password securely to regain access to your account.',
+    path: '/reset-password',
+  });
+
   const [newPassword, setNewPassword] = useState<string>('');
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);

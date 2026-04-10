@@ -2,12 +2,19 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
 import { Loader2, LogIn } from 'lucide-react';
+import { usePageSEO } from '../hooks/usePageSEO';
 
 interface AuthProps {
   onSuccess?: () => void;
 }
 
 const Auth = ({ onSuccess }: AuthProps) => {
+  usePageSEO({
+    title: 'Patient Login | MindHaven',
+    description: 'Sign in or create your patient account to access secure therapist chat and mental wellness support on MindHaven.',
+    path: '/patient-login',
+  });
+
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);

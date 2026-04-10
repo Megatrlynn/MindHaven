@@ -1,7 +1,13 @@
-import React from "react";
 import Footer from "../components/Footer";
+import { usePageSEO } from '../hooks/usePageSEO';
 
 const PrivacyPolicy = () => {
+    usePageSEO({
+        title: 'Privacy Policy | MindHaven',
+        description: 'Read how MindHaven collects, uses, and protects personal and health-related information.',
+        path: '/privacy-policy',
+    });
+
   return (
         <div className="w-full">
         <div 

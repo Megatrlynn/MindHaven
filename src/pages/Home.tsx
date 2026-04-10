@@ -1,9 +1,10 @@
-import React, { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { Users, Notebook as Robot, Video, Star, MessageCircle, ArrowRight, ShieldCheck, ChevronLeft, ChevronRight, Quote } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { Review } from '../lib/types';
 import Footer from "../components/Footer";
+import { usePageSEO } from '../hooks/usePageSEO';
 import hospitalImg from "../assets/partners/hospital.png";
 import verifiedDocImg from "../assets/partners/verified_doctor.png";
 import certifiedImg from "../assets/partners/certified.png";
@@ -19,6 +20,12 @@ interface HealthArticle {
 }
 
 const Home = () => {
+  usePageSEO({
+    title: 'MindHaven | Online Therapy, Mental Health Support, and Expert Care',
+    description: 'Connect with licensed therapists, access AI-assisted support, and manage your mental wellness journey on MindHaven.',
+    path: '/',
+  });
+
   const [reviews, setReviews] = useState<Review[]>([]);
   const [currentReviewIndex, setCurrentReviewIndex] = useState(0);
   const intervalRef = useRef<number>();
@@ -30,7 +37,7 @@ const Home = () => {
   const [categories, setCategories] = useState<string[]>([]);
   const [expanded, setExpanded] = useState<string | null>(null);
 
-  const [autoScrollEnabled, setAutoScrollEnabled] = useState(true);
+  const [autoScrollEnabled] = useState(true);
 
   const [currentIndex, setCurrentIndex] = useState(0);
   // const intervalRef = useRef(null);

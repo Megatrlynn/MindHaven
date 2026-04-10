@@ -1,8 +1,14 @@
-import React from 'react';
 import { Shield, Clock, Heart, Brain, Users, MessageCircle, CheckCircle2 } from 'lucide-react';
 import Footer from '../components/Footer';
+import { usePageSEO } from '../hooks/usePageSEO';
 
 const About = () => {
+  usePageSEO({
+    title: 'About MindHaven | Trusted Digital Mental Health Care',
+    description: 'Learn how MindHaven combines compassionate therapists and secure technology to deliver reliable mental health care.',
+    path: '/about',
+  });
+
   return (
     <div className="w-full">
       <section className="content-shell py-8 lg:py-10">

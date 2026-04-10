@@ -1,7 +1,13 @@
-import React from "react";
 import Footer from "../components/Footer";
+import { usePageSEO } from '../hooks/usePageSEO';
 
 const TermsOfService = () => {
+    usePageSEO({
+        title: 'Terms of Service | MindHaven',
+        description: 'Review the terms and conditions for using the MindHaven mental health platform.',
+        path: '/terms-of-service',
+    });
+
   return (
         <div className="w-full">
         <div 

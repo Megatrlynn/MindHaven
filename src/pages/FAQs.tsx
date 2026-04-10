@@ -3,8 +3,15 @@ import { supabase } from '../lib/supabase';
 import { Question } from '../lib/types';
 import { MessageCircle, Search, CalendarDays, BadgeCheck, HelpCircle } from 'lucide-react';
 import Footer from '../components/Footer';
+import { usePageSEO } from '../hooks/usePageSEO';
 
 const FAQs = () => {
+  usePageSEO({
+    title: 'FAQs | MindHaven Mental Health Questions and Answers',
+    description: 'Browse frequently asked mental health questions answered by professionals on MindHaven.',
+    path: '/faqs',
+  });
+
   const [questions, setQuestions] = useState<Question[]>([]);
   const [filteredQuestions, setFilteredQuestions] = useState<Question[]>([]);
   const [loading, setLoading] = useState(true);

@@ -2,8 +2,15 @@ import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { LogIn, Loader2, AlertCircle } from 'lucide-react';
 import { supabase } from '../lib/supabase';
+import { usePageSEO } from '../hooks/usePageSEO';
 
 const Login = () => {
+  usePageSEO({
+    title: 'Admin and Therapist Login | MindHaven',
+    description: 'Sign in as an administrator or therapist to manage care, users, and platform operations in MindHaven.',
+    path: '/login',
+  });
+
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
