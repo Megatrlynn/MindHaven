@@ -12,6 +12,7 @@ export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children, requir
   const [isAuthorized, setIsAuthorized] = useState<boolean | null>(null);
   const [needsProfileCompletion, setNeedsProfileCompletion] = useState(false);
   const location = useLocation();
+  const unauthorizedRedirect = requiredRole === 'patient' ? '/patient-login' : '/login';
 
   useEffect(() => {
     const checkAuth = async () => {
@@ -49,7 +50,7 @@ export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children, requir
   }
 
   if (!isAuthorized) {
-    return <Navigate to="/login" replace />;
+    return <Navigate to={unauthorizedRedirect} replace state={{ from: location }} />;
   }
 
   if (needsProfileCompletion) {
