@@ -11,15 +11,23 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 dotenv.config({ path: path.join(__dirname, "../.env") });
 
 const app = express();
-const allowedOrigins = new Set([
+const defaultAllowedOrigins = [
   "http://localhost:5173",
   "http://127.0.0.1:5173",
-]);
+  "https://mind-haven.netlify.app",
+];
+
+const envAllowedOrigins = (process.env.CORS_ORIGINS || "")
+  .split(",")
+  .map((origin) => origin.trim())
+  .filter(Boolean);
+
+const allowedOrigins = new Set([...defaultAllowedOrigins, ...envAllowedOrigins]);
 
 app.use((req, res, next) => {
   const origin = req.headers.origin;
 
-  if (origin && (allowedOrigins.has(origin) || origin.endsWith(":5173"))) {
+  if (origin && allowedOrigins.has(origin)) {
     res.setHeader("Access-Control-Allow-Origin", origin);
     res.setHeader("Vary", "Origin");
   }
@@ -37,9 +45,13 @@ app.use((req, res, next) => {
 
 app.use(express.json());
 const server = createServer(app);
+
+const socketCorsOrigins = Array.from(allowedOrigins);
 const io = new Server(server, {
   cors: {
-    origin: "*",
+    origin: socketCorsOrigins,
+    methods: ["GET", "POST"],
+    credentials: true,
   },
 });
 
