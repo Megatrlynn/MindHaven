@@ -3,10 +3,8 @@ import { supabase } from "./supabase";
 
 const GEMINI_API_KEY = import.meta.env.VITE_GEMINI_API_KEY;
 const SEARCH_API_KEY = import.meta.env.VITE_SERPAPI_KEY;
+const GEMINI_API_URL = import.meta.env.VITE_GEMINI_API_URL;
 
-const GEMINI_API_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent";
-
-// 🧠 Fetch chat memory
 async function fetchChatSummaries(userId: string) {
   const { data, error } = await supabase
     .from("chat_history")
@@ -25,7 +23,6 @@ async function fetchChatSummaries(userId: string) {
   }));
 }
 
-// 🧠 Save a summary
 async function saveChatSummary(userId: string, summary: string) {
   const { error } = await supabase.from("chat_history").insert([
     { user_id: userId, summary },
@@ -33,7 +30,6 @@ async function saveChatSummary(userId: string, summary: string) {
   if (error) console.error("Save summary error:", error);
 }
 
-// 💬 Summarize conversation
 async function summarizeChat(prompt: string, answer: string) {
   const summaryMessages = [
     {
@@ -104,10 +100,8 @@ async function suggestDoctor(userId: string) {
     : null;
 }
 
-// Function to fetch AI response from Google Gemini
 async function fetchAIResponse(messages: any) {
   try {
-    // Convert OpenAI-style messages to Gemini format
     const contents = messages.map((msg: any) => ({
       role: msg.role === "user" ? "user" : "model",
       parts: [{ text: msg.content }],
@@ -142,7 +136,6 @@ async function fetchAIResponse(messages: any) {
   }
 }
 
-// Function to perform a Google search using SerpAPI
 export async function searchInternet(query: string) {
   try {
     const response = await getJson({
@@ -163,7 +156,6 @@ export async function searchInternet(query: string) {
   }
 }
 
-// Main function to process user queries
 export async function getAIResponse(prompt: string, userId: string) {
   if (!userId) throw new Error("Missing userId! Cannot proceed.");
   console.log("🆔 Using userId:", userId);
@@ -206,7 +198,6 @@ Respond with JSON only in this format:
       throw new Error("AI response format is invalid.");
     }
 
-    // 🌐 Search & 📚 Book/Video Rec
     let searchResults = [];
     let bookOrVideoResults = [];
 
@@ -228,15 +219,13 @@ Respond with JSON only in this format:
           return isNotAmazon && isValidVideoLink;
         });
     
-        // Set fallback safely
         bookOrVideoResults =
           filtered.length > 0 ? filtered : [rawResults[0]].filter(Boolean);
       } else {
-        bookOrVideoResults = []; // No results at all
+        bookOrVideoResults = [];
       }
     }    
 
-    // 📊 Question counter logic (now safe!)
     let questionCount = 1;
     let isEligible = false;
 
@@ -274,7 +263,6 @@ Respond with JSON only in this format:
         .insert([{ user_id: userId, question_count: 1 }]);
     }
 
-    // 🧠 Doctor suggestion if 3 therapy-related questions reached
     let doctorSuggestion = "";
 
     if (isEligible) {
@@ -282,9 +270,9 @@ Respond with JSON only in this format:
 
       if (suggestion) {
         if (suggestion.isConnected) {
-          doctorSuggestion = `👩‍⚕️ You're already connected to Dr. ${suggestion.name} (${suggestion.profession}). Consider reaching out for personalized help.`;
+          doctorSuggestion = `You're already connected to Dr. ${suggestion.name} (${suggestion.profession}). Consider reaching out for personalized help.`;
         } else {
-          doctorSuggestion = `🕓 You've requested to connect with Dr. ${suggestion.name} (${suggestion.profession}), but it’s still pending. Please wait for confirmation.`;
+          doctorSuggestion = `You've requested to connect with Dr. ${suggestion.name} (${suggestion.profession}), but it’s still pending. Please wait for confirmation.`;
         }
       } else {
         const fallbackDocs = await supabase
@@ -295,7 +283,7 @@ Respond with JSON only in this format:
 
         if (fallbackDocs.data && fallbackDocs.data.length > 0) {
           const doc = fallbackDocs.data[0];
-          doctorSuggestion = `💡 You're not connected to any doctor yet. Based on your queries, Dr. ${doc.name} (${doc.profession}) might be a good fit.`;
+          doctorSuggestion = `You're not connected to any doctor yet. Based on your queries, Dr. ${doc.name} (${doc.profession}) might be a good fit.`;
         }
       }
 
@@ -342,22 +330,22 @@ Respond with JSON only in this format:
     const summary = await summarizeChat(prompt, aiResponse);
     await saveChatSummary(userId, summary);
 
-    console.log("💬 Final AI Response:", aiResponse);
-    console.log("🧑‍⚕️ Doctor Suggestion:", doctorSuggestion);
+    console.log("Final AI Response:", aiResponse);
+    console.log("Doctor Suggestion:", doctorSuggestion);
 
     return (
       aiResponse +
       (bookOrVideoResults.length > 0
-        ? `\n\n📚 Recommended books or videos for you:\n` +
+        ? `\n\nRecommended books or videos for you:\n` +
           bookOrVideoResults
             .map(
               (r: any) =>
-                `- ${r.title}\n  ${r.snippet}\n  👉 ${r.link}`
+                `- ${r.title}\n  ${r.snippet}\n  ${r.link}`
             )
             .join("\n")
         : "") +
       (doctorSuggestion
-        ? `\n\n🧑‍⚕️ Based on your recent questions:\n${doctorSuggestion}`
+        ? `\n\nBased on your recent questions:\n${doctorSuggestion}`
         : "")
     );    
     
@@ -367,7 +355,6 @@ Respond with JSON only in this format:
   }
 }
 
-// Function to validate YouTube links (to check if the video exists)
 async function isValidYouTubeLink(link: string) {
   try {
     const videoId = link.split("v=")[1]?.split("&")[0];

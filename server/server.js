@@ -223,12 +223,12 @@ app.post("/admin/delete-user", async (req, res) => {
 
 // Handle user connections
 io.on("connection", (socket) => {
-  console.log(`✅ A user connected: ${socket.id}`);
+  console.log(` A user connected: ${socket.id}`);
 
-  // ✅ Register user
+  //  Register user
   socket.on("register", async ({ userId, role }) => {
     if (!userId) {
-      console.error(`❌ Error: Received undefined userId from socket ${socket.id}`);
+      console.error(` Error: Received undefined userId from socket ${socket.id}`);
       return;
     }
 
@@ -237,13 +237,13 @@ io.on("connection", (socket) => {
 
     // Update user socketId if they reconnect
     users[userId] = { socketId: socket.id, role };
-    console.log(`✅ User ${userId} registered as ${role}`);
-    console.log(`📌 Current Users:`, users); // Log the entire users object
+    console.log(`User ${userId} registered as ${role}`);
+    console.log(` Current Users:`, users); // Log the entire users object
 
     // Deliver any queued call offers for this user after they come online.
     const queuedCalls = pendingCalls[userId] || [];
     if (queuedCalls.length > 0) {
-      console.log(`📨 Delivering ${queuedCalls.length} queued call(s) to user ${userId}`);
+      console.log(` Delivering ${queuedCalls.length} queued call(s) to user ${userId}`);
       queuedCalls.forEach((callPayload) => {
         io.to(`user:${userId}`).emit("incoming-call", callPayload);
       });
@@ -251,12 +251,12 @@ io.on("connection", (socket) => {
     }
   });
 
-  // ✅ Handle doctor initiating a call
+  //  Handle doctor initiating a call
   socket.on("call-user", async ({ doctorId, targetUserId, offer }) => {
-    console.log(`📞 call-user event received: Doctor ${doctorId} → Patient ${targetUserId}`);
+    console.log(` call-user event received: Doctor ${doctorId} → Patient ${targetUserId}`);
 
     if (!doctorId || !targetUserId || !offer) {
-      console.error("❌ Error: Invalid doctorId, targetUserId, or missing offer in call-user event");
+      console.error(" Error: Invalid doctorId, targetUserId, or missing offer in call-user event");
       return;
     }
 
@@ -271,23 +271,23 @@ io.on("connection", (socket) => {
         .maybeSingle();
 
       if (error) {
-        console.error("❌ Supabase Query Error:", error);
+        console.error(" Supabase Query Error:", error);
         return;
       }
 
       if (!data || data.status !== "connected") {
-        console.log(`⛔ Call blocked: Doctor ${doctorId} and Patient ${targetUserId} are not connected.`);
+        console.log(`Call blocked: Doctor ${doctorId} and Patient ${targetUserId} are not connected.`);
         return;
       }
 
-      console.log(`✅ Connection exists in database. Proceeding with call...`);
+      console.log(` Connection exists in database. Proceeding with call...`);
 
       const targetRoom = `user:${targetUserId}`;
       const targetSockets = await io.in(targetRoom).fetchSockets();
-      console.log(`🎯 Active sockets in room ${targetRoom}:`, targetSockets.map((s) => s.id));
+      console.log(` Active sockets in room ${targetRoom}:`, targetSockets.map((s) => s.id));
 
       if (!targetSockets.length) {
-        console.log(`⚠️ Patient ${targetUserId} is not online.`);
+        console.log(` Patient ${targetUserId} is not online.`);
 
         if (!pendingCalls[targetUserId]) {
           pendingCalls[targetUserId] = [];
@@ -317,7 +317,7 @@ io.on("connection", (socket) => {
     }
   });
 
-  // ✅ Handle patient answering the call
+  //  Handle patient answering the call
   socket.on("answer-call", ({ targetSocketId, answer }) => {
     if (!targetSocketId || !answer) {
       console.error("❌ Error: Invalid targetSocketId or answer in answer-call event");
@@ -325,13 +325,13 @@ io.on("connection", (socket) => {
     }
 
     io.to(targetSocketId).emit("call-answered", answer);
-    console.log(`📩 Answer relayed to ${targetSocketId}`);
+    console.log(` Answer relayed to ${targetSocketId}`);
   });
 
-  // ✅ Handle ICE candidate exchange
+  //  Handle ICE candidate exchange
   socket.on("ice-candidate", ({ targetSocketId, candidate }) => {
     if (!targetSocketId || !candidate) {
-      console.error("❌ Error: Invalid targetSocketId or candidate in ice-candidate event");
+      console.error(" Error: Invalid targetSocketId or candidate in ice-candidate event");
       return;
     }
 
@@ -339,21 +339,21 @@ io.on("connection", (socket) => {
     io.to(targetSocketId).emit("ice-candidate", candidate);
   });
 
-  // ✅ Handle call declined
+  //  Handle call declined
   socket.on("call-declined", ({ targetSocketId }) => {
     if (!targetSocketId) {
-      console.error("❌ Error: Invalid targetSocketId in call-declined event");
+      console.error(" Error: Invalid targetSocketId in call-declined event");
       return;
     }
 
-    console.log(`📴 Call declined from ${socket.id} to ${targetSocketId}`);
+    console.log(`Call declined from ${socket.id} to ${targetSocketId}`);
     io.to(targetSocketId).emit("call-declined");
   });
 
-  // ✅ Handle call ended
+  // Handle call ended
   socket.on("end-call", ({ targetSocketId }) => {
     if (!targetSocketId) {
-      console.error("❌ Error: Invalid targetSocketId in end-call event");
+      console.error(" Error: Invalid targetSocketId in end-call event");
       return;
     }
 
@@ -361,7 +361,7 @@ io.on("connection", (socket) => {
     io.to(targetSocketId).emit("end-call");
   });
 
-  // ✅ Handle user disconnection
+  // Handle user disconnection
   socket.on("disconnect", () => {
     let disconnectedUserId = null;
 
@@ -375,9 +375,9 @@ io.on("connection", (socket) => {
     }
 
     if (disconnectedUserId) {
-      console.log(`❌ User ${disconnectedUserId} disconnected`);
+      console.log(` User ${disconnectedUserId} disconnected`);
     } else {
-      console.log(`❌ Unknown user disconnected: ${socket.id}`);
+      console.log(` Unknown user disconnected: ${socket.id}`);
     }
   });
 });
@@ -385,11 +385,37 @@ io.on("connection", (socket) => {
 setInterval(() => {
   if (Object.keys(users).length > 0) { // Only ping if users are connected
     io.emit("ping", "keep-alive");
-    console.log("🔄 Keep-alive ping sent to all connected clients.");
+    console.log(" Keep-alive ping sent to all connected clients.");
   }
 }, 50000);
 
-// ✅ Start the server
-server.listen(5000, () => {
-  console.log("🚀 Signaling server running on http://localhost:5000");
+// Wakeup call to prevent idle shutdown on Render free tier
+// Calls the server's /health endpoint every 10 minutes
+const wakeupInterval = setInterval(() => {
+  const serverUrl = process.env.SERVER_URL || "http://localhost:5000";
+  fetch(`${serverUrl}/health`)
+    .then((res) => {
+      if (res.ok) {
+        console.log(" Server wakeup call successful at", new Date().toISOString());
+      }
+    })
+    .catch((err) => {
+      console.error(" Wakeup call failed:", err.message);
+    });
+}, 10 * 60 * 1000); // 10 minutes
+
+// Clean up wakeup interval on shutdown
+process.on("SIGTERM", () => {
+  clearInterval(wakeupInterval);
+  console.log(" Wakeup interval cleared, shutting down gracefully.");
+  server.close(() => {
+    console.log(" Server closed.");
+    process.exit(0);
+  });
+});
+
+//  Start the server
+const PORT = process.env.PORT || 5000;
+server.listen(PORT, () => {
+  console.log(` Signaling server running on port ${PORT}`);
 });

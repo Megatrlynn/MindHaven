@@ -1,0 +1,26 @@
+services:
+  - type: web
+    name: mindhaven-server
+    runtime: node
+    plan: free
+    
+    # Root of the project
+    rootDir: .
+    
+    # Install dependencies
+    buildCommand: npm install
+    
+    # Start the server from server/server.js
+    startCommand: npm start
+    
+    # Environment variables (set these in Render UI, not here for security)
+    envVars:
+      - key: PORT
+        value: 5000
+      - key: NODE_ENV
+        value: production
+    # Add sensitive vars in Render dashboard:
+    # - SUPABASE_URL
+    # - SUPABASE_ANON_KEY
+    # - SUPABASE_SERVICE_ROLE_KEY
+    # - SERVER_URL
