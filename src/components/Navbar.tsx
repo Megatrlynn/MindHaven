@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
-import { Brain, LogIn, Menu, X, LogOut, LayoutDashboard, MessageSquareText, UserRound } from 'lucide-react';
+import { Brain, LogIn, Menu, X, LogOut, LayoutDashboard, MessageSquareText, UserRound, Moon, Sun } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { getUserRole, isPatientProfileComplete } from '../lib/auth';
 
@@ -12,6 +12,14 @@ const Navbar = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const [loading, setLoading] = useState(false);
+  const [theme, setTheme] = useState<'light' | 'dark'>(() => {
+    if (typeof window === 'undefined') return 'light';
+    const savedTheme = localStorage.getItem('mindhaven-theme');
+    if (savedTheme === 'light' || savedTheme === 'dark') {
+      return savedTheme;
+    }
+    return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+  });
 
   const handleClick = async () => {
     setLoading(true);
@@ -40,6 +48,12 @@ const Navbar = () => {
       window.removeEventListener('patient-profile-updated', handleProfileUpdate);
     };
   }, []);
+
+  useEffect(() => {
+    const root = document.documentElement;
+    root.classList.toggle('dark', theme === 'dark');
+    localStorage.setItem('mindhaven-theme', theme);
+  }, [theme]);
 
   const checkUserRole = async () => {
     setIsLoading(true);
@@ -86,6 +100,7 @@ const Navbar = () => {
 
   const hideButton = location.pathname === "/login" || location.pathname === "/patient-login";
   const hideSignInButton = !userRole && location.pathname === "/chat";
+  const isDark = theme === 'dark';
 
   const patientNavLinks = isPatientProfileCompleteState
     ? [
@@ -113,7 +128,9 @@ const Navbar = () => {
   const brandTarget = userRole === 'patient' && !isPatientProfileCompleteState ? '/profile' : '/';
 
   return (
-    <nav className="sticky top-0 z-50 border-b border-slate-200/90 bg-white/90 backdrop-blur">
+    <nav className={`sticky top-0 z-50 border-b backdrop-blur ${
+      isDark ? 'border-slate-800/90 bg-slate-950/90' : 'border-slate-200/90 bg-white/90'
+    }`}>
       <div className="content-shell">
         <div className="flex h-20 items-center justify-between">
           <div className="flex items-center">
@@ -121,7 +138,7 @@ const Navbar = () => {
               <span className="inline-flex h-10 w-10 items-center justify-center rounded-xl bg-cyan-700 text-white shadow-sm">
                 <Brain className="h-5 w-5" />
               </span>
-              <span className="text-xl font-extrabold tracking-tight text-slate-900">MindHaven</span>
+              <span className={`text-xl font-extrabold tracking-tight ${isDark ? 'text-slate-100' : 'text-slate-900'}`}>MindHaven</span>
             </Link>
             <div className="ml-8 hidden items-center gap-2 lg:flex">
               {navLinks.map(({ to, label, icon: Icon }) => (
@@ -131,7 +148,9 @@ const Navbar = () => {
                   className={`inline-flex items-center gap-2 rounded-xl px-3 py-2 text-sm font-semibold transition-colors duration-200 ${
                     isActive(to)
                       ? 'bg-cyan-100 text-cyan-900'
-                      : 'text-slate-700 hover:bg-slate-100 hover:text-slate-900'
+                      : isDark
+                        ? 'text-slate-300 hover:bg-slate-800 hover:text-slate-100'
+                        : 'text-slate-700 hover:bg-slate-100 hover:text-slate-900'
                   }`}
                 >
                   <Icon className="h-4 w-4" />
@@ -142,6 +161,20 @@ const Navbar = () => {
           </div>
 
           <div className="flex items-center">
+            <button
+              onClick={() => setTheme((prev) => (prev === 'dark' ? 'light' : 'dark'))}
+              className={`mr-3 inline-flex items-center gap-2 rounded-xl border px-3 py-2 text-sm font-semibold transition-colors ${
+                isDark
+                  ? 'border-slate-700 bg-slate-900 text-slate-100 hover:bg-slate-800'
+                  : 'border-slate-300 bg-white text-slate-700 hover:bg-slate-100'
+              }`}
+              aria-label={`Switch to ${isDark ? 'light' : 'dark'} mode`}
+              title={`Switch to ${isDark ? 'light' : 'dark'} mode`}
+            >
+              {isDark ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
+              <span className="hidden sm:inline">{isDark ? 'Light' : 'Dark'}</span>
+            </button>
+
             {!isLoading && !hideButton && (
               userRole ? (
                 <button
@@ -171,7 +204,11 @@ const Navbar = () => {
             <div className="ml-3 lg:hidden">
               <button
                 onClick={() => setIsMenuOpen(!isMenuOpen)}
-                className="inline-flex items-center justify-center rounded-xl border border-slate-300 bg-white p-2 text-slate-700"
+                className={`inline-flex items-center justify-center rounded-xl border p-2 ${
+                  isDark
+                    ? 'border-slate-700 bg-slate-900 text-slate-100'
+                    : 'border-slate-300 bg-white text-slate-700'
+                }`}
               >
                 {isMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
               </button>
@@ -190,7 +227,9 @@ const Navbar = () => {
                 className={`mb-1 flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium transition-colors ${
                   isActive(to)
                     ? 'bg-cyan-100 text-cyan-900'
-                    : 'text-slate-700 hover:bg-slate-100 hover:text-slate-900'
+                    : isDark
+                      ? 'text-slate-300 hover:bg-slate-800 hover:text-slate-100'
+                      : 'text-slate-700 hover:bg-slate-100 hover:text-slate-900'
                 }`}
                 onClick={() => setIsMenuOpen(false)}
               >
