@@ -6,7 +6,7 @@ import { MessageSquare, PhoneCall, Video, Check, Clock, UserCircle, X, Send, Loa
 import { io } from "socket.io-client";
 import { format } from 'date-fns';
 
-const socket = io(import.meta.env.VITE_SOCKET_SERVER_URL);
+const socket = io(import.meta.env.VITE_SOCKET_SERVER_URL || "https://mindhaven-lwo0.onrender.com");
 
 interface ExtendedConnection extends DoctorPatientConnection {
   patient_profile: UserProfile;

@@ -8,7 +8,7 @@ import Auth from '../components/Auth';
 import { io } from "socket.io-client";
 import { format } from "date-fns";
 
-const socket = io(import.meta.env.VITE_SOCKET_SERVER_URL);
+const socket = io(import.meta.env.VITE_SOCKET_SERVER_URL || "https://mindhaven-lwo0.onrender.com");
 
 interface ChatMessage {
   id: string;

@@ -15,7 +15,7 @@ const ManageUsers = () => {
     name: '',
     date_of_birth: '',
   });
-  const apiBaseUrl = (import.meta.env.VITE_SOCKET_SERVER_URL || 'http://localhost:5000').replace(/\/$/, '');
+  const apiBaseUrl = (import.meta.env.VITE_SOCKET_SERVER_URL || 'https://mindhaven-lwo0.onrender.com').replace(/\/$/, '');
 
   useEffect(() => {
     loadUsers();

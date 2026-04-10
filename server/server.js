@@ -392,7 +392,7 @@ setInterval(() => {
 // Wakeup call to prevent idle shutdown on Render free tier
 // Calls the server's /health endpoint every 10 minutes
 const wakeupInterval = setInterval(() => {
-  const serverUrl = process.env.SERVER_URL || "http://localhost:5000";
+  const serverUrl = process.env.SERVER_URL || "https://mindhaven-lwo0.onrender.com";
   fetch(`${serverUrl}/health`)
     .then((res) => {
       if (res.ok) {

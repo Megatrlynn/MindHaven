@@ -61,7 +61,7 @@ VITE_SUPABASE_ANON_KEY=
 Optional frontend variables used in the app:
 
 ```env
-VITE_SOCKET_SERVER_URL=http://localhost:5000
+VITE_SOCKET_SERVER_URL=https://mindhaven-lwo0.onrender.com
 VITE_GEMINI_API_KEY=
 VITE_SERPAPI_KEY=
 ```
@@ -96,7 +96,7 @@ npm run server
 Default local URLs:
 
 - Frontend: `http://localhost:5173`
-- Server: `http://localhost:5000` (if configured as such in your runtime)
+- Server: `https://mindhaven-lwo0.onrender.com` (or your Render service URL)
 
 ## Build
 
