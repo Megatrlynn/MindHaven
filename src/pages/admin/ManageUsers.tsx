@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+﻿import React, { useState, useEffect } from 'react';
 import { supabase } from '../../lib/supabase';
 import { UserProfile } from '../../lib/types';
 import { Pencil, Trash2, Loader2, X, AlertCircle, Search, UserRound } from 'lucide-react';
@@ -144,56 +144,56 @@ const ManageUsers = () => {
   return (
     <div className="p-6 md:p-8">
       <div className="mb-6">
-        <h2 className="text-2xl font-bold text-slate-900">Users Management</h2>
-        <p className="mt-1 text-sm text-slate-600">Review and maintain patient profile records.</p>
+        <h2 className="text-2xl font-bold text-[var(--mh-text)]">Users Management</h2>
+        <p className="mt-1 text-sm text-[var(--mh-text-muted)]">Review and maintain patient profile records.</p>
       </div>
 
       <div className="mb-4">
         <label className="relative block max-w-xl">
-          <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+          <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[var(--mh-text-muted)]" />
           <input
             type="text"
             placeholder="Search by name or username"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full rounded-xl border border-slate-300 bg-white py-2 pl-10 pr-3 text-sm text-slate-800 focus:border-cyan-700 focus:outline-none focus:ring-2 focus:ring-cyan-200"
+            className="w-full rounded-xl border border-[var(--mh-border)] bg-[var(--mh-surface)] py-2 pl-10 pr-3 text-sm text-[var(--mh-text)] focus:border-cyan-700 focus:outline-none focus:ring-2 focus:ring-cyan-200"
           />
         </label>
       </div>
 
       <div className="surface-card overflow-x-auto">
         <table className="min-w-full divide-y divide-slate-200">
-          <thead className="bg-slate-50">
+          <thead className="bg-[var(--mh-surface-soft)]">
             <tr>
-              <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-slate-500">
+              <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-[var(--mh-text-muted)]">
                 Username
               </th>
-              <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-slate-500">
+              <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-[var(--mh-text-muted)]">
                 Name
               </th>
-              <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-slate-500">
+              <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-[var(--mh-text-muted)]">
                 DOB
               </th>
-              <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-slate-500">
+              <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-[var(--mh-text-muted)]">
                 Actions
               </th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-slate-200 bg-white">
+          <tbody className="divide-y divide-slate-200 bg-[var(--mh-surface)]">
             {filteredUsers.map((user) => (
               <tr key={user.id}>
-                <td className="whitespace-nowrap px-6 py-4 text-sm text-slate-600">
+                <td className="whitespace-nowrap px-6 py-4 text-sm text-[var(--mh-text-muted)]">
                   {user.profile_picture ? (
                     <img src={user.profile_picture} alt="Profile" className="h-8 w-8 rounded-full" />
                   ) : (
-                    <UserRound className="h-4 w-4 text-slate-400" />
+                    <UserRound className="h-4 w-4 text-[var(--mh-text-muted)]" />
                   )}
                   <span className="ml-2">{user.username || '-'}</span>
                 </td>
-                <td className="whitespace-nowrap px-6 py-4 text-sm text-slate-600">
+                <td className="whitespace-nowrap px-6 py-4 text-sm text-[var(--mh-text-muted)]">
                   {user.name || '-'}
                 </td>
-                <td className="whitespace-nowrap px-6 py-4 text-sm text-slate-600">
+                <td className="whitespace-nowrap px-6 py-4 text-sm text-[var(--mh-text-muted)]">
                   {user.date_of_birth || '-'}
                 </td>
                 <td className="whitespace-nowrap px-6 py-4 text-sm font-medium">
@@ -222,13 +222,13 @@ const ManageUsers = () => {
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 backdrop-blur-sm">
           <div className="surface-card w-full max-w-md p-6">
             <div className="mb-4 flex items-center justify-between">
-              <h3 className="inline-flex items-center gap-2 text-lg font-semibold text-slate-900">
+              <h3 className="inline-flex items-center gap-2 text-lg font-semibold text-[var(--mh-text)]">
                 <UserRound className="h-5 w-5 text-cyan-700" />
                 Edit User Profile
               </h3>
               <button
                 onClick={() => setIsModalOpen(false)}
-                className="text-slate-400 hover:text-slate-600"
+                className="text-[var(--mh-text-muted)] hover:text-[var(--mh-text-muted)]"
               >
                 <X className="w-5 h-5" />
               </button>
@@ -243,38 +243,38 @@ const ManageUsers = () => {
 
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label className="block text-sm font-medium text-[var(--mh-text-muted)] mb-1">
                   Username
                 </label>
                 <input
                   type="text"
                   value={formData.username}
                   onChange={(e) => setFormData({ ...formData, username: e.target.value })}
-                  className="w-full rounded-lg border border-slate-300 px-3 py-2 focus:border-cyan-700 focus:outline-none focus:ring-2 focus:ring-cyan-200"
+                  className="w-full rounded-lg border border-[var(--mh-border)] px-3 py-2 focus:border-cyan-700 focus:outline-none focus:ring-2 focus:ring-cyan-200"
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label className="block text-sm font-medium text-[var(--mh-text-muted)] mb-1">
                   Name
                 </label>
                 <input
                   type="text"
                   value={formData.name}
                   onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                  className="w-full rounded-lg border border-slate-300 px-3 py-2 focus:border-cyan-700 focus:outline-none focus:ring-2 focus:ring-cyan-200"
+                  className="w-full rounded-lg border border-[var(--mh-border)] px-3 py-2 focus:border-cyan-700 focus:outline-none focus:ring-2 focus:ring-cyan-200"
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label className="block text-sm font-medium text-[var(--mh-text-muted)] mb-1">
                   Date Of Birth
                 </label>
                 <input
                   type="date"
                   value={formData.date_of_birth}
                   onChange={(e) => setFormData({ ...formData, date_of_birth: e.target.value })}
-                  className="w-full rounded-lg border border-slate-300 px-3 py-2 focus:border-cyan-700 focus:outline-none focus:ring-2 focus:ring-cyan-200"
+                  className="w-full rounded-lg border border-[var(--mh-border)] px-3 py-2 focus:border-cyan-700 focus:outline-none focus:ring-2 focus:ring-cyan-200"
                 />
               </div>
 
@@ -310,3 +310,4 @@ const ManageUsers = () => {
 };
 
 export default ManageUsers;
+

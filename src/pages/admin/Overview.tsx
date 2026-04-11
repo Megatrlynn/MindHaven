@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+﻿import React, { useEffect, useState } from 'react';
 import {
   Activity,
   BookOpenText,
@@ -277,8 +277,8 @@ const Overview = () => {
     <div className="w-full p-6 md:p-8">
       <div className="flex flex-wrap items-end justify-between gap-3">
         <div>
-          <h2 className="text-2xl font-bold text-slate-900">Platform Overview</h2>
-          <p className="mt-1 text-sm text-slate-600">Track operations, user growth, and engagement trends.</p>
+          <h2 className="text-2xl font-bold text-[var(--mh-text)]">Platform Overview</h2>
+          <p className="mt-1 text-sm text-[var(--mh-text-muted)]">Track operations, user growth, and engagement trends.</p>
         </div>
       </div>
 
@@ -287,7 +287,7 @@ const Overview = () => {
           <a
             key={item.id}
             href={`#${item.id}`}
-            className="inline-flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-700 transition-colors hover:bg-slate-100"
+            className="inline-flex items-center gap-2 rounded-lg border border-[var(--mh-border)] bg-[var(--mh-surface)] px-3 py-2 text-xs font-semibold text-[var(--mh-text-muted)] transition-colors hover:bg-[var(--mh-surface-soft)]"
           >
             <item.icon className="h-4 w-4" />
             {item.label}
@@ -317,9 +317,9 @@ const Overview = () => {
       </section>
 
       <section id="engagement-trends" className="mt-8">
-        <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-          <h3 className="text-xl font-bold text-slate-900">Engagement Trends</h3>
-          <p className="mt-1 text-sm text-slate-600">
+        <div className="rounded-2xl border border-[var(--mh-border)] bg-[var(--mh-surface)] p-6 shadow-sm">
+          <h3 className="text-xl font-bold text-[var(--mh-text)]">Engagement Trends</h3>
+          <p className="mt-1 text-sm text-[var(--mh-text-muted)]">
             Compare daily sign-ups, user questions, and review activity over time.
           </p>
           <StatisticsChart data={overviewData} />
@@ -327,11 +327,11 @@ const Overview = () => {
       </section>
 
       <section id="recent-activity" className="mt-8">
-        <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+        <div className="rounded-2xl border border-[var(--mh-border)] bg-[var(--mh-surface)] p-6 shadow-sm">
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div>
-              <h3 className="text-xl font-bold text-slate-900">Recent Activity</h3>
-              <p className="mt-1 text-sm text-slate-600">A live pulse of therapist, patient, content, and support interactions.</p>
+              <h3 className="text-xl font-bold text-[var(--mh-text)]">Recent Activity</h3>
+              <p className="mt-1 text-sm text-[var(--mh-text-muted)]">A live pulse of therapist, patient, content, and support interactions.</p>
             </div>
             <span className="inline-flex items-center rounded-full border border-cyan-200 bg-cyan-50 px-3 py-1 text-xs font-semibold text-cyan-800">
               Updated in real time
@@ -444,13 +444,13 @@ const ActivityFeedBlock = ({
   count: number;
 }) => {
   return (
-    <div className={`rounded-xl border bg-slate-50 p-4 ${tone}`}>
+    <div className={`rounded-xl border bg-[var(--mh-surface-soft)] p-4 ${tone}`}>
       <div className="mb-3 flex items-center justify-between gap-2">
         <div className="flex items-center gap-2">
           {icon}
-          <h4 className="text-lg font-semibold text-slate-900">{title}</h4>
+          <h4 className="text-lg font-semibold text-[var(--mh-text)]">{title}</h4>
         </div>
-        <span className="rounded-full border border-slate-200 bg-white px-2 py-0.5 text-xs font-semibold text-slate-600">
+        <span className="rounded-full border border-[var(--mh-border)] bg-[var(--mh-surface)] px-2 py-0.5 text-xs font-semibold text-[var(--mh-text-muted)]">
           {count}
         </span>
       </div>
@@ -461,18 +461,18 @@ const ActivityFeedBlock = ({
 
 const ActivityCard: React.FC<ActivityCardProps> = ({ icon, title, subtitle, time, image, rating }) => {
   return (
-    <article className="rounded-xl border border-slate-200 bg-white p-4 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-sm">
+    <article className="rounded-xl border border-[var(--mh-border)] bg-[var(--mh-surface)] p-4 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-sm">
       <div className="flex items-start gap-3">
         {image ? (
           <img src={image} alt="Profile" className="h-11 w-11 rounded-full object-cover" />
         ) : (
-          <span className="inline-flex h-11 w-11 items-center justify-center rounded-full border border-slate-200 bg-white">
+          <span className="inline-flex h-11 w-11 items-center justify-center rounded-full border border-[var(--mh-border)] bg-[var(--mh-surface)]">
             {icon}
           </span>
         )}
         <div className="min-w-0 flex-1">
-          <h5 className="truncate text-sm font-semibold text-slate-900">{title}</h5>
-          <p className="mt-1 text-sm text-slate-600">{subtitle}</p>
+          <h5 className="truncate text-sm font-semibold text-[var(--mh-text)]">{title}</h5>
+          <p className="mt-1 text-sm text-[var(--mh-text-muted)]">{subtitle}</p>
 
           {rating ? (
             <div className="mt-2 flex items-center gap-1">
@@ -482,7 +482,7 @@ const ActivityCard: React.FC<ActivityCardProps> = ({ icon, title, subtitle, time
             </div>
           ) : null}
 
-          <p className="mt-2 flex items-center text-xs text-slate-500">
+          <p className="mt-2 flex items-center text-xs text-[var(--mh-text-muted)]">
             <CalendarClock className="mr-1 h-3.5 w-3.5" />
             {new Date(time).toLocaleString()}
           </p>
@@ -493,3 +493,5 @@ const ActivityCard: React.FC<ActivityCardProps> = ({ icon, title, subtitle, time
 };
 
 export default Overview;
+
+

@@ -1,4 +1,4 @@
-import React from 'react';
+﻿import React from 'react';
 import { Outlet, NavLink } from 'react-router-dom';
 import { Users, UserCog, MessageCircle, Home, FileText, ShieldCheck, Mail } from 'lucide-react';
 
@@ -18,8 +18,8 @@ const AdminDashboard = () => {
         <div className="flex flex-wrap items-center justify-between gap-4">
           <div>
             <p className="text-sm font-semibold uppercase tracking-wide text-cyan-700">Control Center</p>
-            <h1 className="mt-1 text-3xl font-bold text-slate-900">Admin Dashboard</h1>
-            <p className="mt-2 text-sm text-slate-600">
+            <h1 className="mt-1 text-3xl font-bold text-[var(--mh-text)]">Admin Dashboard</h1>
+            <p className="mt-2 text-sm text-[var(--mh-text-muted)]">
               Monitor platform growth, manage content, and review user activity in one place.
             </p>
           </div>
@@ -39,7 +39,7 @@ const AdminDashboard = () => {
               `inline-flex items-center gap-2 whitespace-nowrap rounded-xl border px-4 py-2 text-sm font-semibold transition-colors duration-200 ${
                 isActive
                   ? 'border-cyan-200 bg-cyan-100 text-cyan-900'
-                  : 'border-slate-200 bg-white text-slate-700 hover:bg-slate-100'
+                  : 'border-[var(--mh-border)] bg-[var(--mh-surface)] text-[var(--mh-text-muted)] hover:bg-[var(--mh-surface-soft)]'
               }`
             }
           >
@@ -57,3 +57,5 @@ const AdminDashboard = () => {
 };
 
 export default AdminDashboard;
+
+

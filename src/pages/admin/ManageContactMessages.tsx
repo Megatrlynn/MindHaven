@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+﻿import React, { useState, useEffect } from 'react';
 import { supabase } from '../../lib/supabase';
 import { Mail, Eye, EyeOff, Trash2, ChevronDown, X } from 'lucide-react';
 
@@ -90,7 +90,7 @@ const ManageContactMessages = () => {
       case 'responded':
         return 'bg-green-50 dark:bg-green-950 text-green-700 dark:text-green-300 border-green-200 dark:border-green-800';
       default:
-        return 'bg-gray-50 dark:bg-gray-950 text-gray-700 dark:text-gray-300';
+        return 'bg-[var(--mh-surface-soft)] text-[var(--mh-text-muted)] border-[var(--mh-border)]';
     }
   };
 
@@ -105,7 +105,7 @@ const ManageContactMessages = () => {
   return (
     <div className="p-6">
       <div className="mb-6">
-        <h2 className="text-2xl font-bold text-slate-900 dark:text-slate-100 mb-4">Contact Messages</h2>
+        <h2 className="text-2xl font-bold text-[var(--mh-text)]  mb-4">Contact Messages</h2>
         
         <div className="flex gap-2 mb-6 flex-wrap">
           {(['all', 'new', 'read', 'responded'] as const).map((status) => (
@@ -115,7 +115,7 @@ const ManageContactMessages = () => {
               className={`px-4 py-2 rounded-lg font-medium transition ${
                 filterStatus === status
                   ? 'bg-cyan-500 text-white'
-                  : 'bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-300 dark:hover:bg-slate-600'
+                    : 'bg-[var(--mh-surface-soft)] text-[var(--mh-text-muted)] hover:bg-[var(--mh-surface)]'
               }`}
             >
               {status === 'all' ? 'All' : status.charAt(0).toUpperCase() + status.slice(1)} ({filteredMessages.filter(m => status === 'all' || m.status === status).length})
@@ -129,7 +129,7 @@ const ManageContactMessages = () => {
         <div className="md:col-span-1">
           <div className="space-y-2 max-h-[600px] overflow-y-auto">
             {filteredMessages.length === 0 ? (
-              <div className="text-center py-8 text-slate-500 dark:text-slate-400">
+              <div className="py-8 text-center text-[var(--mh-text-muted)]">
                 <Mail className="h-8 w-8 mx-auto mb-2 opacity-50" />
                 <p>No messages</p>
               </div>
@@ -141,18 +141,18 @@ const ManageContactMessages = () => {
                   className={`w-full text-left p-3 rounded-lg border transition ${
                     selectedMessage?.id === msg.id
                       ? 'bg-cyan-50 dark:bg-cyan-950 border-cyan-300 dark:border-cyan-700'
-                      : 'bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700'
+                      : 'bg-[var(--mh-surface)] border-[var(--mh-border)] hover:bg-[var(--mh-surface-soft)]'
                   }`}
                 >
                   <div className="flex items-start justify-between mb-1">
-                    <p className="font-semibold text-slate-900 dark:text-slate-100 truncate text-sm">{msg.name}</p>
+                    <p className="truncate text-sm font-semibold text-[var(--mh-text)]">{msg.name}</p>
                     <span className={`text-xs px-2 py-1 rounded border ${getStatusColor(msg.status)}`}>
                       {msg.status}
                     </span>
                   </div>
-                  <p className="text-xs text-slate-600 dark:text-slate-400 truncate">{msg.email}</p>
-                  <p className="text-xs text-slate-600 dark:text-slate-400 truncate mt-1">{msg.subject}</p>
-                  <p className="text-xs text-slate-500 dark:text-slate-500 mt-1">
+                  <p className="truncate text-xs text-[var(--mh-text-muted)]">{msg.email}</p>
+                  <p className="mt-1 truncate text-xs text-[var(--mh-text-muted)]">{msg.subject}</p>
+                  <p className="mt-1 text-xs text-[var(--mh-text-muted)]">
                     {new Date(msg.created_at).toLocaleDateString()}
                   </p>
                 </button>
@@ -164,17 +164,17 @@ const ManageContactMessages = () => {
         {/* Message Details */}
         <div className="md:col-span-2">
           {selectedMessage ? (
-            <div className="bg-white dark:bg-slate-800 rounded-lg border border-slate-200 dark:border-slate-700 p-6">
+            <div className="rounded-lg border border-[var(--mh-border)] bg-[var(--mh-surface)] p-6">
               <div className="flex items-start justify-between mb-4">
                 <div>
-                  <h3 className="text-xl font-bold text-slate-900 dark:text-slate-100">{selectedMessage.name}</h3>
-                  <p className="text-sm text-slate-600 dark:text-slate-400">{selectedMessage.email}</p>
+                  <h3 className="text-xl font-bold text-[var(--mh-text)]">{selectedMessage.name}</h3>
+                  <p className="text-sm text-[var(--mh-text-muted)]">{selectedMessage.email}</p>
                 </div>
                 <button
                   onClick={() => setSelectedMessage(null)}
-                  className="p-1 hover:bg-slate-100 dark:hover:bg-slate-700 rounded"
+                  className="rounded p-1 hover:bg-[var(--mh-surface-soft)]"
                 >
-                  <X className="h-5 w-5 text-slate-500" />
+                  <X className="h-5 w-5 text-[var(--mh-text-muted)]" />
                 </button>
               </div>
 
@@ -183,21 +183,21 @@ const ManageContactMessages = () => {
                   <span className={`inline-flex text-xs px-3 py-1 rounded-full border font-medium ${getStatusColor(selectedMessage.status)}`}>
                     {selectedMessage.status}
                   </span>
-                  <p className="text-xs text-slate-500 dark:text-slate-400">
+                  <p className="text-xs text-[var(--mh-text-muted)]">
                     {new Date(selectedMessage.created_at).toLocaleString()}
                   </p>
                 </div>
               </div>
 
               <div className="mb-4">
-                <p className="text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">Subject:</p>
-                <p className="text-slate-900 dark:text-slate-100">{selectedMessage.subject}</p>
+                <p className="mb-2 text-sm font-semibold text-[var(--mh-text-muted)]">Subject:</p>
+                <p className="text-[var(--mh-text)]">{selectedMessage.subject}</p>
               </div>
 
               <div className="mb-4">
-                <p className="text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">Message:</p>
-                <div className="bg-slate-50 dark:bg-slate-900 p-4 rounded-lg border border-slate-200 dark:border-slate-700">
-                  <p className="text-slate-700 dark:text-slate-300 whitespace-pre-wrap">{selectedMessage.message}</p>
+                <p className="mb-2 text-sm font-semibold text-[var(--mh-text-muted)]">Message:</p>
+                <div className="rounded-lg border border-[var(--mh-border)] bg-[var(--mh-surface-soft)] p-4">
+                  <p className="whitespace-pre-wrap text-[var(--mh-text-muted)]">{selectedMessage.message}</p>
                 </div>
               </div>
 
@@ -239,9 +239,9 @@ const ManageContactMessages = () => {
               </div>
             </div>
           ) : (
-            <div className="bg-white dark:bg-slate-800 rounded-lg border border-slate-200 dark:border-slate-700 p-8 text-center">
-              <Mail className="h-12 w-12 text-slate-300 dark:text-slate-600 mx-auto mb-3" />
-              <p className="text-slate-500 dark:text-slate-400">Select a message to view details</p>
+            <div className="rounded-lg border border-[var(--mh-border)] bg-[var(--mh-surface)] p-8 text-center">
+              <Mail className="mx-auto mb-3 h-12 w-12 text-[var(--mh-text-muted)]" />
+              <p className="text-[var(--mh-text-muted)]">Select a message to view details</p>
             </div>
           )}
         </div>
@@ -251,3 +251,5 @@ const ManageContactMessages = () => {
 };
 
 export default ManageContactMessages;
+
+

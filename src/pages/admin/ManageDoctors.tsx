@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+﻿import React, { useState, useEffect } from 'react';
 import { supabase } from '../../lib/supabase';
 import { Doctor } from '../../lib/types';
 import { Pencil, Trash2, Plus, Loader2, X, Search, Stethoscope, Phone, UserRound } from 'lucide-react';
@@ -203,8 +203,8 @@ const ManageDoctors = () => {
     <div className="p-6 md:p-8">
       <div className="mb-6 flex flex-wrap items-center justify-between gap-4">
         <div>
-          <h2 className="text-2xl font-bold text-slate-900">Therapists Management</h2>
-          <p className="mt-1 text-sm text-slate-600">Add, update, and curate verified therapist profiles.</p>
+          <h2 className="text-2xl font-bold text-[var(--mh-text)]">Therapists Management</h2>
+          <p className="mt-1 text-sm text-[var(--mh-text-muted)]">Add, update, and curate verified therapist profiles.</p>
         </div>
 
         <button
@@ -218,36 +218,36 @@ const ManageDoctors = () => {
 
       <div className="mb-4">
         <label className="relative block max-w-xl">
-          <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+          <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[var(--mh-text-muted)]" />
           <input
             type="text"
             placeholder="Search by name, profession, or phone"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full rounded-xl border border-slate-300 bg-white py-2 pl-10 pr-3 text-sm text-slate-800 focus:border-cyan-700 focus:outline-none focus:ring-2 focus:ring-cyan-200"
+            className="w-full rounded-xl border border-[var(--mh-border)] bg-[var(--mh-surface)] py-2 pl-10 pr-3 text-sm text-[var(--mh-text)] focus:border-cyan-700 focus:outline-none focus:ring-2 focus:ring-cyan-200"
           />
         </label>
       </div>
 
       <div className="surface-card overflow-x-auto">
         <table className="min-w-full divide-y divide-slate-200">
-          <thead className="bg-slate-50">
+          <thead className="bg-[var(--mh-surface-soft)]">
             <tr>
-              <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-slate-500">
+              <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-[var(--mh-text-muted)]">
                 Name
               </th>
-              <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-slate-500">
+              <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-[var(--mh-text-muted)]">
                 Profession
               </th>
-              <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-slate-500">
+              <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-[var(--mh-text-muted)]">
                 Phone
               </th>
-              <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-slate-500">
+              <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-[var(--mh-text-muted)]">
                 Actions
               </th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-slate-200 bg-white">
+          <tbody className="divide-y divide-slate-200 bg-[var(--mh-surface)]">
             {filteredDoctors.map((doctor) => (
               <tr key={doctor.id}>
                 <td className="px-6 py-4 whitespace-nowrap">
@@ -260,21 +260,21 @@ const ManageDoctors = () => {
                       />
                     )}
                     <div>
-                      <div className="text-sm font-medium text-slate-900">
+                      <div className="text-sm font-medium text-[var(--mh-text)]">
                         {doctor.name}
                       </div>
                     </div>
                   </div>
                 </td>
-                <td className="whitespace-nowrap px-6 py-4 text-sm text-slate-600">
-                  <span className="inline-flex items-center gap-1 rounded-full bg-slate-100 px-2 py-1 text-xs font-medium text-slate-700">
+                <td className="whitespace-nowrap px-6 py-4 text-sm text-[var(--mh-text-muted)]">
+                  <span className="inline-flex items-center gap-1 rounded-full bg-[var(--mh-surface-soft)] px-2 py-1 text-xs font-medium text-[var(--mh-text-muted)]">
                     <Stethoscope className="h-3 w-3" />
                     {doctor.profession}
                   </span>
                 </td>
-                <td className="whitespace-nowrap px-6 py-4 text-sm text-slate-600">
+                <td className="whitespace-nowrap px-6 py-4 text-sm text-[var(--mh-text-muted)]">
                   <span className="inline-flex items-center gap-1">
-                    <Phone className="h-3.5 w-3.5 text-slate-500" />
+                    <Phone className="h-3.5 w-3.5 text-[var(--mh-text-muted)]" />
                     {doctor.phone || '-'}
                   </span>
                 </td>
@@ -302,13 +302,13 @@ const ManageDoctors = () => {
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 backdrop-blur-sm">
           <div className="surface-card w-full max-w-xl p-6">
             <div className="mb-4 flex items-center justify-between">
-              <h3 className="text-lg font-semibold text-slate-900 inline-flex items-center gap-2">
+              <h3 className="text-lg font-semibold text-[var(--mh-text)] inline-flex items-center gap-2">
                 <UserRound className="h-5 w-5 text-cyan-700" />
                 {editingDoctor ? 'Edit Therapist' : 'Add New Therapist'}
               </h3>
               <button
                 onClick={() => setIsModalOpen(false)}
-                className="text-slate-400 hover:text-slate-600"
+                className="text-[var(--mh-text-muted)] hover:text-[var(--mh-text-muted)]"
               >
                 <X className="w-5 h-5" />
               </button>
@@ -324,7 +324,7 @@ const ManageDoctors = () => {
               {!editingDoctor && (
                 <>
                   <div>
-                    <label className="mb-1 block text-sm font-medium text-slate-700">
+                    <label className="mb-1 block text-sm font-medium text-[var(--mh-text-muted)]">
                       Email
                     </label>
                     <input
@@ -334,12 +334,12 @@ const ManageDoctors = () => {
                       onChange={(e) =>
                         setFormData({ ...formData, email: e.target.value })
                       }
-                      className="w-full rounded-lg border border-slate-300 px-3 py-2 focus:border-cyan-700 focus:outline-none focus:ring-2 focus:ring-cyan-200"
+                      className="w-full rounded-lg border border-[var(--mh-border)] px-3 py-2 focus:border-cyan-700 focus:outline-none focus:ring-2 focus:ring-cyan-200"
                       placeholder="example@doc.com"
                     />
                   </div>
                   <div>
-                    <label className="mb-1 block text-sm font-medium text-slate-700">
+                    <label className="mb-1 block text-sm font-medium text-[var(--mh-text-muted)]">
                       Password
                     </label>
                     <input
@@ -349,14 +349,14 @@ const ManageDoctors = () => {
                       onChange={(e) =>
                         setFormData({ ...formData, password: e.target.value })
                       }
-                      className="w-full rounded-lg border border-slate-300 px-3 py-2 focus:border-cyan-700 focus:outline-none focus:ring-2 focus:ring-cyan-200"
+                      className="w-full rounded-lg border border-[var(--mh-border)] px-3 py-2 focus:border-cyan-700 focus:outline-none focus:ring-2 focus:ring-cyan-200"
                     />
                   </div>
                 </>
               )}
 
               <div>
-                <label className="mb-1 block text-sm font-medium text-slate-700">
+                <label className="mb-1 block text-sm font-medium text-[var(--mh-text-muted)]">
                   Name
                 </label>
                 <input
@@ -366,12 +366,12 @@ const ManageDoctors = () => {
                   onChange={(e) =>
                     setFormData({ ...formData, name: e.target.value })
                   }
-                  className="w-full rounded-lg border border-slate-300 px-3 py-2 focus:border-cyan-700 focus:outline-none focus:ring-2 focus:ring-cyan-200"
+                  className="w-full rounded-lg border border-[var(--mh-border)] px-3 py-2 focus:border-cyan-700 focus:outline-none focus:ring-2 focus:ring-cyan-200"
                 />
               </div>
 
               <div>
-                <label className="mb-1 block text-sm font-medium text-slate-700">
+                <label className="mb-1 block text-sm font-medium text-[var(--mh-text-muted)]">
                   Profession
                 </label>
                 <select
@@ -380,7 +380,7 @@ const ManageDoctors = () => {
                   onChange={(e) =>
                     setFormData({ ...formData, profession: e.target.value })
                   }
-                  className="w-full rounded-lg border border-slate-300 px-3 py-2 focus:border-cyan-700 focus:outline-none focus:ring-2 focus:ring-cyan-200"
+                  className="w-full rounded-lg border border-[var(--mh-border)] px-3 py-2 focus:border-cyan-700 focus:outline-none focus:ring-2 focus:ring-cyan-200"
                 >
                   <option value="" disabled>
                     Select a profession
@@ -394,7 +394,7 @@ const ManageDoctors = () => {
               </div>
 
               <div>
-                <label className="mb-1 block text-sm font-medium text-slate-700">
+                <label className="mb-1 block text-sm font-medium text-[var(--mh-text-muted)]">
                   Phone
                 </label>
                 <input
@@ -403,12 +403,12 @@ const ManageDoctors = () => {
                   onChange={(e) =>
                     setFormData({ ...formData, phone: e.target.value })
                   }
-                  className="w-full rounded-lg border border-slate-300 px-3 py-2 focus:border-cyan-700 focus:outline-none focus:ring-2 focus:ring-cyan-200"
+                  className="w-full rounded-lg border border-[var(--mh-border)] px-3 py-2 focus:border-cyan-700 focus:outline-none focus:ring-2 focus:ring-cyan-200"
                 />
               </div>
 
               <div className="md:col-span-2">
-                <label className="mb-1 block text-sm font-medium text-slate-700">
+                <label className="mb-1 block text-sm font-medium text-[var(--mh-text-muted)]">
                   Profile Picture URL
                 </label>
                 <input
@@ -417,7 +417,7 @@ const ManageDoctors = () => {
                   onChange={(e) =>
                     setFormData({ ...formData, profile_picture: e.target.value })
                   }
-                  className="w-full rounded-lg border border-slate-300 px-3 py-2 focus:border-cyan-700 focus:outline-none focus:ring-2 focus:ring-cyan-200"
+                  className="w-full rounded-lg border border-[var(--mh-border)] px-3 py-2 focus:border-cyan-700 focus:outline-none focus:ring-2 focus:ring-cyan-200"
                   placeholder="https://example.com/image.jpg"
                 />
               </div>
@@ -451,3 +451,4 @@ const ManageDoctors = () => {
 };
 
 export default ManageDoctors;
+

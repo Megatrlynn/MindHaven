@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+﻿import { useState, useEffect } from 'react';
 import { Line } from 'react-chartjs-2';
 import { Chart as ChartJS, CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend } from 'chart.js';
 import { Activity, HelpCircle, Star } from 'lucide-react';
@@ -95,7 +95,7 @@ const StatisticsChart = ({ data }: { data: OverviewData[] }) => {
             className={`inline-flex items-center gap-2 rounded-xl px-4 py-2 text-sm font-semibold transition-colors duration-200 ${
               chartType === 'signUps'
                 ? 'bg-cyan-700 text-white'
-                : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
+                : 'bg-[var(--mh-surface-soft)] text-[var(--mh-text-muted)] hover:bg-[var(--mh-surface)]'
             }`}
             onClick={() => setChartType('signUps')}
           >
@@ -106,7 +106,7 @@ const StatisticsChart = ({ data }: { data: OverviewData[] }) => {
             className={`inline-flex items-center gap-2 rounded-xl px-4 py-2 text-sm font-semibold transition-colors duration-200 ${
               chartType === 'questions'
                 ? 'bg-emerald-600 text-white'
-                : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
+                : 'bg-[var(--mh-surface-soft)] text-[var(--mh-text-muted)] hover:bg-[var(--mh-surface)]'
             }`}
             onClick={() => setChartType('questions')}
           >
@@ -117,7 +117,7 @@ const StatisticsChart = ({ data }: { data: OverviewData[] }) => {
             className={`inline-flex items-center gap-2 rounded-xl px-4 py-2 text-sm font-semibold transition-colors duration-200 ${
               chartType === 'reviews'
                 ? 'bg-amber-500 text-white'
-                : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
+                : 'bg-[var(--mh-surface-soft)] text-[var(--mh-text-muted)] hover:bg-[var(--mh-surface)]'
             }`}
             onClick={() => setChartType('reviews')}
           >
@@ -158,3 +158,5 @@ const StatisticsChart = ({ data }: { data: OverviewData[] }) => {
 };
 
 export default StatisticsChart;
+
+

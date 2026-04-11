@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+﻿import React, { useState, useEffect } from 'react';
 import { supabase } from '../../lib/supabase';
 import { Question } from '../../lib/types';
 import { MessageCircle, Loader2, Send, Clock, CheckCircle, HelpCircle } from 'lucide-react';
@@ -77,30 +77,30 @@ const ManageFAQs = () => {
   return (
     <div className="p-6 md:p-8">
       <div className="mb-6">
-        <h2 className="text-2xl font-bold text-slate-900">FAQs Management</h2>
-        <p className="mt-1 text-sm text-slate-600">Respond to user questions and keep community answers up to date.</p>
+        <h2 className="text-2xl font-bold text-[var(--mh-text)]">FAQs Management</h2>
+        <p className="mt-1 text-sm text-[var(--mh-text-muted)]">Respond to user questions and keep community answers up to date.</p>
       </div>
 
       <div className="space-y-8">
         {/* Pending Questions */}
         <div className="surface-card p-5">
-          <h3 className="mb-4 flex items-center text-lg font-semibold text-slate-900">
+          <h3 className="mb-4 flex items-center text-lg font-semibold text-[var(--mh-text)]">
             <Clock className="mr-2 h-5 w-5 text-amber-600" />
             Pending Questions ({pendingQuestions.length})
           </h3>
           <div className="space-y-4">
             {pendingQuestions.map((question) => (
-              <div key={question.id} className="rounded-xl border border-slate-200 bg-slate-50 p-4">
+              <div key={question.id} className="rounded-xl border border-[var(--mh-border)] bg-[var(--mh-surface-soft)] p-4">
                 <div className="flex items-start space-x-4">
                   <div className="flex-shrink-0">
                     <HelpCircle className="h-6 w-6 text-amber-600" />
                   </div>
                   <div className="flex-1">
-                    <p className="font-medium text-slate-900">
+                    <p className="font-medium text-[var(--mh-text)]">
                       User #{question.user_id.slice(0, 8)}
                     </p>
-                    <p className="mt-1 text-slate-600">{question.question}</p>
-                    <p className="mt-2 text-xs text-slate-400">
+                    <p className="mt-1 text-[var(--mh-text-muted)]">{question.question}</p>
+                    <p className="mt-2 text-xs text-[var(--mh-text-muted)]">
                       Asked on {new Date(question.created_at).toLocaleString()}
                     </p>
 
@@ -109,7 +109,7 @@ const ManageFAQs = () => {
                         <textarea
                           value={answer}
                           onChange={(e) => setAnswer(e.target.value)}
-                          className="w-full rounded-lg border border-slate-300 px-3 py-2 focus:border-cyan-700 focus:outline-none focus:ring-2 focus:ring-cyan-200"
+                          className="w-full rounded-lg border border-[var(--mh-border)] px-3 py-2 focus:border-cyan-700 focus:outline-none focus:ring-2 focus:ring-cyan-200"
                           rows={4}
                           placeholder="Type your answer..."
                         />
@@ -153,34 +153,34 @@ const ManageFAQs = () => {
               </div>
             ))}
             {pendingQuestions.length === 0 && (
-              <p className="py-4 text-center text-slate-500">No pending questions</p>
+              <p className="py-4 text-center text-[var(--mh-text-muted)]">No pending questions</p>
             )}
           </div>
         </div>
 
         {/* Answered Questions */}
         <div className="surface-card p-5">
-          <h3 className="mb-4 flex items-center text-lg font-semibold text-slate-900">
+          <h3 className="mb-4 flex items-center text-lg font-semibold text-[var(--mh-text)]">
             <CheckCircle className="mr-2 h-5 w-5 text-emerald-600" />
             Answered Questions ({answeredQuestions.length})
           </h3>
           <div className="space-y-4">
             {answeredQuestions.map((question) => (
-              <div key={question.id} className="rounded-xl border border-slate-200 bg-slate-50 p-4">
+              <div key={question.id} className="rounded-xl border border-[var(--mh-border)] bg-[var(--mh-surface-soft)] p-4">
                 <div className="flex items-start space-x-4">
                   <div className="flex-shrink-0">
                     <MessageCircle className="h-6 w-6 text-emerald-600" />
                   </div>
                   <div className="flex-1">
-                    <p className="font-medium text-slate-900">
+                    <p className="font-medium text-[var(--mh-text)]">
                       User #{question.user_id.slice(0, 8)}
                     </p>
-                    <p className="mt-1 text-slate-600">{question.question}</p>
+                    <p className="mt-1 text-[var(--mh-text-muted)]">{question.question}</p>
                     <div className="mt-4 rounded-lg border border-emerald-100 bg-emerald-50 p-4">
                       <p className="font-medium text-emerald-900">Answer:</p>
                       <p className="mt-1 text-emerald-800">{question.answer}</p>
                     </div>
-                    <p className="mt-2 text-xs text-slate-400">
+                    <p className="mt-2 text-xs text-[var(--mh-text-muted)]">
                       Asked on {new Date(question.created_at).toLocaleString()}
                     </p>
                   </div>
@@ -188,7 +188,7 @@ const ManageFAQs = () => {
               </div>
             ))}
             {answeredQuestions.length === 0 && (
-              <p className="py-4 text-center text-slate-500">No answered questions</p>
+              <p className="py-4 text-center text-[var(--mh-text-muted)]">No answered questions</p>
             )}
           </div>
         </div>
@@ -198,3 +198,4 @@ const ManageFAQs = () => {
 };
 
 export default ManageFAQs;
+
