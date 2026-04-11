@@ -1,6 +1,6 @@
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
-import { copyFileSync } from 'fs';
+import { copyFileSync, existsSync } from 'fs';
 import Pages from 'vite-plugin-pages'
 import Sitemap from 'vite-plugin-sitemap'
 
@@ -10,7 +10,10 @@ export default defineConfig({
     {
       name: 'copy-redirects',
       closeBundle() {
-        copyFileSync('public/_redirects', 'dist/_redirects');
+        // Only copy _redirects if it exists (for Netlify deployments)
+        if (existsSync('public/_redirects')) {
+          copyFileSync('public/_redirects', 'dist/_redirects');
+        }
       },
     },
     Pages(),
