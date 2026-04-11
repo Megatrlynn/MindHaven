@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+﻿import React, { useState, useEffect, useRef } from 'react';
 import { MessageSquare, PhoneCall, Bot, Loader2, UserPlus, Clock, Send, ArrowLeft, XCircle, CheckCircle, Check, ShieldCheck, Sparkles, MessageSquareText } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { getAIResponse } from '../lib/ai';
@@ -121,7 +121,7 @@ const Chat: React.FC = () => {
           }
         }
       } catch (err) {
-        console.error("❌ Error fetching doctors:", err);
+        console.error("âŒ Error fetching doctors:", err);
       }
     };
   
@@ -217,8 +217,8 @@ const Chat: React.FC = () => {
         return;
       }
 
-      console.log("📞 Incoming call for patient:", targetPatientId);
-      console.log("📞 Incoming call from:", from, "Offer received:", offer);
+      console.log("ðŸ“ž Incoming call for patient:", targetPatientId);
+      console.log("ðŸ“ž Incoming call from:", from, "Offer received:", offer);
 
       setStoredOffer(offer);
       setCallerSocketId(from);
@@ -226,7 +226,7 @@ const Chat: React.FC = () => {
     };
 
     const handleCallDeclined = () => {
-      console.log("📴 Call declined by therapist");
+      console.log("ðŸ“´ Call declined by therapist");
       setIncomingCall(false);
       setIsCallActive(false);
       setIsConnected(false);
@@ -235,7 +235,7 @@ const Chat: React.FC = () => {
     };
 
     const handleEndCall = () => {
-      console.log("🔚 Call ended by therapist");
+      console.log("ðŸ”š Call ended by therapist");
       setIsCallActive(false);
       setIsConnected(false);
       setCallEndMessage("Therapist ended the call");
@@ -441,7 +441,7 @@ const Chat: React.FC = () => {
     }
   
     try {
-      const aiResponse = await getAIResponse(message, user.id); // ✅ PASS user.id here
+      const aiResponse = await getAIResponse(message, user.id); // âœ… PASS user.id here
   
       if (!aiResponse || aiResponse.startsWith("Error")) {
         throw new Error("AI response failed. Please try again.");
@@ -455,7 +455,7 @@ const Chat: React.FC = () => {
   
       if (error) throw error;
       
-      // ✅ Immediately add to UI state without waiting for realtime
+      // âœ… Immediately add to UI state without waiting for realtime
       if (data) {
         setChatHistory((prev) => [...prev, data as ChatMessage]);
       }
@@ -475,11 +475,11 @@ const Chat: React.FC = () => {
 
   useEffect(() => {
     if (!patientId || patientId.length === 0) {
-      console.log("⏳ Waiting for patient IDs to be fetched...");
+      console.log("â³ Waiting for patient IDs to be fetched...");
       return;
     }
   
-    console.log("✅ Using patient IDs:", patientId);
+    console.log("âœ… Using patient IDs:", patientId);
   
     const fetchConnectionData = async () => {
       try {
@@ -491,7 +491,7 @@ const Chat: React.FC = () => {
         if (error) throw error;
   
         if (data?.length) {
-          console.log("🔄 Fetched connection data:", data);
+          console.log("ðŸ”„ Fetched connection data:", data);
   
           const connectedDoctors = data
             .filter((entry) => entry.status === "connected")
@@ -501,7 +501,7 @@ const Chat: React.FC = () => {
             setDoctorId(connectedDoctors);
             setIsPatientConnected(true); 
             isPatientConnectedRef.current = true;
-            console.log("✅ Patient connected to doctors:", connectedDoctors);
+            console.log("âœ… Patient connected to doctors:", connectedDoctors);
           } else {
             setIsPatientConnected(false); 
             isPatientConnectedRef.current = false;
@@ -509,21 +509,21 @@ const Chat: React.FC = () => {
   
         }
       } catch (err) {
-        console.error("❌ Error fetching connection data:", err);
+        console.error("âŒ Error fetching connection data:", err);
       }
     };
   
     fetchConnectionData();
   
     socket.on("call-answered", async (answer) => {
-      console.log("✅ Call connected! Setting remote description...");
+      console.log("âœ… Call connected! Setting remote description...");
       if (peerConnectionRef.current) {
         await peerConnectionRef.current.setRemoteDescription(answer);
         setIsConnected(true);
         setIsCallActive(true);
         setCallStatus("Connected");
       } else {
-        console.error("❌ PeerConnection is missing when setting remote description!");
+        console.error("âŒ PeerConnection is missing when setting remote description!");
       }
     });
   
@@ -532,11 +532,11 @@ const Chat: React.FC = () => {
         if (peerConnectionRef.current) {
           await peerConnectionRef.current.addIceCandidate(new RTCIceCandidate(candidate));
         } else {
-          console.warn("⚠️ Storing ICE candidate as PeerConnection is not ready.");
+          console.warn("âš ï¸ Storing ICE candidate as PeerConnection is not ready.");
           pendingIceCandidatesRef.current.push(candidate);
         }
       } catch (error) {
-        console.error("❌ Error adding ICE candidate:", error);
+        console.error("âŒ Error adding ICE candidate:", error);
       }
     });
   
@@ -555,20 +555,20 @@ const Chat: React.FC = () => {
     if (remoteAudioRef.current && remoteStream) {
       remoteAudioRef.current.srcObject = remoteStream;
       remoteAudioRef.current.play().catch((error) => {
-        console.error("🔇 Autoplay blocked, retrying...", error);
+        console.error("ðŸ”‡ Autoplay blocked, retrying...", error);
         setTimeout(() => remoteAudioRef.current?.play(), 500);
       });
     }
   }, [remoteStream]);
 
   const acceptCall = async () => {
-    console.log("🔍 Checking call data before accepting...");
+    console.log("ðŸ” Checking call data before accepting...");
     if (!incomingCall || !storedOffer || !callerSocketId) {
-      console.error("❌ No incoming call detected or missing required data.");
+      console.error("âŒ No incoming call detected or missing required data.");
       return;
     }
   
-    console.log(`✅ Accepting call from: ${callerSocketId}`);
+    console.log(`âœ… Accepting call from: ${callerSocketId}`);
     setIncomingCall(false);
     setCallStatus("Connecting...");
   
@@ -591,30 +591,30 @@ const Chat: React.FC = () => {
   
       peerConnection.onicecandidate = (event) => {
         if (event.candidate) {
-          console.log("📡 Sending ICE candidate:", event.candidate);
+          console.log("ðŸ“¡ Sending ICE candidate:", event.candidate);
           socket.emit("ice-candidate", {
             targetSocketId: callerSocketId,
             candidate: event.candidate 
           });
         } else {
-          console.log("⚠️ ICE candidate gathering complete");
+          console.log("âš ï¸ ICE candidate gathering complete");
         }
       };
   
       peerConnection.oniceconnectionstatechange = () => {
-        console.log("🔄 ICE Connection State:", peerConnection.iceConnectionState);
+        console.log("ðŸ”„ ICE Connection State:", peerConnection.iceConnectionState);
         if (peerConnection.iceConnectionState === "connected") {
-          console.log("✅ ICE connection established - Call is live!");
+          console.log("âœ… ICE connection established - Call is live!");
           setCallStatus("Connected");
         }
         if (peerConnection.iceConnectionState === "failed") {
-          console.error("❌ ICE connection failed");
+          console.error("âŒ ICE connection failed");
           setCallStatus("Call Failed - ICE Error");
         }
       };
   
       peerConnection.ontrack = (event) => {
-        console.log("🔊 Received remote track:", event.streams[0]);
+        console.log("ðŸ”Š Received remote track:", event.streams[0]);
         setRemoteStream(event.streams[0]);
       
         setTimeout(() => {
@@ -623,19 +623,19 @@ const Chat: React.FC = () => {
       
             remoteAudioRef.current.play()
               .then(() => {
-                console.log("✅ Audio playback started successfully");
+                console.log("âœ… Audio playback started successfully");
               })
               .catch((error) => {
-                console.error("🔇 Autoplay blocked. Waiting for user interaction...", error);
+                console.error("ðŸ”‡ Autoplay blocked. Waiting for user interaction...", error);
       
                 document.addEventListener("click", () => {
                   if (remoteAudioRef.current) {
-                    remoteAudioRef.current.play().catch(err => console.error("🔇 Still blocked", err));
+                    remoteAudioRef.current.play().catch(err => console.error("ðŸ”‡ Still blocked", err));
                   }
                 }, { once: true });
               });
           } else {
-            console.warn("⚠️ remoteAudioRef not available yet!");
+            console.warn("âš ï¸ remoteAudioRef not available yet!");
           }
         }, 500); 
       };      
@@ -650,7 +650,7 @@ const Chat: React.FC = () => {
       setIsCallActive(true);
       setCallStatus("Connected");
     } catch (error) {
-      console.error("❌ Error accepting call:", error);
+      console.error("âŒ Error accepting call:", error);
       setCallStatus("Call Failed");
       setIsCallActive(false);
       setIsConnected(false);
@@ -658,7 +658,7 @@ const Chat: React.FC = () => {
   };  
   
   const declineCall = () => {
-    console.log("📴 Declining call...");
+    console.log("ðŸ“´ Declining call...");
     setIncomingCall(false);
     setIsConnected(false);
     setIsCallActive(false);
@@ -668,7 +668,7 @@ const Chat: React.FC = () => {
   };
   
   const endCall = () => {
-    console.log("🔚 Ending call...");
+    console.log("ðŸ”š Ending call...");
     setIsConnected(false);
     setIsCallActive(false);
     if (peerConnectionRef.current) {
@@ -723,8 +723,8 @@ const Chat: React.FC = () => {
             <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-cyan-100 text-cyan-800 dark:bg-cyan-900 dark:text-cyan-200">
               <PhoneCall className="h-6 w-6" />
             </div>
-            <h2 className="mt-4 text-xl font-bold text-slate-900 dark:text-slate-100">Incoming call</h2>
-            <p className="mt-2 text-sm text-slate-600 dark:text-slate-300">{doctorName ? `${doctorName} is calling...` : 'Your therapist is calling...'}</p>
+            <h2 className="mt-4 text-xl font-bold text-[var(--mh-text)]">Incoming call</h2>
+            <p className="mt-2 text-sm text-[var(--mh-text-muted)]">{doctorName ? `${doctorName} is calling...` : 'Your therapist is calling...'}</p>
 
             <div className="mt-6 flex gap-3">
               <button
@@ -752,13 +752,13 @@ const Chat: React.FC = () => {
             <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-cyan-100 text-cyan-800 dark:bg-cyan-900 dark:text-cyan-200">
               <PhoneCall className="h-6 w-6" />
             </div>
-            <h2 className="mt-4 text-xl font-bold text-slate-900 dark:text-slate-100">{callStatus}</h2>
+            <h2 className="mt-4 text-xl font-bold text-[var(--mh-text)]">{callStatus}</h2>
 
             <div className="mt-4">
               {remoteStream ? (
                 <audio ref={remoteAudioRef} autoPlay playsInline controls className="w-full rounded-lg" />
               ) : (
-                <p className="text-sm italic text-slate-500 dark:text-slate-400">Waiting for audio...</p>
+                <p className="text-sm italic text-[var(--mh-text-muted)]">Waiting for audio...</p>
               )}
             </div>
 
@@ -774,25 +774,25 @@ const Chat: React.FC = () => {
       )}
 
       <div className="surface-card overflow-hidden">
-        <div className="border-b border-slate-200 bg-slate-50 px-6 py-6 md:px-8 dark:border-slate-700 dark:bg-slate-900">
+        <div className="border-b border-[var(--mh-border)] bg-[var(--mh-surface-soft)] px-6 py-6 md:px-8">
           <div className="flex flex-wrap items-start justify-between gap-4">
             <div>
               <p className="inline-flex items-center gap-2 rounded-full border border-cyan-100 bg-cyan-50 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-cyan-800 dark:border-cyan-900 dark:bg-cyan-950 dark:text-cyan-200">
                 <ShieldCheck className="h-3.5 w-3.5" />
                 Patient workspace
               </p>
-              <h1 className="mt-3 text-3xl font-bold text-slate-900 dark:text-slate-100">Support chat</h1>
-              <p className="mt-2 max-w-2xl text-sm text-slate-600 dark:text-slate-300">
+              <h1 className="mt-3 text-3xl font-bold text-[var(--mh-text)]">Support chat</h1>
+              <p className="mt-2 max-w-2xl text-sm text-[var(--mh-text-muted)]">
                 Chat with the AI assistant or continue a secure conversation with your connected therapist.
               </p>
             </div>
 
             <div className="flex flex-wrap gap-2">
-              <span className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-600 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-300">
+              <span className="inline-flex items-center gap-2 rounded-full border border-[var(--mh-border)] bg-[var(--mh-surface)] px-3 py-2 text-xs font-semibold text-[var(--mh-text-muted)]">
                 <Sparkles className="h-3.5 w-3.5 text-cyan-700" />
                 AI support available
               </span>
-              <span className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-600 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-300">
+              <span className="inline-flex items-center gap-2 rounded-full border border-[var(--mh-border)] bg-[var(--mh-surface)] px-3 py-2 text-xs font-semibold text-[var(--mh-text-muted)]">
                 <MessageSquareText className="h-3.5 w-3.5 text-cyan-700" />
                 {connections.length} therapist links
               </span>
@@ -800,13 +800,13 @@ const Chat: React.FC = () => {
           </div>
         </div>
 
-        <div className="border-b border-slate-200 bg-white px-6 py-4 md:px-8 dark:border-slate-700 dark:bg-slate-950">
+        <div className="border-b border-[var(--mh-border)] bg-[var(--mh-surface)] px-6 py-4 md:px-8">
           <div className="flex flex-wrap gap-3">
             <button
               className={`inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-semibold transition-colors ${
                 activeTab === 'ai'
                   ? 'bg-cyan-100 text-cyan-900'
-                  : 'border border-slate-200 text-slate-600 hover:border-cyan-200 hover:bg-cyan-50 hover:text-cyan-900 dark:border-slate-700 dark:text-slate-300 dark:hover:border-cyan-700 dark:hover:bg-cyan-950 dark:hover:text-cyan-200'
+                  : 'border border-[var(--mh-border)] text-[var(--mh-text-muted)] hover:border-cyan-200 hover:bg-cyan-50 hover:text-cyan-900 dark:hover:border-cyan-700 dark:hover:bg-cyan-950 dark:hover:text-cyan-200'
               }`}
               onClick={() => {
                 setActiveTab('ai');
@@ -820,7 +820,7 @@ const Chat: React.FC = () => {
               className={`inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-semibold transition-colors ${
                 activeTab === 'doctor'
                   ? 'bg-cyan-100 text-cyan-900'
-                  : 'border border-slate-200 text-slate-600 hover:border-cyan-200 hover:bg-cyan-50 hover:text-cyan-900 dark:border-slate-700 dark:text-slate-300 dark:hover:border-cyan-700 dark:hover:bg-cyan-950 dark:hover:text-cyan-200'
+                  : 'border border-[var(--mh-border)] text-[var(--mh-text-muted)] hover:border-cyan-200 hover:bg-cyan-50 hover:text-cyan-900 dark:hover:border-cyan-700 dark:hover:bg-cyan-950 dark:hover:text-cyan-200'
               }`}
               onClick={() => {
                 setActiveTab('doctor');
@@ -836,17 +836,17 @@ const Chat: React.FC = () => {
         <div className="px-4 py-6 md:px-6 lg:px-8">
           {activeTab === 'ai' ? (
             <div className="space-y-6">
-              <div className="rounded-3xl border border-slate-200 bg-slate-50 px-6 py-8 text-center dark:border-slate-700 dark:bg-slate-900">
+              <div className="rounded-3xl border border-[var(--mh-border)] bg-[var(--mh-surface-soft)] px-6 py-8 text-center">
                 <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-cyan-100 text-cyan-800 dark:bg-cyan-900 dark:text-cyan-200">
                   <Bot className="h-8 w-8" />
                 </div>
-                <h2 className="mt-4 text-2xl font-bold text-slate-900 dark:text-slate-100">AI therapy support</h2>
-                <p className="mx-auto mt-2 max-w-2xl text-sm text-slate-600 dark:text-slate-300">
+                <h2 className="mt-4 text-2xl font-bold text-[var(--mh-text)]">AI therapy support</h2>
+                <p className="mx-auto mt-2 max-w-2xl text-sm text-[var(--mh-text-muted)]">
                   Share your thoughts in a safe space. Receive supportive guidance and coping strategies.
                 </p>
               </div>
             
-              <div className="mx-auto max-h-[620px] max-w-4xl space-y-5 overflow-y-auto rounded-3xl border border-slate-200 bg-white p-5 shadow-sm md:p-6 dark:border-slate-700 dark:bg-slate-950">
+              <div className="mx-auto max-h-[620px] max-w-4xl space-y-5 overflow-y-auto rounded-3xl border border-[var(--mh-border)] bg-[var(--mh-surface)] p-5 shadow-sm md:p-6">
               {chatHistory.map((chat, index) => {
                 const nextChat = chatHistory[index + 1];
 
@@ -876,14 +876,14 @@ const Chat: React.FC = () => {
                     </div>
 
                     <div className="flex justify-start mt-2">
-                      <div className="max-w-[80%] rounded-2xl border border-slate-200 bg-slate-50 p-4 text-slate-800 shadow-sm dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200">
+                      <div className="max-w-[80%] rounded-2xl border border-[var(--mh-border)] bg-[var(--mh-surface-soft)] p-4 text-[var(--mh-text)] shadow-sm">
                         <p className="text-xs font-semibold uppercase tracking-wide text-cyan-700">AI Support</p>
                         <p className="mt-1 whitespace-pre-line text-sm leading-6">{chat.response}</p>
                       </div>
                     </div>
 
                     {showTimestamp && (
-                      <p className="text-center text-xs text-slate-400 dark:text-slate-500">{formattedDate}</p>
+                      <p className="text-center text-xs text-[var(--mh-text-muted)]">{formattedDate}</p>
                     )}
                   </div>
                 )}
@@ -892,10 +892,10 @@ const Chat: React.FC = () => {
               </div>
             
               <div className="mx-auto max-w-4xl">
-                <div className="surface-card border-slate-200 p-4">
+                <div className="surface-card border-[var(--mh-border)] p-4">
                   <div className="flex flex-col gap-3 lg:flex-row lg:items-end">
                   <textarea
-                    className="min-h-[96px] flex-1 rounded-2xl border border-slate-300 bg-white px-4 py-3 text-slate-900 shadow-sm placeholder:text-slate-500 focus:border-cyan-700 focus:outline-none focus:ring-2 focus:ring-cyan-200 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 dark:placeholder:text-slate-400 dark:focus:border-cyan-500 dark:focus:ring-cyan-900"
+                    className="min-h-[96px] flex-1 rounded-2xl border border-[var(--mh-border)] bg-[var(--mh-surface)] px-4 py-3 text-[var(--mh-text)] shadow-sm placeholder:text-[var(--mh-text-muted)] focus:border-cyan-700 focus:outline-none focus:ring-2 focus:ring-cyan-200 dark:placeholder:text-[var(--mh-text-muted)] dark:focus:border-cyan-500 dark:focus:ring-cyan-900"
                     placeholder="Type your message..."
                     rows={3}
                     value={message}
@@ -926,17 +926,17 @@ const Chat: React.FC = () => {
               <div className="flex items-center gap-4">
                 <button
                   onClick={() => setActiveDoctorChat(null)}
-                  className="inline-flex h-11 w-11 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-600 transition hover:border-cyan-200 hover:bg-cyan-50 hover:text-cyan-900 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-300 dark:hover:border-cyan-700 dark:hover:bg-cyan-950 dark:hover:text-cyan-200"
+                  className="inline-flex h-11 w-11 items-center justify-center rounded-full border border-[var(--mh-border)] bg-[var(--mh-surface)] text-[var(--mh-text-muted)] transition hover:border-cyan-200 hover:bg-cyan-50 hover:text-cyan-900 dark:hover:border-cyan-700 dark:hover:bg-cyan-950 dark:hover:text-cyan-200"
                 >
                   <ArrowLeft className="h-5 w-5" />
                 </button>
                 <div>
-                  <p className="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">Therapist chat</p>
-                  <h2 className="mt-1 text-2xl font-bold text-slate-900 dark:text-slate-100">Dr. {activeDoctorChat?.doctorName}</h2>
+                  <p className="text-xs font-semibold uppercase tracking-wide text-[var(--mh-text-muted)]">Therapist chat</p>
+                  <h2 className="mt-1 text-2xl font-bold text-[var(--mh-text)]">Dr. {activeDoctorChat?.doctorName}</h2>
                 </div>
               </div>
 
-              <div className="mx-auto max-h-[620px] max-w-4xl space-y-4 overflow-y-auto rounded-3xl border border-slate-200 bg-white p-5 shadow-sm md:p-6 dark:border-slate-700 dark:bg-slate-950">
+              <div className="mx-auto max-h-[620px] max-w-4xl space-y-4 overflow-y-auto rounded-3xl border border-[var(--mh-border)] bg-[var(--mh-surface)] p-5 shadow-sm md:p-6">
                 {doctorChatLoading ? (
                   <div className="flex justify-center py-6">
                     <Loader2 className="h-6 w-6 animate-spin text-cyan-700" />
@@ -966,14 +966,14 @@ const Chat: React.FC = () => {
                       <div key={msg.id} className={`flex flex-col ${isCurrentUser ? 'items-end' : 'items-start'} mb-1`}>
                         <div
                           className={`max-w-[78%] rounded-2xl p-4 shadow-sm ${
-                            isCurrentUser ? 'bg-cyan-700 text-white' : 'border border-slate-200 bg-slate-50 text-slate-800 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200'
+                            isCurrentUser ? 'bg-cyan-700 text-white' : 'border border-[var(--mh-border)] bg-[var(--mh-surface-soft)] text-[var(--mh-text)]'
                           }`}
                         >
                           <p className="text-sm leading-6">{msg.message}</p>
                         </div>
                   
                         {showTimestamp && (
-                          <p className="mt-1 text-xs text-slate-400 dark:text-slate-500">{formattedDate}</p>
+                          <p className="mt-1 text-xs text-[var(--mh-text-muted)]">{formattedDate}</p>
                         )}
                       </div>
                     );
@@ -982,14 +982,14 @@ const Chat: React.FC = () => {
                 <div ref={chatEndRef} />
               </div>
 
-              <div className="surface-card border-slate-200 p-4">
+              <div className="surface-card border-[var(--mh-border)] p-4">
                 <div className="flex flex-col gap-3 lg:flex-row lg:items-end">
                   <input
                     type="text"
                     value={message}
                     onChange={(e) => setMessage(e.target.value)}
                     placeholder="Type your message..."
-                    className="flex-1 rounded-2xl border border-slate-300 bg-white px-4 py-3 text-slate-900 shadow-sm placeholder:text-slate-500 focus:border-cyan-700 focus:outline-none focus:ring-2 focus:ring-cyan-200 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 dark:placeholder:text-slate-400 dark:focus:border-cyan-500 dark:focus:ring-cyan-900"
+                    className="flex-1 rounded-2xl border border-[var(--mh-border)] bg-[var(--mh-surface)] px-4 py-3 text-[var(--mh-text)] shadow-sm placeholder:text-[var(--mh-text-muted)] focus:border-cyan-700 focus:outline-none focus:ring-2 focus:ring-cyan-200 dark:placeholder:text-[var(--mh-text-muted)] dark:focus:border-cyan-500 dark:focus:ring-cyan-900"
                     onKeyPress={(e) => {
                       if (e.key === 'Enter' && !e.shiftKey) {
                         e.preventDefault();
@@ -1009,12 +1009,12 @@ const Chat: React.FC = () => {
             </div>
           ) : (
             <div className="space-y-6">
-              <div className="rounded-3xl border border-slate-200 bg-slate-50 px-6 py-8 text-center dark:border-slate-700 dark:bg-slate-900">
+              <div className="rounded-3xl border border-[var(--mh-border)] bg-[var(--mh-surface-soft)] px-6 py-8 text-center">
                 <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-cyan-100 text-cyan-800 dark:bg-cyan-900 dark:text-cyan-200">
                   <MessageSquare className="h-8 w-8" />
                 </div>
-                <h2 className="mt-4 text-2xl font-bold text-slate-900 dark:text-slate-100">Connect with a therapist</h2>
-                <p className="mx-auto mt-2 max-w-2xl text-sm text-slate-600 dark:text-slate-300">
+                <h2 className="mt-4 text-2xl font-bold text-[var(--mh-text)]">Connect with a therapist</h2>
+                <p className="mx-auto mt-2 max-w-2xl text-sm text-[var(--mh-text-muted)]">
                   Choose a therapist to start your support journey and open a secure chat when the connection is approved.
                 </p>
               </div>
@@ -1034,13 +1034,13 @@ const Chat: React.FC = () => {
                           className="h-16 w-16 rounded-full object-cover"
                         />
                         <div className="min-w-0 flex-1">
-                          <h3 className="truncate text-lg font-semibold text-slate-900 dark:text-slate-100">{doctor.name}</h3>
-                          <p className="truncate text-sm text-slate-600 dark:text-slate-300">{doctor.profession}</p>
+                          <h3 className="truncate text-lg font-semibold text-[var(--mh-text)]">{doctor.name}</h3>
+                          <p className="truncate text-sm text-[var(--mh-text-muted)]">{doctor.profession}</p>
                         </div>
                       </div>
-                      <div className="mt-4 rounded-2xl border border-slate-200 bg-slate-50 p-4 dark:border-slate-700 dark:bg-slate-900">
-                        <p className="text-sm text-slate-600 dark:text-slate-300">
-                          <span className="font-semibold text-slate-900 dark:text-slate-100">Phone:</span> {doctor.phone || 'Not available'}
+                      <div className="mt-4 rounded-2xl border border-[var(--mh-border)] bg-[var(--mh-surface-soft)] p-4">
+                        <p className="text-sm text-[var(--mh-text-muted)]">
+                          <span className="font-semibold text-[var(--mh-text)]">Phone:</span> {doctor.phone || 'Not available'}
                         </p>
                       </div>
                       {isPending ? (
