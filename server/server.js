@@ -15,17 +15,24 @@ const defaultAllowedOrigins = [
   "http://localhost:5173",
   "http://127.0.0.1:5173",
   "https://mind-haven.netlify.app",
+  "https://mindhaven.titans.studio",
+  "https://www.mindhaven.titans.studio",
 ];
+
+const normalizeOrigin = (origin) => String(origin || "").trim().replace(/\/$/, "");
 
 const envAllowedOrigins = (process.env.CORS_ORIGINS || "")
   .split(",")
-  .map((origin) => origin.trim())
+  .map((origin) => normalizeOrigin(origin))
   .filter(Boolean);
 
-const allowedOrigins = new Set([...defaultAllowedOrigins, ...envAllowedOrigins]);
+const allowedOrigins = new Set([
+  ...defaultAllowedOrigins.map((origin) => normalizeOrigin(origin)),
+  ...envAllowedOrigins,
+]);
 
 app.use((req, res, next) => {
-  const origin = req.headers.origin;
+  const origin = normalizeOrigin(req.headers.origin);
 
   if (origin && allowedOrigins.has(origin)) {
     res.setHeader("Access-Control-Allow-Origin", origin);
@@ -49,7 +56,15 @@ const server = createServer(app);
 const socketCorsOrigins = Array.from(allowedOrigins);
 const io = new Server(server, {
   cors: {
-    origin: socketCorsOrigins,
+    origin: (origin, callback) => {
+      const normalizedOrigin = normalizeOrigin(origin);
+      if (!origin || allowedOrigins.has(normalizedOrigin)) {
+        callback(null, true);
+        return;
+      }
+
+      callback(new Error(`Origin not allowed by CORS: ${origin}`));
+    },
     methods: ["GET", "POST"],
     credentials: true,
   },
