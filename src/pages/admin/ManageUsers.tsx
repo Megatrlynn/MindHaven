@@ -162,7 +162,7 @@ const ManageUsers = () => {
       </div>
 
       <div className="surface-card overflow-x-auto">
-        <table className="min-w-full divide-y divide-slate-200">
+        <table className="min-w-full divide-y divide-[var(--mh-border)]">
           <thead className="bg-[var(--mh-surface-soft)]">
             <tr>
               <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-[var(--mh-text-muted)]">
@@ -179,7 +179,7 @@ const ManageUsers = () => {
               </th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-slate-200 bg-[var(--mh-surface)]">
+          <tbody className="divide-y divide-[var(--mh-border)] bg-[var(--mh-surface)]">
             {filteredUsers.map((user) => (
               <tr key={user.id}>
                 <td className="whitespace-nowrap px-6 py-4 text-sm text-[var(--mh-text-muted)]">
@@ -250,7 +250,7 @@ const ManageUsers = () => {
                   type="text"
                   value={formData.username}
                   onChange={(e) => setFormData({ ...formData, username: e.target.value })}
-                  className="w-full rounded-lg border border-[var(--mh-border)] px-3 py-2 focus:border-cyan-700 focus:outline-none focus:ring-2 focus:ring-cyan-200"
+                  className="w-full rounded-lg border border-[var(--mh-border)] bg-[var(--mh-surface)] px-3 py-2 text-[var(--mh-text)] placeholder:text-[var(--mh-text-muted)] focus:border-cyan-700 focus:outline-none focus:ring-2 focus:ring-cyan-200"
                 />
               </div>
 
@@ -262,7 +262,7 @@ const ManageUsers = () => {
                   type="text"
                   value={formData.name}
                   onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                  className="w-full rounded-lg border border-[var(--mh-border)] px-3 py-2 focus:border-cyan-700 focus:outline-none focus:ring-2 focus:ring-cyan-200"
+                  className="w-full rounded-lg border border-[var(--mh-border)] bg-[var(--mh-surface)] px-3 py-2 text-[var(--mh-text)] placeholder:text-[var(--mh-text-muted)] focus:border-cyan-700 focus:outline-none focus:ring-2 focus:ring-cyan-200"
                 />
               </div>
 
@@ -274,7 +274,7 @@ const ManageUsers = () => {
                   type="date"
                   value={formData.date_of_birth}
                   onChange={(e) => setFormData({ ...formData, date_of_birth: e.target.value })}
-                  className="w-full rounded-lg border border-[var(--mh-border)] px-3 py-2 focus:border-cyan-700 focus:outline-none focus:ring-2 focus:ring-cyan-200"
+                  className="w-full rounded-lg border border-[var(--mh-border)] bg-[var(--mh-surface)] px-3 py-2 text-[var(--mh-text)] focus:border-cyan-700 focus:outline-none focus:ring-2 focus:ring-cyan-200"
                 />
               </div>
 

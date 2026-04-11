@@ -284,7 +284,7 @@ const ManageArticles = () => {
                   required
                   value={formValues.title}
                   onChange={(e) => setFormValues({ ...formValues, title: e.target.value })}
-                  className="w-full rounded-lg border border-[var(--mh-border)] px-3 py-2 text-sm focus:border-cyan-700 focus:outline-none focus:ring-2 focus:ring-cyan-200"
+                  className="w-full rounded-lg border border-[var(--mh-border)] bg-[var(--mh-surface)] px-3 py-2 text-sm text-[var(--mh-text)] placeholder:text-[var(--mh-text-muted)] focus:border-cyan-700 focus:outline-none focus:ring-2 focus:ring-cyan-200"
                 />
               </div>
 
@@ -294,7 +294,7 @@ const ManageArticles = () => {
                   required
                   value={formValues.category}
                   onChange={(e) => setFormValues({ ...formValues, category: e.target.value })}
-                  className="w-full rounded-lg border border-[var(--mh-border)] px-3 py-2 text-sm focus:border-cyan-700 focus:outline-none focus:ring-2 focus:ring-cyan-200"
+                  className="w-full rounded-lg border border-[var(--mh-border)] bg-[var(--mh-surface)] px-3 py-2 text-sm text-[var(--mh-text)] focus:border-cyan-700 focus:outline-none focus:ring-2 focus:ring-cyan-200"
                 >
                   <option value="">Select category</option>
                   {categories.map((category) => (
@@ -312,7 +312,7 @@ const ManageArticles = () => {
                   required
                   value={formValues.excerpt}
                   onChange={(e) => setFormValues({ ...formValues, excerpt: e.target.value })}
-                  className="w-full rounded-lg border border-[var(--mh-border)] px-3 py-2 text-sm focus:border-cyan-700 focus:outline-none focus:ring-2 focus:ring-cyan-200"
+                  className="w-full rounded-lg border border-[var(--mh-border)] bg-[var(--mh-surface)] px-3 py-2 text-sm text-[var(--mh-text)] placeholder:text-[var(--mh-text-muted)] focus:border-cyan-700 focus:outline-none focus:ring-2 focus:ring-cyan-200"
                 />
               </div>
 
@@ -322,7 +322,7 @@ const ManageArticles = () => {
                   type="url"
                   value={formValues.image_url}
                   onChange={(e) => setFormValues({ ...formValues, image_url: e.target.value })}
-                  className="w-full rounded-lg border border-[var(--mh-border)] px-3 py-2 text-sm focus:border-cyan-700 focus:outline-none focus:ring-2 focus:ring-cyan-200"
+                  className="w-full rounded-lg border border-[var(--mh-border)] bg-[var(--mh-surface)] px-3 py-2 text-sm text-[var(--mh-text)] placeholder:text-[var(--mh-text-muted)] focus:border-cyan-700 focus:outline-none focus:ring-2 focus:ring-cyan-200"
                   placeholder="https://example.com/image.jpg"
                 />
               </div>
@@ -334,7 +334,7 @@ const ManageArticles = () => {
                   required
                   value={formValues.content}
                   onChange={(e) => setFormValues({ ...formValues, content: e.target.value })}
-                  className="w-full rounded-lg border border-[var(--mh-border)] px-3 py-2 text-sm focus:border-cyan-700 focus:outline-none focus:ring-2 focus:ring-cyan-200"
+                  className="w-full rounded-lg border border-[var(--mh-border)] bg-[var(--mh-surface)] px-3 py-2 text-sm text-[var(--mh-text)] placeholder:text-[var(--mh-text-muted)] focus:border-cyan-700 focus:outline-none focus:ring-2 focus:ring-cyan-200"
                 />
               </div>
 

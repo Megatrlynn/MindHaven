@@ -109,7 +109,7 @@ const ManageFAQs = () => {
                         <textarea
                           value={answer}
                           onChange={(e) => setAnswer(e.target.value)}
-                          className="w-full rounded-lg border border-[var(--mh-border)] px-3 py-2 focus:border-cyan-700 focus:outline-none focus:ring-2 focus:ring-cyan-200"
+                          className="w-full rounded-lg border border-[var(--mh-border)] bg-[var(--mh-surface)] px-3 py-2 text-[var(--mh-text)] placeholder:text-[var(--mh-text-muted)] focus:border-cyan-700 focus:outline-none focus:ring-2 focus:ring-cyan-200"
                           rows={4}
                           placeholder="Type your answer..."
                         />
@@ -176,9 +176,9 @@ const ManageFAQs = () => {
                       User #{question.user_id.slice(0, 8)}
                     </p>
                     <p className="mt-1 text-[var(--mh-text-muted)]">{question.question}</p>
-                    <div className="mt-4 rounded-lg border border-emerald-100 bg-emerald-50 p-4">
-                      <p className="font-medium text-emerald-900">Answer:</p>
-                      <p className="mt-1 text-emerald-800">{question.answer}</p>
+                    <div className="mt-4 rounded-lg border border-emerald-100 bg-emerald-50 p-4 dark:border-emerald-800 dark:bg-emerald-950">
+                      <p className="font-medium text-emerald-900 dark:text-emerald-200">Answer:</p>
+                      <p className="mt-1 text-emerald-800 dark:text-emerald-300">{question.answer}</p>
                     </div>
                     <p className="mt-2 text-xs text-[var(--mh-text-muted)]">
                       Asked on {new Date(question.created_at).toLocaleString()}

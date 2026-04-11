@@ -230,7 +230,7 @@ const ManageDoctors = () => {
       </div>
 
       <div className="surface-card overflow-x-auto">
-        <table className="min-w-full divide-y divide-slate-200">
+        <table className="min-w-full divide-y divide-[var(--mh-border)]">
           <thead className="bg-[var(--mh-surface-soft)]">
             <tr>
               <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-[var(--mh-text-muted)]">
@@ -247,7 +247,7 @@ const ManageDoctors = () => {
               </th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-slate-200 bg-[var(--mh-surface)]">
+          <tbody className="divide-y divide-[var(--mh-border)] bg-[var(--mh-surface)]">
             {filteredDoctors.map((doctor) => (
               <tr key={doctor.id}>
                 <td className="px-6 py-4 whitespace-nowrap">
@@ -334,7 +334,7 @@ const ManageDoctors = () => {
                       onChange={(e) =>
                         setFormData({ ...formData, email: e.target.value })
                       }
-                      className="w-full rounded-lg border border-[var(--mh-border)] px-3 py-2 focus:border-cyan-700 focus:outline-none focus:ring-2 focus:ring-cyan-200"
+                      className="w-full rounded-lg border border-[var(--mh-border)] bg-[var(--mh-surface)] px-3 py-2 text-[var(--mh-text)] placeholder:text-[var(--mh-text-muted)] focus:border-cyan-700 focus:outline-none focus:ring-2 focus:ring-cyan-200"
                       placeholder="example@doc.com"
                     />
                   </div>
@@ -349,7 +349,7 @@ const ManageDoctors = () => {
                       onChange={(e) =>
                         setFormData({ ...formData, password: e.target.value })
                       }
-                      className="w-full rounded-lg border border-[var(--mh-border)] px-3 py-2 focus:border-cyan-700 focus:outline-none focus:ring-2 focus:ring-cyan-200"
+                      className="w-full rounded-lg border border-[var(--mh-border)] bg-[var(--mh-surface)] px-3 py-2 text-[var(--mh-text)] placeholder:text-[var(--mh-text-muted)] focus:border-cyan-700 focus:outline-none focus:ring-2 focus:ring-cyan-200"
                     />
                   </div>
                 </>
@@ -366,7 +366,7 @@ const ManageDoctors = () => {
                   onChange={(e) =>
                     setFormData({ ...formData, name: e.target.value })
                   }
-                  className="w-full rounded-lg border border-[var(--mh-border)] px-3 py-2 focus:border-cyan-700 focus:outline-none focus:ring-2 focus:ring-cyan-200"
+                  className="w-full rounded-lg border border-[var(--mh-border)] bg-[var(--mh-surface)] px-3 py-2 text-[var(--mh-text)] placeholder:text-[var(--mh-text-muted)] focus:border-cyan-700 focus:outline-none focus:ring-2 focus:ring-cyan-200"
                 />
               </div>
 
@@ -380,7 +380,7 @@ const ManageDoctors = () => {
                   onChange={(e) =>
                     setFormData({ ...formData, profession: e.target.value })
                   }
-                  className="w-full rounded-lg border border-[var(--mh-border)] px-3 py-2 focus:border-cyan-700 focus:outline-none focus:ring-2 focus:ring-cyan-200"
+                  className="w-full rounded-lg border border-[var(--mh-border)] bg-[var(--mh-surface)] px-3 py-2 text-[var(--mh-text)] focus:border-cyan-700 focus:outline-none focus:ring-2 focus:ring-cyan-200"
                 >
                   <option value="" disabled>
                     Select a profession
@@ -403,7 +403,7 @@ const ManageDoctors = () => {
                   onChange={(e) =>
                     setFormData({ ...formData, phone: e.target.value })
                   }
-                  className="w-full rounded-lg border border-[var(--mh-border)] px-3 py-2 focus:border-cyan-700 focus:outline-none focus:ring-2 focus:ring-cyan-200"
+                  className="w-full rounded-lg border border-[var(--mh-border)] bg-[var(--mh-surface)] px-3 py-2 text-[var(--mh-text)] placeholder:text-[var(--mh-text-muted)] focus:border-cyan-700 focus:outline-none focus:ring-2 focus:ring-cyan-200"
                 />
               </div>
 
@@ -417,7 +417,7 @@ const ManageDoctors = () => {
                   onChange={(e) =>
                     setFormData({ ...formData, profile_picture: e.target.value })
                   }
-                  className="w-full rounded-lg border border-[var(--mh-border)] px-3 py-2 focus:border-cyan-700 focus:outline-none focus:ring-2 focus:ring-cyan-200"
+                  className="w-full rounded-lg border border-[var(--mh-border)] bg-[var(--mh-surface)] px-3 py-2 text-[var(--mh-text)] placeholder:text-[var(--mh-text-muted)] focus:border-cyan-700 focus:outline-none focus:ring-2 focus:ring-cyan-200"
                   placeholder="https://example.com/image.jpg"
                 />
               </div>
