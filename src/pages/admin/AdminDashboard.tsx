@@ -1,6 +1,6 @@
 import React from 'react';
 import { Outlet, NavLink } from 'react-router-dom';
-import { Users, UserCog, MessageCircle, Home, FileText, ShieldCheck } from 'lucide-react';
+import { Users, UserCog, MessageCircle, Home, FileText, ShieldCheck, Mail } from 'lucide-react';
 
 const AdminDashboard = () => {
   const navItems = [
@@ -9,6 +9,7 @@ const AdminDashboard = () => {
     { to: '/admin/users', label: 'Users', icon: UserCog },
     { to: '/admin/faqs', label: 'FAQs', icon: MessageCircle },
     { to: '/admin/articles', label: 'Articles', icon: FileText },
+    { to: '/admin/contact-messages', label: 'Contact Messages', icon: Mail },
   ];
 
   return (

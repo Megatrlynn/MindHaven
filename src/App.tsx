@@ -11,12 +11,14 @@ import Profile from './pages/Profile';
 import PrivacyPolicy from "./pages/PrivacyPolicy";
 import TermsOfService from "./pages/TermsOfService";
 import ResetPassword from './pages/ResetPassword';
+import ContactUs from './pages/ContactUs';
 import Overview from "./pages/admin/Overview";
 import AdminDashboard from './pages/admin/AdminDashboard';
 import ManageDoctors from './pages/admin/ManageDoctors';
 import ManageUsers from './pages/admin/ManageUsers';
 import ManageFAQs from './pages/admin/ManageFAQs';
 import ManageArticles from './pages/admin/ManageArticles';
+import ManageContactMessages from './pages/admin/ManageContactMessages';
 import DoctorDashboard from './pages/doctor/DoctorDashboard';
 import DoctorChats from './pages/doctor/DoctorChats';
 import DoctorProfile from './pages/doctor/DoctorProfile';
@@ -46,7 +48,7 @@ function App() {
           <Route path="/privacy-policy" element={<PrivacyPolicy />} />
           <Route path="/terms-of-service" element={<TermsOfService />} />
           <Route path="/reset-password" element={<ResetPassword />} />
-          {/* <Route path="/contact" element={<ContactUs />} /> */}
+          <Route path="/contact" element={<ContactUs />} />
           <Route path="/admin" element={
             <ProtectedRoute requiredRole="admin">
               <AdminDashboard />
@@ -58,6 +60,7 @@ function App() {
             <Route path="users" element={<ManageUsers />} />
             <Route path="faqs" element={<ManageFAQs />} />
             <Route path='articles' element={<ManageArticles />} />
+            <Route path="contact-messages" element={<ManageContactMessages />} />
           </Route>
           <Route path="/doctor" element={
             <ProtectedRoute requiredRole="doctor">

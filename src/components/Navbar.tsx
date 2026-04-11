@@ -3,6 +3,7 @@ import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { Brain, LogIn, Menu, X, LogOut, LayoutDashboard, MessageSquareText, UserRound, Moon, Sun } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { getUserRole, isPatientProfileComplete } from '../lib/auth';
+import { useDarkMode } from '../hooks/useDarkMode';
 
 const Navbar = () => {
   const [userRole, setUserRole] = useState<string | null>(null);
@@ -12,14 +13,7 @@ const Navbar = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const [loading, setLoading] = useState(false);
-  const [theme, setTheme] = useState<'light' | 'dark'>(() => {
-    if (typeof window === 'undefined') return 'light';
-    const savedTheme = localStorage.getItem('mindhaven-theme');
-    if (savedTheme === 'light' || savedTheme === 'dark') {
-      return savedTheme;
-    }
-    return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
-  });
+  const { isDark, toggleDarkMode } = useDarkMode();
 
   const handleClick = async () => {
     setLoading(true);
@@ -48,12 +42,6 @@ const Navbar = () => {
       window.removeEventListener('patient-profile-updated', handleProfileUpdate);
     };
   }, []);
-
-  useEffect(() => {
-    const root = document.documentElement;
-    root.classList.toggle('dark', theme === 'dark');
-    localStorage.setItem('mindhaven-theme', theme);
-  }, [theme]);
 
   const checkUserRole = async () => {
     setIsLoading(true);
@@ -100,7 +88,6 @@ const Navbar = () => {
 
   const hideButton = location.pathname === "/login" || location.pathname === "/patient-login";
   const hideSignInButton = !userRole && location.pathname === "/chat";
-  const isDark = theme === 'dark';
 
   const patientNavLinks = isPatientProfileCompleteState
     ? [
@@ -162,7 +149,7 @@ const Navbar = () => {
 
           <div className="flex items-center">
             <button
-              onClick={() => setTheme((prev) => (prev === 'dark' ? 'light' : 'dark'))}
+              onClick={toggleDarkMode}
               className={`mr-3 inline-flex items-center gap-2 rounded-xl border px-3 py-2 text-sm font-semibold transition-colors ${
                 isDark
                   ? 'border-slate-700 bg-slate-900 text-slate-100 hover:bg-slate-800'
