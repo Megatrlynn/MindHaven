@@ -40,6 +40,7 @@ const Home = () => {
   const [autoScrollEnabled] = useState(true);
 
   const [currentIndex, setCurrentIndex] = useState(0);
+  const [articlesPerView, setArticlesPerView] = useState(1);
   // const intervalRef = useRef(null);
   
   useEffect(() => {
@@ -149,14 +150,37 @@ const Home = () => {
   }, []);
 
   useEffect(() => {
+    const updateArticlesPerView = () => {
+      const width = window.innerWidth;
+
+      if (width >= 1536) {
+        setArticlesPerView(4);
+      } else if (width >= 1024) {
+        setArticlesPerView(3);
+      } else if (width >= 768) {
+        setArticlesPerView(2);
+      } else {
+        setArticlesPerView(1);
+      }
+    };
+
+    updateArticlesPerView();
+    window.addEventListener('resize', updateArticlesPerView);
+
+    return () => {
+      window.removeEventListener('resize', updateArticlesPerView);
+    };
+  }, []);
+
+  useEffect(() => {
     if (filteredArticles.length === 0) return;
 
     const interval = setInterval(() => {
-      setCurrentIndex((prevIndex) => (prevIndex + 1) % filteredArticles.length);
+      setCurrentIndex((prevIndex) => (prevIndex + articlesPerView) % filteredArticles.length);
     }, 30000); 
 
     return () => clearInterval(interval); 
-  }, [filteredArticles]);
+  }, [filteredArticles, articlesPerView]);
 
   const toggleReadMore = (id: string) => {
     setExpanded(expanded === id ? null : id);
@@ -165,21 +189,16 @@ const Home = () => {
   const handleNext = () => {
     if (filteredArticles.length === 0) return;
 
-    if (selectedCategory === "All") {
-      setCurrentIndex((prevIndex) => (prevIndex + 1) % articles.length);
-    } else {
-      setCurrentIndex((prevIndex) => (prevIndex + 1) % filteredArticles.length);
-    }
+    setCurrentIndex((prevIndex) => (prevIndex + articlesPerView) % filteredArticles.length);
   };
 
   const handlePrevious = () => {
     if (filteredArticles.length === 0) return;
 
-    if (selectedCategory === "All") {
-      setCurrentIndex((prevIndex) => (prevIndex === 0 ? articles.length - 1 : prevIndex - 1));
-    } else {
-      setCurrentIndex((prevIndex) => (prevIndex === 0 ? filteredArticles.length - 1 : prevIndex - 1));
-    }
+    setCurrentIndex((prevIndex) => {
+      const nextIndex = prevIndex - articlesPerView;
+      return nextIndex >= 0 ? nextIndex : filteredArticles.length + nextIndex;
+    });
   };
 
   const getVisibleArticles = (list: HealthArticle[], start: number, count: number) => {
@@ -192,7 +211,7 @@ const Home = () => {
     return visible;
   };
 
-  const visibleArticles = getVisibleArticles(filteredArticles, currentIndex, 1);
+  const visibleArticles = getVisibleArticles(filteredArticles, currentIndex, articlesPerView);
   const consultationPath = userDomain ? '/chat' : '/patient-login';
 
   if (loading) {
@@ -429,7 +448,7 @@ const Home = () => {
               No articles yet in this category.
             </div>
           ) : (
-            <div className="grid gap-4 grid-cols-1 md:grid-cols-2 xl:grid-cols-3">
+            <div className="grid gap-4 grid-cols-1 md:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4">
               {visibleArticles.map((article) => (
                 <article key={article.id} className="surface-card overflow-hidden border border-slate-200 bg-white p-0 shadow-sm">
                   <img
