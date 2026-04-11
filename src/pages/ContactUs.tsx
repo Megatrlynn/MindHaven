@@ -1,8 +1,8 @@
-import React, { useState } from "react";
-import { supabase } from "../lib/supabase";
-import { Mail, Phone, MapPin, CheckCircle, AlertCircle } from "lucide-react";
-import { usePageSEO } from "../hooks/usePageSEO";
-import Footer from "../components/Footer";
+﻿import React, { useState } from 'react';
+import { supabase } from '../lib/supabase';
+import { Mail, Phone, MapPin, CheckCircle, AlertCircle } from 'lucide-react';
+import { usePageSEO } from '../hooks/usePageSEO';
+import Footer from '../components/Footer';
 
 const ContactUs = () => {
   usePageSEO({
@@ -24,7 +24,7 @@ const ContactUs = () => {
     const { name, value } = e.target;
     setFormData(prev => ({
       ...prev,
-      [name]: value
+      [name]: value,
     }));
   };
 
@@ -40,15 +40,13 @@ const ContactUs = () => {
         return;
       }
 
-      const { error } = await supabase
-        .from('contact_messages')
-        .insert({
-          name: formData.name,
-          email: formData.email,
-          subject: formData.subject || 'No subject',
-          message: formData.message,
-          status: 'new'
-        });
+      const { error } = await supabase.from('contact_messages').insert({
+        name: formData.name,
+        email: formData.email,
+        subject: formData.subject || 'No subject',
+        message: formData.message,
+        status: 'new',
+      });
 
       if (error) {
         console.error('Error submitting form:', error);
@@ -69,7 +67,6 @@ const ContactUs = () => {
   return (
     <>
       <div className="w-full">
-        {/* Hero Section */}
         <section className="content-shell py-12 lg:py-16">
           <div className="text-center mb-12">
             <p className="inline-flex items-center gap-2 rounded-full border border-cyan-100 dark:border-cyan-900 bg-cyan-50 dark:bg-cyan-950 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-cyan-800 dark:text-cyan-200 mb-6">
@@ -77,9 +74,7 @@ const ContactUs = () => {
               Get in Touch
             </p>
             <h1 className="text-4xl md:text-5xl font-extrabold text-slate-900 dark:text-slate-100 mb-4">Contact Us</h1>
-            <p className="text-lg text-slate-600 dark:text-slate-400 max-w-2xl mx-auto">
-              Have questions or feedback? We'd love to hear from you. Reach out and we'll respond as soon as possible.
-            </p>
+            <p className="text-lg text-slate-600 dark:text-slate-400 max-w-2xl mx-auto">Have questions or feedback? We'd love to hear from you. Reach out and we'll respond as soon as possible.</p>
           </div>
 
           <div className="grid md:grid-cols-3 gap-6 mb-12">
@@ -88,13 +83,8 @@ const ContactUs = () => {
                 <Mail className="h-6 w-6" />
               </div>
               <h3 className="text-lg font-semibold text-slate-900 dark:text-slate-100 mb-2">Email</h3>
-              <p className="text-slate-600 dark:text-slate-400">
-                <a href="mailto:support@mindhaven.com" className="hover:text-cyan-700 dark:hover:text-cyan-300 transition">
-                  support@mindhaven.com
-                </a>
-              </p>
+              <p className="text-slate-600 dark:text-slate-400"><a href="mailto:support@mindhaven.com" className="hover:text-cyan-700 dark:hover:text-cyan-300 transition">support@mindhaven.com</a></p>
             </div>
-
             <div className="surface-card p-6 text-center">
               <div className="inline-flex h-12 w-12 items-center justify-center rounded-xl bg-cyan-100 dark:bg-cyan-900 text-cyan-700 dark:text-cyan-300 mb-4">
                 <Phone className="h-6 w-6" />
@@ -102,7 +92,6 @@ const ContactUs = () => {
               <h3 className="text-lg font-semibold text-slate-900 dark:text-slate-100 mb-2">Phone</h3>
               <p className="text-slate-600 dark:text-slate-400">+1 (555) 123-4567</p>
             </div>
-
             <div className="surface-card p-6 text-center">
               <div className="inline-flex h-12 w-12 items-center justify-center rounded-xl bg-cyan-100 dark:bg-cyan-900 text-cyan-700 dark:text-cyan-300 mb-4">
                 <MapPin className="h-6 w-6" />
@@ -113,7 +102,6 @@ const ContactUs = () => {
           </div>
         </section>
 
-        {/* Contact Form Section */}
         <section className="content-shell mb-16">
           <div className="max-w-2xl mx-auto">
             <div className="surface-card p-8 md:p-10">
@@ -135,69 +123,22 @@ const ContactUs = () => {
 
               <form onSubmit={handleSubmit} className="space-y-5">
                 <div>
-                  <label className="block text-sm font-semibold text-slate-900 dark:text-slate-100 mb-2">
-                    Name <span className="text-red-500">*</span>
-                  </label>
-                  <input
-                    type="text"
-                    name="name"
-                    value={formData.name}
-                    onChange={handleChange}
-                    className="w-full px-4 py-3 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 placeholder-slate-500 dark:placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-cyan-500 dark:focus:ring-cyan-400 transition"
-                    placeholder="Your Full Name"
-                    required
-                  />
+                  <label className="block text-sm font-semibold text-slate-900 dark:text-slate-100 mb-2">Name <span className="text-red-500">*</span></label>
+                  <input type="text" name="name" value={formData.name} onChange={handleChange} className="w-full px-4 py-3 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 placeholder-slate-500 dark:placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-cyan-500 dark:focus:ring-cyan-400 transition" placeholder="Your Full Name" required />
                 </div>
-
                 <div>
-                  <label className="block text-sm font-semibold text-slate-900 dark:text-slate-100 mb-2">
-                    Email <span className="text-red-500">*</span>
-                  </label>
-                  <input
-                    type="email"
-                    name="email"
-                    value={formData.email}
-                    onChange={handleChange}
-                    className="w-full px-4 py-3 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 placeholder-slate-500 dark:placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-cyan-500 dark:focus:ring-cyan-400 transition"
-                    placeholder="your.email@example.com"
-                    required
-                  />
+                  <label className="block text-sm font-semibold text-slate-900 dark:text-slate-100 mb-2">Email <span className="text-red-500">*</span></label>
+                  <input type="email" name="email" value={formData.email} onChange={handleChange} className="w-full px-4 py-3 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 placeholder-slate-500 dark:placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-cyan-500 dark:focus:ring-cyan-400 transition" placeholder="your.email@example.com" required />
                 </div>
-
                 <div>
-                  <label className="block text-sm font-semibold text-slate-900 dark:text-slate-100 mb-2">
-                    Subject
-                  </label>
-                  <input
-                    type="text"
-                    name="subject"
-                    value={formData.subject}
-                    onChange={handleChange}
-                    className="w-full px-4 py-3 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 placeholder-slate-500 dark:placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-cyan-500 dark:focus:ring-cyan-400 transition"
-                    placeholder="Subject of your message (optional)"
-                  />
+                  <label className="block text-sm font-semibold text-slate-900 dark:text-slate-100 mb-2">Subject</label>
+                  <input type="text" name="subject" value={formData.subject} onChange={handleChange} className="w-full px-4 py-3 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 placeholder-slate-500 dark:placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-cyan-500 dark:focus:ring-cyan-400 transition" placeholder="Subject (optional)" />
                 </div>
-
                 <div>
-                  <label className="block text-sm font-semibold text-slate-900 dark:text-slate-100 mb-2">
-                    Message <span className="text-red-500">*</span>
-                  </label>
-                  <textarea
-                    name="message"
-                    value={formData.message}
-                    onChange={handleChange}
-                    rows={6}
-                    className="w-full px-4 py-3 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 placeholder-slate-500 dark:placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-cyan-500 dark:focus:ring-cyan-400 transition resize-none"
-                    placeholder="Tell us what's on your mind..."
-                    required
-                  ></textarea>
+                  <label className="block text-sm font-semibold text-slate-900 dark:text-slate-100 mb-2">Message <span className="text-red-500">*</span></label>
+                  <textarea name="message" value={formData.message} onChange={handleChange} rows={6} className="w-full px-4 py-3 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 placeholder-slate-500 dark:placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-cyan-500 dark:focus:ring-cyan-400 transition resize-none" placeholder="Your message..." required></textarea>
                 </div>
-
-                <button
-                  type="submit"
-                  disabled={loading}
-                  className="w-full btn-primary disabled:opacity-60 disabled:cursor-not-allowed py-3 text-base font-semibold"
-                >
+                <button type="submit" disabled={loading} className="w-full btn-primary disabled:opacity-60 disabled:cursor-not-allowed py-3 text-base font-semibold">
                   {loading ? 'Sending...' : 'Send Message'}
                 </button>
               </form>
@@ -207,59 +148,6 @@ const ContactUs = () => {
       </div>
       <Footer />
     </>
-  );
-};
-
-export default ContactUs;
-import React from "react";
-
-const ContactUs = () => {
-  return (
-    <div className="max-w-3xl mx-auto p-6">
-      <h1 className="text-3xl font-bold text-blue-600 mb-4">Contact Us</h1>
-      <p className="text-gray-600 mb-4">
-        We’d love to hear from you! Fill out the form below or reach us directly.
-      </p>
-
-      <form className="space-y-4">
-        <div>
-          <label className="block text-gray-700 font-medium">Name</label>
-          <input
-            type="text"
-            className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-600"
-            placeholder="Your Name"
-          />
-        </div>
-
-        <div>
-          <label className="block text-gray-700 font-medium">Email</label>
-          <input
-            type="email"
-            className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-600"
-            placeholder="Your Email"
-          />
-        </div>
-
-        <div>
-          <label className="block text-gray-700 font-medium">Message</label>
-          <textarea
-            rows={4}
-            className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-600"
-            placeholder="Your Message"
-          ></textarea>
-        </div>
-
-        <button className="w-full bg-blue-600 text-white p-2 rounded-md hover:bg-blue-700 transition">
-          Send Message
-        </button>
-      </form>
-
-      <div className="mt-6 text-gray-600">
-        <p>Email: <a href="mailto:support@mindhaven.com" className="text-blue-600 underline">support@mindhaven.com</a></p>
-        <p>Phone: +1 (555) 123-4567</p>
-        <p>Address: 123 Wellness Street, Therapy City, MH 56789</p>
-      </div>
-    </div>
   );
 };
 
