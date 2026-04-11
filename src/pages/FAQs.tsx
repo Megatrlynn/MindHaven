@@ -69,7 +69,7 @@ const FAQs = () => {
         <div className="surface-card overflow-hidden border border-[var(--mh-border)] bg-[var(--mh-surface)]">
           <div className="grid gap-0 lg:grid-cols-[1.05fr_0.95fr]">
             <div className="px-6 py-10 md:px-10 lg:px-12">
-              <p className="inline-flex items-center gap-2 rounded-full border border-cyan-100 bg-cyan-50 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-cyan-800">
+              <p className="inline-flex items-center gap-2 rounded-full border border-[var(--mh-accent-border)] bg-[var(--mh-accent-soft)] px-3 py-1 text-xs font-semibold uppercase tracking-wide text-[var(--mh-accent-text)]">
                 <MessageCircle className="h-3.5 w-3.5" />
                 Community Knowledge Base
               </p>
@@ -127,9 +127,9 @@ const FAQs = () => {
                 key={question.id} 
                 className="group overflow-hidden rounded-2xl border border-[var(--mh-border)] bg-[var(--mh-surface)] shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:shadow-md"
               >
-                <div className="border-b border-[var(--mh-border)] bg-[var(--mh-surface-soft)]/90 px-6 py-4">
+                <div className="border-b border-[var(--mh-border)] bg-[var(--mh-surface-soft)] px-6 py-4">
                   <div className="flex flex-wrap items-center justify-between gap-3">
-                    <div className="inline-flex items-center gap-2 rounded-full border border-cyan-100 bg-cyan-50 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-cyan-800">
+                    <div className="inline-flex items-center gap-2 rounded-full border border-[var(--mh-accent-border)] bg-[var(--mh-accent-soft)] px-3 py-1 text-xs font-semibold uppercase tracking-wide text-[var(--mh-accent-text)]">
                       <BadgeCheck className="h-3.5 w-3.5" />
                       Answered Question
                     </div>
@@ -142,7 +142,7 @@ const FAQs = () => {
 
                 <div className="grid gap-4 p-6 md:grid-cols-[auto_1fr]">
                   <div className="flex items-start gap-3 md:flex-col md:items-center">
-                    <div className="inline-flex h-11 w-11 items-center justify-center rounded-xl bg-cyan-100 text-cyan-800">
+                    <div className="inline-flex h-11 w-11 items-center justify-center rounded-xl bg-[var(--mh-accent-soft)] text-[var(--mh-accent-text)]">
                       <HelpCircle className="h-5 w-5" />
                     </div>
                     <div className="rounded-xl border border-[var(--mh-border)] bg-[var(--mh-surface-soft)] px-3 py-1.5 text-xs font-semibold text-[var(--mh-text-muted)]">
@@ -158,10 +158,10 @@ const FAQs = () => {
                       </p>
                     </div>
 
-                    <div className="rounded-xl border border-cyan-100 bg-cyan-50/60 p-4 dark:border-cyan-900 dark:bg-cyan-950/40">
+                    <div className="rounded-xl border border-[var(--mh-accent-border)] bg-[var(--mh-accent-soft)] p-4">
                       <div className="flex items-center gap-2">
-                        <MessageCircle className="h-4 w-4 text-cyan-700 dark:text-cyan-300" />
-                        <p className="text-sm font-semibold text-cyan-900 dark:text-cyan-200">Answer</p>
+                        <MessageCircle className="h-4 w-4 text-[var(--mh-accent-text)]" />
+                        <p className="text-sm font-semibold text-[var(--mh-accent-text)]">Answer</p>
                       </div>
                       <p className="mt-2 text-sm leading-7 text-[var(--mh-text-muted)]">
                         {question.answer}
