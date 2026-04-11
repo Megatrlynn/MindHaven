@@ -712,7 +712,7 @@ const Chat: React.FC = () => {
   return (
     <div className="content-shell py-8 lg:py-10 space-y-6">
       {callEndMessage && (
-        <div className="fixed right-4 top-4 z-[60] rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-amber-900 shadow-lg">
+        <div className="fixed right-4 top-4 z-[60] rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-amber-900 shadow-lg dark:border-amber-900 dark:bg-amber-950 dark:text-amber-200">
           <p className="font-medium">{callEndMessage}</p>
         </div>
       )}
@@ -720,11 +720,11 @@ const Chat: React.FC = () => {
       {incomingCall && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/60 px-4 backdrop-blur-sm">
           <div className="surface-card w-full max-w-md p-6 text-center shadow-2xl animate-fade-in">
-            <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-cyan-100 text-cyan-800">
+            <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-cyan-100 text-cyan-800 dark:bg-cyan-900 dark:text-cyan-200">
               <PhoneCall className="h-6 w-6" />
             </div>
-            <h2 className="mt-4 text-xl font-bold text-slate-900">Incoming call</h2>
-            <p className="mt-2 text-sm text-slate-600">{doctorName ? `${doctorName} is calling...` : 'Your therapist is calling...'}</p>
+            <h2 className="mt-4 text-xl font-bold text-slate-900 dark:text-slate-100">Incoming call</h2>
+            <p className="mt-2 text-sm text-slate-600 dark:text-slate-300">{doctorName ? `${doctorName} is calling...` : 'Your therapist is calling...'}</p>
 
             <div className="mt-6 flex gap-3">
               <button
@@ -735,7 +735,7 @@ const Chat: React.FC = () => {
                 Accept
               </button>
               <button
-                className="btn-subtle flex-1 justify-center bg-rose-50 text-rose-700 hover:bg-rose-100"
+                className="btn-subtle flex-1 justify-center bg-rose-50 text-rose-700 hover:bg-rose-100 dark:bg-rose-950 dark:text-rose-200 dark:hover:bg-rose-900"
                 onClick={declineCall}
               >
                 <XCircle className="w-6 h-6 mr-2" />
@@ -749,16 +749,16 @@ const Chat: React.FC = () => {
       {isCallActive && isConnected && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/60 px-4 backdrop-blur-sm">
           <div className="surface-card w-full max-w-md p-6 text-center shadow-2xl animate-fade-in">
-            <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-cyan-100 text-cyan-800">
+            <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-cyan-100 text-cyan-800 dark:bg-cyan-900 dark:text-cyan-200">
               <PhoneCall className="h-6 w-6" />
             </div>
-            <h2 className="mt-4 text-xl font-bold text-slate-900">{callStatus}</h2>
+            <h2 className="mt-4 text-xl font-bold text-slate-900 dark:text-slate-100">{callStatus}</h2>
 
             <div className="mt-4">
               {remoteStream ? (
                 <audio ref={remoteAudioRef} autoPlay playsInline controls className="w-full rounded-lg" />
               ) : (
-                <p className="text-sm italic text-slate-500">Waiting for audio...</p>
+                <p className="text-sm italic text-slate-500 dark:text-slate-400">Waiting for audio...</p>
               )}
             </div>
 
@@ -774,25 +774,25 @@ const Chat: React.FC = () => {
       )}
 
       <div className="surface-card overflow-hidden">
-        <div className="border-b border-slate-200 bg-slate-50 px-6 py-6 md:px-8">
+        <div className="border-b border-slate-200 bg-slate-50 px-6 py-6 md:px-8 dark:border-slate-700 dark:bg-slate-900">
           <div className="flex flex-wrap items-start justify-between gap-4">
             <div>
-              <p className="inline-flex items-center gap-2 rounded-full border border-cyan-100 bg-cyan-50 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-cyan-800">
+              <p className="inline-flex items-center gap-2 rounded-full border border-cyan-100 bg-cyan-50 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-cyan-800 dark:border-cyan-900 dark:bg-cyan-950 dark:text-cyan-200">
                 <ShieldCheck className="h-3.5 w-3.5" />
                 Patient workspace
               </p>
-              <h1 className="mt-3 text-3xl font-bold text-slate-900">Support chat</h1>
-              <p className="mt-2 max-w-2xl text-sm text-slate-600">
+              <h1 className="mt-3 text-3xl font-bold text-slate-900 dark:text-slate-100">Support chat</h1>
+              <p className="mt-2 max-w-2xl text-sm text-slate-600 dark:text-slate-300">
                 Chat with the AI assistant or continue a secure conversation with your connected therapist.
               </p>
             </div>
 
             <div className="flex flex-wrap gap-2">
-              <span className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-600">
+              <span className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-600 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-300">
                 <Sparkles className="h-3.5 w-3.5 text-cyan-700" />
                 AI support available
               </span>
-              <span className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-600">
+              <span className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-600 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-300">
                 <MessageSquareText className="h-3.5 w-3.5 text-cyan-700" />
                 {connections.length} therapist links
               </span>
@@ -800,13 +800,13 @@ const Chat: React.FC = () => {
           </div>
         </div>
 
-        <div className="border-b border-slate-200 bg-white px-6 py-4 md:px-8">
+        <div className="border-b border-slate-200 bg-white px-6 py-4 md:px-8 dark:border-slate-700 dark:bg-slate-950">
           <div className="flex flex-wrap gap-3">
             <button
               className={`inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-semibold transition-colors ${
                 activeTab === 'ai'
                   ? 'bg-cyan-100 text-cyan-900'
-                  : 'border border-slate-200 text-slate-600 hover:border-cyan-200 hover:bg-cyan-50 hover:text-cyan-900'
+                  : 'border border-slate-200 text-slate-600 hover:border-cyan-200 hover:bg-cyan-50 hover:text-cyan-900 dark:border-slate-700 dark:text-slate-300 dark:hover:border-cyan-700 dark:hover:bg-cyan-950 dark:hover:text-cyan-200'
               }`}
               onClick={() => {
                 setActiveTab('ai');
@@ -820,7 +820,7 @@ const Chat: React.FC = () => {
               className={`inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-semibold transition-colors ${
                 activeTab === 'doctor'
                   ? 'bg-cyan-100 text-cyan-900'
-                  : 'border border-slate-200 text-slate-600 hover:border-cyan-200 hover:bg-cyan-50 hover:text-cyan-900'
+                  : 'border border-slate-200 text-slate-600 hover:border-cyan-200 hover:bg-cyan-50 hover:text-cyan-900 dark:border-slate-700 dark:text-slate-300 dark:hover:border-cyan-700 dark:hover:bg-cyan-950 dark:hover:text-cyan-200'
               }`}
               onClick={() => {
                 setActiveTab('doctor');
@@ -836,17 +836,17 @@ const Chat: React.FC = () => {
         <div className="px-4 py-6 md:px-6 lg:px-8">
           {activeTab === 'ai' ? (
             <div className="space-y-6">
-              <div className="rounded-3xl border border-slate-200 bg-slate-50 px-6 py-8 text-center">
-                <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-cyan-100 text-cyan-800">
+              <div className="rounded-3xl border border-slate-200 bg-slate-50 px-6 py-8 text-center dark:border-slate-700 dark:bg-slate-900">
+                <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-cyan-100 text-cyan-800 dark:bg-cyan-900 dark:text-cyan-200">
                   <Bot className="h-8 w-8" />
                 </div>
-                <h2 className="mt-4 text-2xl font-bold text-slate-900">AI therapy support</h2>
-                <p className="mx-auto mt-2 max-w-2xl text-sm text-slate-600">
+                <h2 className="mt-4 text-2xl font-bold text-slate-900 dark:text-slate-100">AI therapy support</h2>
+                <p className="mx-auto mt-2 max-w-2xl text-sm text-slate-600 dark:text-slate-300">
                   Share your thoughts in a safe space. Receive supportive guidance and coping strategies.
                 </p>
               </div>
             
-              <div className="mx-auto max-h-[620px] max-w-4xl space-y-5 overflow-y-auto rounded-3xl border border-slate-200 bg-white p-5 shadow-sm md:p-6">
+              <div className="mx-auto max-h-[620px] max-w-4xl space-y-5 overflow-y-auto rounded-3xl border border-slate-200 bg-white p-5 shadow-sm md:p-6 dark:border-slate-700 dark:bg-slate-950">
               {chatHistory.map((chat, index) => {
                 const nextChat = chatHistory[index + 1];
 
@@ -876,14 +876,14 @@ const Chat: React.FC = () => {
                     </div>
 
                     <div className="flex justify-start mt-2">
-                      <div className="max-w-[80%] rounded-2xl border border-slate-200 bg-slate-50 p-4 text-slate-800 shadow-sm">
+                      <div className="max-w-[80%] rounded-2xl border border-slate-200 bg-slate-50 p-4 text-slate-800 shadow-sm dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200">
                         <p className="text-xs font-semibold uppercase tracking-wide text-cyan-700">AI Support</p>
                         <p className="mt-1 whitespace-pre-line text-sm leading-6">{chat.response}</p>
                       </div>
                     </div>
 
                     {showTimestamp && (
-                      <p className="text-center text-xs text-slate-400">{formattedDate}</p>
+                      <p className="text-center text-xs text-slate-400 dark:text-slate-500">{formattedDate}</p>
                     )}
                   </div>
                 )}
@@ -895,7 +895,7 @@ const Chat: React.FC = () => {
                 <div className="surface-card border-slate-200 p-4">
                   <div className="flex flex-col gap-3 lg:flex-row lg:items-end">
                   <textarea
-                    className="min-h-[96px] flex-1 rounded-2xl border border-slate-300 px-4 py-3 shadow-sm focus:border-cyan-700 focus:outline-none focus:ring-2 focus:ring-cyan-200"
+                    className="min-h-[96px] flex-1 rounded-2xl border border-slate-300 bg-white px-4 py-3 text-slate-900 shadow-sm placeholder:text-slate-500 focus:border-cyan-700 focus:outline-none focus:ring-2 focus:ring-cyan-200 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 dark:placeholder:text-slate-400 dark:focus:border-cyan-500 dark:focus:ring-cyan-900"
                     placeholder="Type your message..."
                     rows={3}
                     value={message}
@@ -926,17 +926,17 @@ const Chat: React.FC = () => {
               <div className="flex items-center gap-4">
                 <button
                   onClick={() => setActiveDoctorChat(null)}
-                  className="inline-flex h-11 w-11 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-600 transition hover:border-cyan-200 hover:bg-cyan-50 hover:text-cyan-900"
+                  className="inline-flex h-11 w-11 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-600 transition hover:border-cyan-200 hover:bg-cyan-50 hover:text-cyan-900 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-300 dark:hover:border-cyan-700 dark:hover:bg-cyan-950 dark:hover:text-cyan-200"
                 >
                   <ArrowLeft className="h-5 w-5" />
                 </button>
                 <div>
-                  <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">Therapist chat</p>
-                  <h2 className="mt-1 text-2xl font-bold text-slate-900">Dr. {activeDoctorChat?.doctorName}</h2>
+                  <p className="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">Therapist chat</p>
+                  <h2 className="mt-1 text-2xl font-bold text-slate-900 dark:text-slate-100">Dr. {activeDoctorChat?.doctorName}</h2>
                 </div>
               </div>
 
-              <div className="mx-auto max-h-[620px] max-w-4xl space-y-4 overflow-y-auto rounded-3xl border border-slate-200 bg-white p-5 shadow-sm md:p-6">
+              <div className="mx-auto max-h-[620px] max-w-4xl space-y-4 overflow-y-auto rounded-3xl border border-slate-200 bg-white p-5 shadow-sm md:p-6 dark:border-slate-700 dark:bg-slate-950">
                 {doctorChatLoading ? (
                   <div className="flex justify-center py-6">
                     <Loader2 className="h-6 w-6 animate-spin text-cyan-700" />
@@ -966,14 +966,14 @@ const Chat: React.FC = () => {
                       <div key={msg.id} className={`flex flex-col ${isCurrentUser ? 'items-end' : 'items-start'} mb-1`}>
                         <div
                           className={`max-w-[78%] rounded-2xl p-4 shadow-sm ${
-                            isCurrentUser ? 'bg-cyan-700 text-white' : 'border border-slate-200 bg-slate-50 text-slate-800'
+                            isCurrentUser ? 'bg-cyan-700 text-white' : 'border border-slate-200 bg-slate-50 text-slate-800 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200'
                           }`}
                         >
                           <p className="text-sm leading-6">{msg.message}</p>
                         </div>
                   
                         {showTimestamp && (
-                          <p className="mt-1 text-xs text-slate-400">{formattedDate}</p>
+                          <p className="mt-1 text-xs text-slate-400 dark:text-slate-500">{formattedDate}</p>
                         )}
                       </div>
                     );
@@ -989,7 +989,7 @@ const Chat: React.FC = () => {
                     value={message}
                     onChange={(e) => setMessage(e.target.value)}
                     placeholder="Type your message..."
-                    className="flex-1 rounded-2xl border border-slate-300 px-4 py-3 shadow-sm focus:border-cyan-700 focus:outline-none focus:ring-2 focus:ring-cyan-200"
+                    className="flex-1 rounded-2xl border border-slate-300 bg-white px-4 py-3 text-slate-900 shadow-sm placeholder:text-slate-500 focus:border-cyan-700 focus:outline-none focus:ring-2 focus:ring-cyan-200 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 dark:placeholder:text-slate-400 dark:focus:border-cyan-500 dark:focus:ring-cyan-900"
                     onKeyPress={(e) => {
                       if (e.key === 'Enter' && !e.shiftKey) {
                         e.preventDefault();
@@ -1009,12 +1009,12 @@ const Chat: React.FC = () => {
             </div>
           ) : (
             <div className="space-y-6">
-              <div className="rounded-3xl border border-slate-200 bg-slate-50 px-6 py-8 text-center">
-                <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-cyan-100 text-cyan-800">
+              <div className="rounded-3xl border border-slate-200 bg-slate-50 px-6 py-8 text-center dark:border-slate-700 dark:bg-slate-900">
+                <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-cyan-100 text-cyan-800 dark:bg-cyan-900 dark:text-cyan-200">
                   <MessageSquare className="h-8 w-8" />
                 </div>
-                <h2 className="mt-4 text-2xl font-bold text-slate-900">Connect with a therapist</h2>
-                <p className="mx-auto mt-2 max-w-2xl text-sm text-slate-600">
+                <h2 className="mt-4 text-2xl font-bold text-slate-900 dark:text-slate-100">Connect with a therapist</h2>
+                <p className="mx-auto mt-2 max-w-2xl text-sm text-slate-600 dark:text-slate-300">
                   Choose a therapist to start your support journey and open a secure chat when the connection is approved.
                 </p>
               </div>
@@ -1034,13 +1034,13 @@ const Chat: React.FC = () => {
                           className="h-16 w-16 rounded-full object-cover"
                         />
                         <div className="min-w-0 flex-1">
-                          <h3 className="truncate text-lg font-semibold text-slate-900">{doctor.name}</h3>
-                          <p className="truncate text-sm text-slate-600">{doctor.profession}</p>
+                          <h3 className="truncate text-lg font-semibold text-slate-900 dark:text-slate-100">{doctor.name}</h3>
+                          <p className="truncate text-sm text-slate-600 dark:text-slate-300">{doctor.profession}</p>
                         </div>
                       </div>
-                      <div className="mt-4 rounded-2xl border border-slate-200 bg-slate-50 p-4">
-                        <p className="text-sm text-slate-600">
-                          <span className="font-semibold text-slate-900">Phone:</span> {doctor.phone || 'Not available'}
+                      <div className="mt-4 rounded-2xl border border-slate-200 bg-slate-50 p-4 dark:border-slate-700 dark:bg-slate-900">
+                        <p className="text-sm text-slate-600 dark:text-slate-300">
+                          <span className="font-semibold text-slate-900 dark:text-slate-100">Phone:</span> {doctor.phone || 'Not available'}
                         </p>
                       </div>
                       {isPending ? (
