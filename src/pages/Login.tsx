@@ -60,12 +60,12 @@ const Login = () => {
   };
 
   return (
-    <div className="flex min-h-screen flex-col justify-center bg-slate-100 px-6 lg:px-8">
+    <div className="flex min-h-screen flex-col justify-center bg-[var(--mh-surface-soft)] px-6 lg:px-8">
       <div className="sm:mx-auto sm:w-full sm:max-w-md">
-        <h2 className="text-center text-4xl font-extrabold text-slate-900">
+        <h2 className="text-center text-4xl font-extrabold text-[var(--mh-text)]">
           {loading ? "Signing In..." : "Admin/Therapist Login"}
         </h2>
-        <p className="mt-2 text-center text-lg text-slate-600">
+        <p className="mt-2 text-center text-lg text-[var(--mh-text-muted)]">
           Access your dashboard to manage your related data
         </p>
       </div>
@@ -85,7 +85,7 @@ const Login = () => {
           <form className="space-y-6" onSubmit={handleSubmit}>
             {/* Email Input */}
             <div>
-              <label htmlFor="email" className="block text-sm font-medium text-gray-700">
+              <label htmlFor="email" className="block text-sm font-medium text-[var(--mh-text-muted)]">
                 Email Address
               </label>
               <div className="mt-1">
@@ -96,7 +96,7 @@ const Login = () => {
                   required
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="w-full rounded-lg border border-slate-300 bg-white px-4 py-3 text-slate-900 placeholder-slate-400 shadow-sm transition-colors duration-200 focus:border-cyan-700 focus:outline-none focus:ring-2 focus:ring-cyan-200"
+                  className="w-full rounded-lg border border-[var(--mh-border)] bg-[var(--mh-surface)] px-4 py-3 text-[var(--mh-text)] placeholder:text-[var(--mh-text-muted)] shadow-sm transition-colors duration-200 focus:border-cyan-700 focus:outline-none focus:ring-2 focus:ring-cyan-200"
                   placeholder="user@admin.com or user@doc.com"
                 />
               </div>
@@ -104,7 +104,7 @@ const Login = () => {
 
             {/* Password Input */}
             <div>
-              <label htmlFor="password" className="block text-sm font-medium text-gray-700">
+              <label htmlFor="password" className="block text-sm font-medium text-[var(--mh-text-muted)]">
                 Password
               </label>
               <div className="mt-1">
@@ -115,7 +115,7 @@ const Login = () => {
                   required
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="w-full rounded-lg border border-slate-300 bg-white px-4 py-3 text-slate-900 placeholder-slate-400 shadow-sm transition-colors duration-200 focus:border-cyan-700 focus:outline-none focus:ring-2 focus:ring-cyan-200"
+                  className="w-full rounded-lg border border-[var(--mh-border)] bg-[var(--mh-surface)] px-4 py-3 text-[var(--mh-text)] placeholder:text-[var(--mh-text-muted)] shadow-sm transition-colors duration-200 focus:border-cyan-700 focus:outline-none focus:ring-2 focus:ring-cyan-200"
                   placeholder="••••••••"
                 />
               </div>
@@ -146,13 +146,13 @@ const Login = () => {
           {/* Other Login Options */}
           <div className="mt-8">
             <div className="relative flex justify-center text-sm">
-              <span className="rounded-full border border-slate-200 bg-white px-4 py-1 text-slate-500 shadow-sm">
+              <span className="rounded-full border border-[var(--mh-border)] bg-[var(--mh-surface)] px-4 py-1 text-[var(--mh-text-muted)] shadow-sm">
                 Other login options
               </span>
             </div>
             
             <div className="mt-6 text-center">
-              <p className="text-sm text-gray-700">Are you a patient?</p>
+              <p className="text-sm text-[var(--mh-text-muted)]">Are you a patient?</p>
               <Link 
                 to="/patient-login" 
                 className="mt-2 font-medium text-cyan-700 transition-colors duration-200 hover:text-cyan-900 hover:underline"
@@ -165,18 +165,18 @@ const Login = () => {
           {/* Email Format Guide */}
           <div className="mt-8">
             <div className="relative flex justify-center text-sm">
-              <span className="rounded-full border border-slate-200 bg-white px-4 py-1 text-slate-500 shadow-sm">
+              <span className="rounded-full border border-[var(--mh-border)] bg-[var(--mh-surface)] px-4 py-1 text-[var(--mh-text-muted)] shadow-sm">
                 Email format guide
               </span>
             </div>
 
             <div className="mt-6 grid grid-cols-2 gap-4">
-              <div className="rounded-lg border border-slate-200 bg-slate-50 p-3 text-center text-sm text-slate-700 shadow-sm">
-                <code className="font-semibold text-slate-800">username@admin.com</code>
+              <div className="rounded-lg border border-[var(--mh-border)] bg-[var(--mh-surface-soft)] p-3 text-center text-sm text-[var(--mh-text-muted)] shadow-sm">
+                <code className="font-semibold text-[var(--mh-text)]">username@admin.com</code>
                 <p className="mt-1">For admins</p>
               </div>
-              <div className="rounded-lg border border-slate-200 bg-slate-50 p-3 text-center text-sm text-slate-700 shadow-sm">
-                <code className="font-semibold text-slate-800">username@doc.com</code>
+              <div className="rounded-lg border border-[var(--mh-border)] bg-[var(--mh-surface-soft)] p-3 text-center text-sm text-[var(--mh-text-muted)] shadow-sm">
+                <code className="font-semibold text-[var(--mh-text)]">username@doc.com</code>
                 <p className="mt-1">For therapists</p>
               </div>
             </div>

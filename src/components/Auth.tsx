@@ -82,11 +82,11 @@ const Auth = ({ onSuccess }: AuthProps) => {
   };
   
   return (
-    <div className="flex min-h-screen items-center justify-center bg-slate-100 px-4 py-10">
+    <div className="flex min-h-screen items-center justify-center bg-[var(--mh-surface-soft)] px-4 py-10">
       <div className="surface-card w-full max-w-md p-8">
         
         {/* Title */}
-        <h2 className="mb-6 text-center text-3xl font-bold text-slate-900">
+        <h2 className="mb-6 text-center text-3xl font-bold text-[var(--mh-text)]">
           {isSignUp ? 'Create Account' : 'Welcome Back'}
         </h2>
 
@@ -100,7 +100,7 @@ const Auth = ({ onSuccess }: AuthProps) => {
         {/* Form */}
         <form className="space-y-6" onSubmit={handleSubmit}>
           <div>
-            <label htmlFor="email" className="block text-sm font-medium text-gray-700">
+            <label htmlFor="email" className="block text-sm font-medium text-[var(--mh-text-muted)]">
               Email Address
             </label>
             <div className="mt-1">
@@ -111,13 +111,13 @@ const Auth = ({ onSuccess }: AuthProps) => {
                 required
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="w-full rounded-lg border border-slate-300 bg-white px-4 py-3 text-slate-900 placeholder-slate-400 shadow-sm transition-colors duration-200 focus:border-cyan-700 focus:outline-none focus:ring-2 focus:ring-cyan-200"
+                className="w-full rounded-lg border border-[var(--mh-border)] bg-[var(--mh-surface)] px-4 py-3 text-[var(--mh-text)] placeholder:text-[var(--mh-text-muted)] shadow-sm transition-colors duration-200 focus:border-cyan-700 focus:outline-none focus:ring-2 focus:ring-cyan-200"
                 placeholder="you@example.com"
               />
             </div>
           </div>
           <div>
-            <label htmlFor="password" className="block text-sm font-medium text-gray-700">
+            <label htmlFor="password" className="block text-sm font-medium text-[var(--mh-text-muted)]">
               Password
             </label>
             <div className="mt-1">
@@ -128,7 +128,7 @@ const Auth = ({ onSuccess }: AuthProps) => {
                 required
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="w-full rounded-lg border border-slate-300 bg-white px-4 py-3 text-slate-900 placeholder-slate-400 shadow-sm transition-colors duration-200 focus:border-cyan-700 focus:outline-none focus:ring-2 focus:ring-cyan-200"
+                className="w-full rounded-lg border border-[var(--mh-border)] bg-[var(--mh-surface)] px-4 py-3 text-[var(--mh-text)] placeholder:text-[var(--mh-text-muted)] shadow-sm transition-colors duration-200 focus:border-cyan-700 focus:outline-none focus:ring-2 focus:ring-cyan-200"
                 placeholder="••••••••"
               />
             </div>
@@ -155,7 +155,7 @@ const Auth = ({ onSuccess }: AuthProps) => {
 
           {/* Forgot Password */}
           {!isSignUp && (
-            <p className="mt-3 text-center text-sm text-gray-700">
+            <p className="mt-3 text-center text-sm text-[var(--mh-text-muted)]">
               <button
                 type="button"
                 onClick={() => setShowForgotPassword(true)}
@@ -167,7 +167,7 @@ const Auth = ({ onSuccess }: AuthProps) => {
           )}
 
           {/* Toggle Sign Up / Sign In */}
-          <p className="mt-4 text-center text-sm text-gray-700">
+          <p className="mt-4 text-center text-sm text-[var(--mh-text-muted)]">
             {isSignUp ? 'Already have an account?' : "Don't have an account?"}{' '}
             <button
               type="button"
@@ -186,13 +186,13 @@ const Auth = ({ onSuccess }: AuthProps) => {
           <div className="surface-card relative w-96 p-6 text-center">
             <button
               onClick={() => setShowForgotPassword(false)}
-              className="absolute top-3 right-4 text-gray-500 hover:text-gray-800"
+              className="absolute top-3 right-4 text-[var(--mh-text-muted)] hover:text-[var(--mh-text)]"
             >
               ✕
             </button>
 
-            <h3 className="text-xl font-semibold text-gray-800">Reset Password</h3>
-            <p className="text-gray-600 text-sm mt-1">
+            <h3 className="text-xl font-semibold text-[var(--mh-text)]">Reset Password</h3>
+            <p className="mt-1 text-sm text-[var(--mh-text-muted)]">
               Enter your email and we'll send you a reset link.
             </p>
             <input
@@ -200,7 +200,7 @@ const Auth = ({ onSuccess }: AuthProps) => {
               placeholder="Enter your email"
               value={resetEmail}
               onChange={(e) => setResetEmail(e.target.value)}
-              className="mt-4 w-full rounded-lg border border-slate-300 px-4 py-2 text-slate-900 shadow-sm focus:border-cyan-700 focus:outline-none focus:ring-2 focus:ring-cyan-200"
+              className="mt-4 w-full rounded-lg border border-[var(--mh-border)] bg-[var(--mh-surface)] px-4 py-2 text-[var(--mh-text)] shadow-sm placeholder:text-[var(--mh-text-muted)] focus:border-cyan-700 focus:outline-none focus:ring-2 focus:ring-cyan-200"
             />
 
             {/* Send Reset Link Button */}
