@@ -95,6 +95,7 @@ const Navbar = () => {
         { to: '/about', label: 'About', icon: Brain },
         { to: '/faqs', label: 'FAQs', icon: MessageSquareText },
         { to: '/chat', label: 'Chat', icon: MessageSquareText },
+        { to: '/contact', label: 'Contact', icon: MessageSquareText },
         { to: '/profile', label: 'Profile', icon: UserRound },
       ]
     : [{ to: '/profile', label: 'Complete Profile', icon: UserRound }];
@@ -110,6 +111,7 @@ const Navbar = () => {
               { to: '/', label: 'Home', icon: LayoutDashboard },
               { to: '/about', label: 'About', icon: Brain },
               { to: '/faqs', label: 'FAQs', icon: MessageSquareText },
+              { to: '/contact', label: 'Contact', icon: MessageSquareText },
             ];
 
   const brandTarget = userRole === 'patient' && !isPatientProfileCompleteState ? '/profile' : '/';
