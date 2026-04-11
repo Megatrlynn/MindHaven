@@ -158,10 +158,10 @@ const FAQs = () => {
                       </p>
                     </div>
 
-                    <div className="rounded-xl border border-cyan-100 bg-cyan-50/60 p-4">
+                    <div className="rounded-xl border border-cyan-100 bg-cyan-50/60 p-4 dark:border-cyan-900 dark:bg-cyan-950/40">
                       <div className="flex items-center gap-2">
-                        <MessageCircle className="h-4 w-4 text-cyan-700" />
-                        <p className="text-sm font-semibold text-cyan-900">Answer</p>
+                        <MessageCircle className="h-4 w-4 text-cyan-700 dark:text-cyan-300" />
+                        <p className="text-sm font-semibold text-cyan-900 dark:text-cyan-200">Answer</p>
                       </div>
                       <p className="mt-2 text-sm leading-7 text-[var(--mh-text-muted)]">
                         {question.answer}
