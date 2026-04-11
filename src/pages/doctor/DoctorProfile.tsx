@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+﻿import React, { useState, useEffect } from 'react';
 import { supabase } from '../../lib/supabase';
 import { Doctor } from '../../lib/types';
 import { Loader2, Camera, UserRound, Phone, Mail, Edit3, KeyRound, Save, XCircle } from 'lucide-react';
@@ -143,17 +143,17 @@ const DoctorProfile = () => {
   }
 
   return (
-    <div className="bg-slate-50 px-4 py-6 md:px-6 md:py-8">
+    <div className="bg-[var(--mh-surface-soft)] px-4 py-6 md:px-6 md:py-8">
       <div className="surface-card mx-auto w-full max-w-4xl overflow-hidden">
-        <div className="border-b border-slate-200 bg-slate-50 p-6">
+        <div className="border-b border-[var(--mh-border)] bg-[var(--mh-surface-soft)] p-6">
           <div className="flex flex-wrap items-center justify-between gap-4">
             <div>
               <p className="inline-flex items-center gap-2 rounded-full border border-cyan-100 bg-cyan-50 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-cyan-800">
                 <UserRound className="h-3.5 w-3.5" />
                 Therapist Profile
               </p>
-              <h2 className="mt-3 text-2xl font-bold text-slate-900">My Profile</h2>
-              <p className="mt-1 text-sm text-slate-600">Update your public therapist details and credentials.</p>
+              <h2 className="mt-3 text-2xl font-bold text-[var(--mh-text)]">My Profile</h2>
+              <p className="mt-1 text-sm text-[var(--mh-text-muted)]">Update your public therapist details and credentials.</p>
             </div>
           {!isEditing && (
             <button
@@ -168,7 +168,7 @@ const DoctorProfile = () => {
         </div>
 
         <div className="grid gap-0 lg:grid-cols-[280px_1fr]">
-          <div className="border-b border-slate-200 bg-white p-6 lg:border-b-0 lg:border-r">
+          <div className="border-b border-[var(--mh-border)] bg-[var(--mh-surface)] p-6 lg:border-b-0 lg:border-r">
             <div className="flex flex-col items-center text-center">
               <div className="relative">
             <img
@@ -180,16 +180,16 @@ const DoctorProfile = () => {
               className="h-32 w-32 rounded-full object-cover shadow-md"
             />
             {isEditing && (
-              <div className="absolute bottom-1 right-1 cursor-pointer rounded-full bg-white p-2 shadow-md">
-                <Camera className="h-5 w-5 text-slate-600" />
+              <div className="absolute bottom-1 right-1 cursor-pointer rounded-full bg-[var(--mh-surface)] p-2 shadow-md">
+                <Camera className="h-5 w-5 text-[var(--mh-text-muted)]" />
               </div>
             )}
           </div>
             
           {!isEditing ? (
             <div className="mt-4 text-center">
-              <h3 className="text-xl font-semibold text-slate-900">{formData.name || 'Your Name'}</h3>
-              <p className="mt-1 inline-flex items-center gap-2 text-slate-600">
+              <h3 className="text-xl font-semibold text-[var(--mh-text)]">{formData.name || 'Your Name'}</h3>
+              <p className="mt-1 inline-flex items-center gap-2 text-[var(--mh-text-muted)]">
                 <Phone className="h-4 w-4 text-cyan-700" />
                 {formData.phone || 'No phone number'}
               </p>
@@ -198,59 +198,59 @@ const DoctorProfile = () => {
           </div>
           </div>
 
-          <div className="bg-slate-50 p-6">
+          <div className="bg-[var(--mh-surface-soft)] p-6">
             {!isEditing ? (
               <div className="grid gap-4 sm:grid-cols-2">
                 <div className="surface-card p-4">
-                  <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">Name</p>
-                  <p className="mt-2 text-base font-semibold text-slate-900">{formData.name || 'Your Name'}</p>
+                  <p className="text-xs font-semibold uppercase tracking-wide text-[var(--mh-text-muted)]">Name</p>
+                  <p className="mt-2 text-base font-semibold text-[var(--mh-text)]">{formData.name || 'Your Name'}</p>
                 </div>
                 <div className="surface-card p-4">
-                  <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">Phone</p>
-                  <p className="mt-2 text-base font-semibold text-slate-900">{formData.phone || 'No phone number'}</p>
+                  <p className="text-xs font-semibold uppercase tracking-wide text-[var(--mh-text-muted)]">Phone</p>
+                  <p className="mt-2 text-base font-semibold text-[var(--mh-text)]">{formData.phone || 'No phone number'}</p>
                 </div>
                 <div className="surface-card p-4 sm:col-span-2">
-                  <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">Profile Picture URL</p>
-                  <p className="mt-2 break-all text-sm text-slate-600">{formData.profile_picture || 'Not set'}</p>
+                  <p className="text-xs font-semibold uppercase tracking-wide text-[var(--mh-text-muted)]">Profile Picture URL</p>
+                  <p className="mt-2 break-all text-sm text-[var(--mh-text-muted)]">{formData.profile_picture || 'Not set'}</p>
                 </div>
               </div>
             ) : (
               <form onSubmit={handleSubmit} className="space-y-4">
                 <div className="grid gap-4 md:grid-cols-2">
                   <div>
-                    <label className="mb-1 block text-sm font-medium text-slate-700">Profile Picture URL</label>
+                    <label className="mb-1 block text-sm font-medium text-[var(--mh-text-muted)]">Profile Picture URL</label>
                     <input
                       type="url"
                       value={formData.profile_picture}
                       onChange={(e) => setFormData({ ...formData, profile_picture: e.target.value })}
-                      className="w-full rounded-lg border border-slate-300 px-3 py-2 focus:border-cyan-700 focus:outline-none focus:ring-2 focus:ring-cyan-200"
+                      className="w-full rounded-lg border border-[var(--mh-border)] bg-[var(--mh-surface)] px-3 py-2 text-[var(--mh-text)] placeholder:text-[var(--mh-text-muted)] focus:border-cyan-700 focus:outline-none focus:ring-2 focus:ring-cyan-200"
                       placeholder="https://example.com/image.jpg"
                     />
                   </div>
 
                   <div>
-                    <label className="mb-1 block text-sm font-medium text-slate-700">Name</label>
+                    <label className="mb-1 block text-sm font-medium text-[var(--mh-text-muted)]">Name</label>
                     <input
                       type="text"
                       required
                       value={formData.name}
                       onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                      className="w-full rounded-lg border border-slate-300 px-3 py-2 focus:border-cyan-700 focus:outline-none focus:ring-2 focus:ring-cyan-200"
+                      className="w-full rounded-lg border border-[var(--mh-border)] bg-[var(--mh-surface)] px-3 py-2 text-[var(--mh-text)] placeholder:text-[var(--mh-text-muted)] focus:border-cyan-700 focus:outline-none focus:ring-2 focus:ring-cyan-200"
                     />
                   </div>
 
                   <div>
-                    <label className="mb-1 block text-sm font-medium text-slate-700">Phone</label>
+                    <label className="mb-1 block text-sm font-medium text-[var(--mh-text-muted)]">Phone</label>
                     <input
                       type="tel"
                       value={formData.phone}
                       onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                      className="w-full rounded-lg border border-slate-300 px-3 py-2 focus:border-cyan-700 focus:outline-none focus:ring-2 focus:ring-cyan-200"
+                      className="w-full rounded-lg border border-[var(--mh-border)] bg-[var(--mh-surface)] px-3 py-2 text-[var(--mh-text)] placeholder:text-[var(--mh-text-muted)] focus:border-cyan-700 focus:outline-none focus:ring-2 focus:ring-cyan-200"
                     />
                   </div>
                 </div>
 
-                <div className="surface-card border-slate-200 bg-white p-4">
+                <div className="surface-card border-[var(--mh-border)] bg-[var(--mh-surface)] p-4">
                   <button
                     type="button"
                     onClick={() => setShowPasswordFields(!showPasswordFields)}
@@ -263,30 +263,30 @@ const DoctorProfile = () => {
                   {showPasswordFields && (
                     <div className="mt-4 grid gap-4 md:grid-cols-3">
                       <div>
-                        <label className="mb-1 block text-sm font-medium text-slate-700">Current Password</label>
+                        <label className="mb-1 block text-sm font-medium text-[var(--mh-text-muted)]">Current Password</label>
                         <input
                           type="password"
                           value={formData.current_password}
                           onChange={(e) => setFormData({ ...formData, current_password: e.target.value })}
-                          className="w-full rounded-lg border border-slate-300 px-3 py-2 focus:border-cyan-700 focus:outline-none focus:ring-2 focus:ring-cyan-200"
+                          className="w-full rounded-lg border border-[var(--mh-border)] bg-[var(--mh-surface)] px-3 py-2 text-[var(--mh-text)] placeholder:text-[var(--mh-text-muted)] focus:border-cyan-700 focus:outline-none focus:ring-2 focus:ring-cyan-200"
                         />
                       </div>
                       <div>
-                        <label className="mb-1 block text-sm font-medium text-slate-700">New Password</label>
+                        <label className="mb-1 block text-sm font-medium text-[var(--mh-text-muted)]">New Password</label>
                         <input
                           type="password"
                           value={formData.new_password}
                           onChange={(e) => setFormData({ ...formData, new_password: e.target.value })}
-                          className="w-full rounded-lg border border-slate-300 px-3 py-2 focus:border-cyan-700 focus:outline-none focus:ring-2 focus:ring-cyan-200"
+                          className="w-full rounded-lg border border-[var(--mh-border)] bg-[var(--mh-surface)] px-3 py-2 text-[var(--mh-text)] placeholder:text-[var(--mh-text-muted)] focus:border-cyan-700 focus:outline-none focus:ring-2 focus:ring-cyan-200"
                         />
                       </div>
                       <div>
-                        <label className="mb-1 block text-sm font-medium text-slate-700">Confirm New Password</label>
+                        <label className="mb-1 block text-sm font-medium text-[var(--mh-text-muted)]">Confirm New Password</label>
                         <input
                           type="password"
                           value={formData.confirm_password}
                           onChange={(e) => setFormData({ ...formData, confirm_password: e.target.value })}
-                          className="w-full rounded-lg border border-slate-300 px-3 py-2 focus:border-cyan-700 focus:outline-none focus:ring-2 focus:ring-cyan-200"
+                          className="w-full rounded-lg border border-[var(--mh-border)] bg-[var(--mh-surface)] px-3 py-2 text-[var(--mh-text)] placeholder:text-[var(--mh-text-muted)] focus:border-cyan-700 focus:outline-none focus:ring-2 focus:ring-cyan-200"
                         />
                       </div>
                     </div>
